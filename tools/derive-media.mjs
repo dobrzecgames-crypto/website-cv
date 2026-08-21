@@ -38,15 +38,37 @@ const STATION = process.env.STATION_CHECKOUT || 'C:/Users/T470/Documents/station
 const SRC = join(ROOT, 'assets', 'station', 'current')
 const OUT = join(ROOT, 'media', 'station', 'final')
 
-/* Target width: the instrument renders at most ~331 CSS px wide on desktop and
-   ~310 on phones, so 1000 px covers a 3x display with room to spare while
-   dropping roughly half the source pixels. */
-const WIDTH = 1000
+/* The instrument renders at most ~331 CSS px wide on desktop and ~310 on phones,
+   so the hero width covers a 3x display with room to spare while dropping
+   roughly half the source pixels. Plates never render larger than the object
+   they came out of, so they need less. */
 const WEBP_QUALITY = 0.86
 
+/* The chassis — transport, display, project and the view tabs — is pixel
+   identical in every mode capture; only the area below the tabs changes. That
+   boundary sits at 221.3 of the 900-unit design height, so every mode plate is
+   the same crop and the six of them can lie exactly on top of one another. */
+const CORE_TOP = 221.3 / 900
+
+/* Every mode stops using the chassis somewhere above its bottom edge, so a
+   plate cropped to the full core would end in 100-180 units of empty panel and
+   read as a card with nothing in it. 800 keeps all six modes intact and only
+   trims LASER's last pad row, which the plate fades out anyway. */
+const CORE_BOTTOM = 800 / 900
+
+const HERO_WIDTH = 1000   /* full chassis + core, used for the intact object */
+const PLATE_WIDTH = 720   /* core only, at the size a single plate renders */
+
 const JOBS = [
-  { from: 'laser/laser-loaded.png',            to: 'station-laser-loaded', role: 'HERO, before the cut: break loaded, no slices, pads empty.' },
-  { from: 'overview/station-overview-01.png',  to: 'station-laser-cut',    role: 'HERO, after the cut: gold slice markers, CUT 8, pads 01-08 ready.' }
+  { from: 'laser/laser-loaded.png',           to: 'station-laser-loaded', width: HERO_WIDTH, role: 'HERO, before the cut: break loaded, no slices, pads empty.' },
+  { from: 'overview/station-overview-01.png', to: 'station-laser-cut',    width: HERO_WIDTH, role: 'HERO, after the cut: gold slice markers, CUT 8, pads 01-08 ready.' },
+
+  /* the five states hiding behind the one the viewer arrived at */
+  { from: 'pads/pads-active.png',        to: 'station-mode-pads',  width: PLATE_WIDTH, crop: [CORE_TOP, CORE_BOTTOM], role: 'PADS plate: sixteen pads, three struck.' },
+  { from: 'synth/zola-x-idle.png',       to: 'station-mode-synth', width: PLATE_WIDTH, crop: [CORE_TOP, CORE_BOTTOM], role: 'SYNTH plate: the ZOLA-X wavetable screen.' },
+  { from: 'seq-song/seq.png',            to: 'station-mode-seq',   width: PLATE_WIDTH, crop: [CORE_TOP, CORE_BOTTOM], role: 'SEQ plate: the step matrix.' },
+  { from: 'seq-song/song.png',           to: 'station-mode-song',  width: PLATE_WIDTH, crop: [CORE_TOP, CORE_BOTTOM], role: 'SONG plate: six lines of arrangement.' },
+  { from: 'mix/mix-active.png',          to: 'station-mode-mix',   width: PLATE_WIDTH, crop: [CORE_TOP, CORE_BOTTOM], role: 'MIX plate: eight channels with live meters.' }
 ]
 
 const sha256 = buf => createHash('sha256').update(buf).digest('hex')
@@ -61,7 +83,8 @@ await mkdir(OUT, { recursive: true })
 const manifest = {
   generatedFrom: 'assets/station/current',
   sourceSetId: JSON.parse(readFileSync(join(SRC, 'MANIFEST.json'), 'utf8')).setId,
-  targetWidth: WIDTH,
+  coreTop: CORE_TOP,
+  coreBottom: CORE_BOTTOM,
   webpQuality: WEBP_QUALITY,
   tool: 'tools/derive-media.mjs',
   files: []
@@ -72,24 +95,26 @@ for (const job of JOBS) {
   if (!existsSync(srcPath)) throw new Error(`missing source: ${job.from}`)
   const srcBuf = readFileSync(srcPath)
 
-  const encoded = await page.evaluate(async ({ b64, width, quality }) => {
+  const encoded = await page.evaluate(async ({ b64, width, quality, crop }) => {
     const img = new Image()
     img.src = 'data:image/png;base64,' + b64
     await img.decode()
-    const height = Math.round(img.naturalHeight * (width / img.naturalWidth))
+    const sy = crop ? Math.round(img.naturalHeight * crop[0]) : 0
+    const sh = (crop ? Math.round(img.naturalHeight * crop[1]) : img.naturalHeight) - sy
+    const height = Math.round(sh * (width / img.naturalWidth))
     const canvas = document.createElement('canvas')
     canvas.width = width
     canvas.height = height
     const ctx = canvas.getContext('2d')
     ctx.imageSmoothingEnabled = true
     ctx.imageSmoothingQuality = 'high'
-    ctx.drawImage(img, 0, 0, width, height)
+    ctx.drawImage(img, 0, sy, img.naturalWidth, sh, 0, 0, width, height)
     return {
-      width, height,
+      width, height, croppedFrom: sy, croppedTo: sy + sh,
       sourceWidth: img.naturalWidth, sourceHeight: img.naturalHeight,
       webp: canvas.toDataURL('image/webp', quality).split(',')[1]
     }
-  }, { b64: srcBuf.toString('base64'), width: WIDTH, quality: WEBP_QUALITY })
+  }, { b64: srcBuf.toString('base64'), width: job.width, quality: WEBP_QUALITY, crop: job.crop || null })
 
   const buf = Buffer.from(encoded.webp, 'base64')
   writeFileSync(join(OUT, `${job.to}.webp`), buf)
@@ -100,6 +125,7 @@ for (const job of JOBS) {
     sourceBytes: srcBuf.length,
     sourceSha256: sha256(srcBuf),
     sourcePx: { width: encoded.sourceWidth, height: encoded.sourceHeight },
+    croppedY: [encoded.croppedFrom, encoded.croppedTo],
     outputPx: { width: encoded.width, height: encoded.height },
     role: job.role,
     cssFallback: `assets/station/current/${job.from}`,
