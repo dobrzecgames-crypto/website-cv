@@ -1,0 +1,272 @@
+{
+  "setId": "2026-08-21-0c64ac8",
+  "capturedAt": "2026-08-21T15:40:55.102Z",
+  "source": {
+    "app": "Station",
+    "checkout": "C:\\Users\\T470\\Documents\\station",
+    "commit": "0c64ac8",
+    "workingTreeDirty": false,
+    "baseUrl": "http://localhost:5173/"
+  },
+  "capture": {
+    "viewportCssPx": {
+      "width": 451,
+      "height": 900
+    },
+    "deviceScaleFactor": 3,
+    "outputPx": {
+      "width": 1353,
+      "height": 2700
+    },
+    "colorScheme": "dark",
+    "hidden": [
+      ".type-lab (dev-only Typography Lab launcher, DEV builds only)"
+    ],
+    "cleanup": "activeElement blurred and pointer parked at 2,2 before every shot",
+    "tool": "tools/capture-station.mjs"
+  },
+  "content": "Built-in break aalonbutler-gettinsoul.wav sliced into 8 LASER slices on pads 01-08; a 16-step pattern; pattern sections A-D; three banks; ZOLA-X on bank 02.",
+  "fileCount": 30,
+  "files": [
+    {
+      "file": "details/mix-faders.png",
+      "description": "The eight-channel bank alone, meters idle.",
+      "bytes": 178008,
+      "width": 1311,
+      "height": 903,
+      "sha256": "166d77b876531b9974650b4a2df73fb121611b0ade37acff862ac247b86a15d8"
+    },
+    {
+      "file": "details/mix-meters.png",
+      "description": "The channel bank with meters moving - pairs with mix-faders.png.",
+      "bytes": 184808,
+      "width": 1311,
+      "height": 903,
+      "sha256": "2081d1c69886f3bc34d937d0282cd9445427fcbed33ce5248c1f68d503147be4"
+    },
+    {
+      "file": "details/pads-grid-active.png",
+      "description": "The same grid with three pads lit - pairs with pads-grid.png.",
+      "bytes": 646155,
+      "width": 1335,
+      "height": 1338,
+      "sha256": "90b0f1c1c52754da8cd03960ea3899a79b0160f446a5bc2086d28aef3835f9ad"
+    },
+    {
+      "file": "details/pads-grid.png",
+      "description": "The 16-pad grid alone, at rest.",
+      "bytes": 685162,
+      "width": 1335,
+      "height": 1338,
+      "sha256": "63a63229c4cd8e03b6595bb53ae9a4c7f3d80829affd34fba0597a895ac43b32"
+    },
+    {
+      "file": "details/seq-grid.png",
+      "description": "The step matrix alone, without app chrome.",
+      "bytes": 110704,
+      "width": 1335,
+      "height": 1542,
+      "sha256": "d6a1c07242bebacb551cea9073cd2e6bf90ae78b9a332bf837cc11c0624795bd"
+    },
+    {
+      "file": "details/slice-markers.png",
+      "description": "The same waveform with golden laser cut markers - closing frame of a cut transition.",
+      "bytes": 91327,
+      "width": 1245,
+      "height": 462,
+      "sha256": "7036f40910975d61a71bdbac38713f23e555fe7bd489aeb378c82ddfe8b11591"
+    },
+    {
+      "file": "details/song-arrangement.png",
+      "description": "The arrangement grid alone, six lanes of clips.",
+      "bytes": 96248,
+      "width": 1245,
+      "height": 924,
+      "sha256": "d85b5bdd8cd7f2ba3d4d941c04d5a5a996b0f0fda049a57cb324ca1718509dcb"
+    },
+    {
+      "file": "details/waveform-laser.png",
+      "description": "Clean uncut waveform - opening frame of a cut transition.",
+      "bytes": 65725,
+      "width": 1245,
+      "height": 462,
+      "sha256": "018bfea3111444f2f253f6eb02ad3074daf38c1d976923a48481d8f39968c9af"
+    },
+    {
+      "file": "details/waveform-playhead.png",
+      "description": "Sliced waveform with the cyan playhead mid-travel.",
+      "bytes": 67340,
+      "width": 1245,
+      "height": 462,
+      "sha256": "4a361aa01717d792b304fd85e96b1aa98c4f9132b63df7fd815e4e4e3e61f655"
+    },
+    {
+      "file": "details/wavetable-zola-x-active.png",
+      "description": "The wavetable screen while sounding - pairs with wavetable-zola-x.png.",
+      "bytes": 61590,
+      "width": 1311,
+      "height": 507,
+      "sha256": "12603d109d5fe144ceff1be2db96964a68bf41d5fe19a2206447ed5978b8c5b3"
+    },
+    {
+      "file": "details/wavetable-zola-x.png",
+      "description": "The ZOLA-X wavetable screen alone, at rest.",
+      "bytes": 96175,
+      "width": 1311,
+      "height": 507,
+      "sha256": "597ae82fbe45d71fe13d9b5e4091990196473c49e388365c8923249a137af688"
+    },
+    {
+      "file": "laser/laser-loaded.png",
+      "description": "Break loaded, waveform only, before any cut.",
+      "bytes": 620042,
+      "width": 1353,
+      "height": 2700,
+      "sha256": "679b2e069163cdf830eef019e6f126eadb2cb8d905fd4652a71678f435f51e27"
+    },
+    {
+      "file": "laser/laser-overview.png",
+      "description": "LASER entry state: CHOOSE WAV FILE, the four built-in samples, empty slice map.",
+      "bytes": 546559,
+      "width": 1353,
+      "height": 2700,
+      "sha256": "8c38acfc3d47696c413b6e9298ffb413dfab07c970e8e53f8579c1e43bd16185"
+    },
+    {
+      "file": "laser/laser-playing.png",
+      "description": "Source preview running - cyan playhead travelling across the sliced waveform.",
+      "bytes": 679735,
+      "width": 1353,
+      "height": 2700,
+      "sha256": "28fa4656dca34addea3e2404357e75579fb6eaee24904dcb87279b0b55ba3cce"
+    },
+    {
+      "file": "laser/laser-preview-cut.png",
+      "description": "Live cut preview: golden laser beams on the transients, CUT head at 8, CANCEL / SET.",
+      "bytes": 650637,
+      "width": 1353,
+      "height": 2700,
+      "sha256": "cac30e70fa83f96f4369ff6bb3e933515620426145fb59413a40af0360300d95"
+    },
+    {
+      "file": "laser/laser-sliced.png",
+      "description": "Cut committed: numbered slices with draggable markers, pads 01-08 READY.",
+      "bytes": 680221,
+      "width": 1353,
+      "height": 2700,
+      "sha256": "cb26a3344f0643975dcd3cb35db8443c924c8ed0a6b2b2e913a5d60607d500cd"
+    },
+    {
+      "file": "mix/mix-active-02.png",
+      "description": "A second meter frame from another point in the loop, for two-frame animations.",
+      "bytes": 484593,
+      "width": 1353,
+      "height": 2700,
+      "sha256": "f3370e70d46d6323555c281188964b2c34880a8f71ff0027f18ef6477bb63a07"
+    },
+    {
+      "file": "mix/mix-active.png",
+      "description": "The same channels during playback - live dBFS meters at different levels on all eight.",
+      "bytes": 487684,
+      "width": 1353,
+      "height": 2700,
+      "sha256": "8fb6af0e473fd6385061b4777c2a0e89b55345c8c10cb4e1cae08046befabc41"
+    },
+    {
+      "file": "mix/mix.png",
+      "description": "Eight channels at mixed levels, M/S per channel, BUS & FX (G1 / MASTER). Meters idle.",
+      "bytes": 480359,
+      "width": 1353,
+      "height": 2700,
+      "sha256": "7b510088ca2b2dc4b758a4012440d431da4c04d1dac1666843fae7008451e092"
+    },
+    {
+      "file": "overview/station-overview-01.png",
+      "description": "HERO. Whole instrument mid-cut: waveform with laser beams, CUT at 8, filled slice map below.",
+      "bytes": 707409,
+      "width": 1353,
+      "height": 2700,
+      "sha256": "a90eda49237f97cb6190acc60744d07b2d2ae71b2c4eb273203769c849a6f0ef"
+    },
+    {
+      "file": "overview/station-overview-02.png",
+      "description": "Whole instrument in PADS with the loaded bank - the calmer product portrait.",
+      "bytes": 934105,
+      "width": 1353,
+      "height": 2700,
+      "sha256": "6d227674eb7ba01e78882ac9231dc4c07c8365bc21a87de035948fbb49cd52ec"
+    },
+    {
+      "file": "pads/pads-active.png",
+      "description": "Three pads (02, 05, 08) held down at once - full press glow.",
+      "bytes": 898299,
+      "width": 1353,
+      "height": 2700,
+      "sha256": "509132e5be6fa270a65935bf91a5203948d6bb55be312dd5b8d4b0b8b178a5b2"
+    },
+    {
+      "file": "pads/pads-idle.png",
+      "description": "Pad bank at rest: 01-08 loaded and READY, 09-16 EMPTY.",
+      "bytes": 935620,
+      "width": 1353,
+      "height": 2700,
+      "sha256": "78e27cec3713abdd46b09315a6e19e9060fa0a42301dc33d5a7e0b69ab587d41"
+    },
+    {
+      "file": "seq-song/seq-active.png",
+      "description": "The same pattern with the transport running (PLAY dimmed, STOP live). The playing-column marker is not capturable - see README NOTES.",
+      "bytes": 357810,
+      "width": 1353,
+      "height": 2700,
+      "sha256": "8380c3d65774d61e7f2a4cf6e20a87b376b4f5d99067ca515024cc5e0e154b8d"
+    },
+    {
+      "file": "seq-song/seq.png",
+      "description": "Step matrix, 8 pads x steps 01-08, transport stopped.",
+      "bytes": 358041,
+      "width": 1353,
+      "height": 2700,
+      "sha256": "312430a1db4cccdb64612b9761d8d921ac3b9456f40dff4d3c18b8bb8e40a929"
+    },
+    {
+      "file": "seq-song/song-active.png",
+      "description": "The arrangement playing in SONG mode.",
+      "bytes": 375051,
+      "width": 1353,
+      "height": 2700,
+      "sha256": "b7bec5a0d3ecf26a8be07ec78234938b0e545c8623ea28fc9c13c8b6d35cf297"
+    },
+    {
+      "file": "seq-song/song.png",
+      "description": "Arrangement with six lanes (1A-1D, 2A, 3A) and per-bank clip colours - bank / section / slot hierarchy.",
+      "bytes": 362413,
+      "width": 1353,
+      "height": 2700,
+      "sha256": "1914d758eb4cf7d2bf768ad6338394f87bd45ae4fa951c23f7579f220363b7f8"
+    },
+    {
+      "file": "synth/synth-picker.png",
+      "description": "Instrument picker: BASSIC / MONOGORG / ZOLA-X / DRUM SYNTH with their own glyphs.",
+      "bytes": 426656,
+      "width": 1353,
+      "height": 2700,
+      "sha256": "7cd77c7c3495381f31775e6e5a4cdb3ccd38d44ff79e407eadaf1566401cb67d"
+    },
+    {
+      "file": "synth/zola-x-active.png",
+      "description": "ZOLA-X sounding: the wavetable turns into a live read, audition key lit.",
+      "bytes": 465347,
+      "width": 1353,
+      "height": 2700,
+      "sha256": "8cad74665f802eb75591f5cbae2bb96843ea583eb0ed359be5757dd76d21ebf0"
+    },
+    {
+      "file": "synth/zola-x-idle.png",
+      "description": "ZOLA-X at rest: the wavetable screen, OSC/FILTER/ENV/MOD pages, TABLE, UNISON, POSITION, LEVEL, OSC MIX.",
+      "bytes": 507414,
+      "width": 1353,
+      "height": 2700,
+      "sha256": "78aef14835519352586ff9128cfe52338d0db879f2e825ada2a280d3d3460dc6"
+    }
+  ]
+}
