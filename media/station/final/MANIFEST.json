@@ -1,7 +1,8 @@
 {
   "generatedFrom": "assets/station/current",
   "sourceSetId": "2026-08-21-0c64ac8",
-  "targetWidth": 1000,
+  "coreTop": 0.2458888888888889,
+  "coreBottom": 0.8888888888888888,
   "webpQuality": 0.86,
   "tool": "tools/derive-media.mjs",
   "files": [
@@ -13,6 +14,10 @@
         "width": 1353,
         "height": 2700
       },
+      "croppedY": [
+        0,
+        2700
+      ],
       "outputPx": {
         "width": 1000,
         "height": 1996
@@ -35,6 +40,10 @@
         "width": 1353,
         "height": 2700
       },
+      "croppedY": [
+        0,
+        2700
+      ],
       "outputPx": {
         "width": 1000,
         "height": 1996
@@ -46,6 +55,136 @@
           "file": "station-laser-cut.webp",
           "bytes": 85454,
           "sha256": "7ca3ad5df5c861a28b7a300940a37d26e7b3c2411ed17977ac6227d7f50f4b78"
+        }
+      ]
+    },
+    {
+      "source": "pads/pads-active.png",
+      "sourceBytes": 898299,
+      "sourceSha256": "509132e5be6fa270a65935bf91a5203948d6bb55be312dd5b8d4b0b8b178a5b2",
+      "sourcePx": {
+        "width": 1353,
+        "height": 2700
+      },
+      "croppedY": [
+        664,
+        2400
+      ],
+      "outputPx": {
+        "width": 720,
+        "height": 924
+      },
+      "role": "PADS plate: sixteen pads, three struck.",
+      "cssFallback": "assets/station/current/pads/pads-active.png",
+      "outputs": [
+        {
+          "file": "station-mode-pads.webp",
+          "bytes": 34022,
+          "sha256": "5cb832f05b37a1c5726a61de782dcda4f053266a071edfb0f25dd7f8027b153a"
+        }
+      ]
+    },
+    {
+      "source": "synth/zola-x-idle.png",
+      "sourceBytes": 507414,
+      "sourceSha256": "78aef14835519352586ff9128cfe52338d0db879f2e825ada2a280d3d3460dc6",
+      "sourcePx": {
+        "width": 1353,
+        "height": 2700
+      },
+      "croppedY": [
+        664,
+        2400
+      ],
+      "outputPx": {
+        "width": 720,
+        "height": 924
+      },
+      "role": "SYNTH plate: the ZOLA-X wavetable screen.",
+      "cssFallback": "assets/station/current/synth/zola-x-idle.png",
+      "outputs": [
+        {
+          "file": "station-mode-synth.webp",
+          "bytes": 28780,
+          "sha256": "34115d6122553b37375e4a55c21d0792b35567768c8263f6dc0c170186e60647"
+        }
+      ]
+    },
+    {
+      "source": "seq-song/seq.png",
+      "sourceBytes": 358041,
+      "sourceSha256": "312430a1db4cccdb64612b9761d8d921ac3b9456f40dff4d3c18b8bb8e40a929",
+      "sourcePx": {
+        "width": 1353,
+        "height": 2700
+      },
+      "croppedY": [
+        664,
+        2400
+      ],
+      "outputPx": {
+        "width": 720,
+        "height": 924
+      },
+      "role": "SEQ plate: the step matrix.",
+      "cssFallback": "assets/station/current/seq-song/seq.png",
+      "outputs": [
+        {
+          "file": "station-mode-seq.webp",
+          "bytes": 13650,
+          "sha256": "aa8008a08944f51f9d22f13a20eba581e24f03586425bd25ff29a5256094165a"
+        }
+      ]
+    },
+    {
+      "source": "seq-song/song.png",
+      "sourceBytes": 362413,
+      "sourceSha256": "1914d758eb4cf7d2bf768ad6338394f87bd45ae4fa951c23f7579f220363b7f8",
+      "sourcePx": {
+        "width": 1353,
+        "height": 2700
+      },
+      "croppedY": [
+        664,
+        2400
+      ],
+      "outputPx": {
+        "width": 720,
+        "height": 924
+      },
+      "role": "SONG plate: six lines of arrangement.",
+      "cssFallback": "assets/station/current/seq-song/song.png",
+      "outputs": [
+        {
+          "file": "station-mode-song.webp",
+          "bytes": 11664,
+          "sha256": "54614936f27c9b9466e11c6ac062fc1b62dce545efaf03384a33795bc0745fe3"
+        }
+      ]
+    },
+    {
+      "source": "mix/mix-active.png",
+      "sourceBytes": 487684,
+      "sourceSha256": "8fb6af0e473fd6385061b4777c2a0e89b55345c8c10cb4e1cae08046befabc41",
+      "sourcePx": {
+        "width": 1353,
+        "height": 2700
+      },
+      "croppedY": [
+        664,
+        2400
+      ],
+      "outputPx": {
+        "width": 720,
+        "height": 924
+      },
+      "role": "MIX plate: eight channels with live meters.",
+      "cssFallback": "assets/station/current/mix/mix-active.png",
+      "outputs": [
+        {
+          "file": "station-mode-mix.webp",
+          "bytes": 23666,
+          "sha256": "1d26ca3dea642e6187158ded0ce01703b4f40f6d1e21e4f9d9f6c5d212905775"
         }
       ]
     }
