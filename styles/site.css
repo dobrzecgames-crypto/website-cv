@@ -37,12 +37,22 @@
   --bleed:      0.75px;   /* removes sub-pixel hairlines between untouched bands */
   --rig-scale:  0.90;
 
+  /* the core: everything below the view tabs, which is the part that changes
+     with the active mode. measured off the capture, not guessed. */
+  --core-top:   .24589;
+  --core-h:     .75411;   /* the whole core: 221.3 to 900 */
+  --plate-h:    .64300;   /* the part of it every mode actually uses: 221.3 to 800 */
+  --pw:         var(--frame-w);
+  --ph:         calc(var(--plate-h) * var(--frame-h));
+  --fan-scale:  0.94;
+
   /* timeline — mirrored in scripts/laser.js */
   --t-arm:      140ms;
   --t-sweep:    620ms;
   --t-flash:    150ms;
   --t-open:     980ms;
   --t-heal:     520ms;
+  --t-deal:     1000ms;
 
   --ease-open:  cubic-bezier(.16, 1, .3, 1);
   --ease-snap:  cubic-bezier(.2, .9, .25, 1);
@@ -166,27 +176,31 @@ body {
 [data-state="slicing"] .readout { color: var(--gold-lit); border-color: rgba(185, 154, 98, .55); }
 [data-state="arming"]  .readout__lamp,
 [data-state="slicing"] .readout__lamp { background: var(--gold-lit); box-shadow: 0 0 10px var(--gold); }
-[data-state="sliced"]  .readout      { color: var(--sand); border-color: rgba(185, 154, 98, .3); }
-[data-state="sliced"]  .readout__lamp { background: var(--gold); box-shadow: 0 0 7px rgba(185, 154, 98, .7); }
+[data-state="sliced"]  .readout,
+[data-state="released"] .readout,
+[data-state="closing"]  .readout      { color: var(--sand); border-color: rgba(185, 154, 98, .3); }
+[data-state="sliced"]  .readout__lamp,
+[data-state="released"] .readout__lamp,
+[data-state="closing"]  .readout__lamp { background: var(--gold); box-shadow: 0 0 7px rgba(185, 154, 98, .7); }
 
 /* ==========================================================================
-   THEATRE — void | object | slice index
-   The object stays optically centred; the index grows into the empty right.
+   THEATRE
+   Before the cut this is mostly empty and looks like restraint. After it, the
+   emptiness turns out to have been clearance: the object needed somewhere to
+   open into.
    ========================================================================== */
 
 .theatre {
   display: grid;
-  grid-template-columns: 1fr auto 1fr;
-  align-items: center;
-  gap: clamp(20px, 4vw, 64px);
+  place-items: center;
   min-height: 0;
   perspective: 1500px;
   perspective-origin: 50% 44%;
 }
 
-.theatre__void { min-width: 0; }
-
-.object { margin: 0; justify-self: center; }
+/* the figure has to keep the 3D context open, or it flattens everything below
+   it and every translateZ in the scene silently does nothing */
+.object { margin: 0; transform-style: preserve-3d; }
 
 .rig {
   position: relative;
@@ -194,6 +208,9 @@ body {
   transition: transform var(--t-open) var(--ease-open);
 }
 [data-state="sliced"] .rig { transform: scale(var(--rig-scale)); }
+/* the fan needs more of the viewport than the opened object did */
+[data-state="released"] .rig,
+[data-state="closing"]  .rig { transform: translate3d(0, -1%, 0) scale(var(--fan-scale)); }
 
 .frame {
   position: relative;
@@ -212,6 +229,8 @@ body {
   transition: transform var(--t-open) var(--ease-open), opacity var(--t-open) ease;
 }
 [data-state="sliced"] .cast { transform: translate(-50%, 2%) scale(1.24, .7); opacity: .5; }
+[data-state="released"] .cast,
+[data-state="closing"]  .cast { transform: translate(-50%, 16%) scaleY(.5); opacity: .26; }
 
 /* --- the eight layers --------------------------------------------------- */
 
@@ -259,7 +278,9 @@ body {
 /* the laser cut the object AND the material inside it: the waveform gains its
    markers, CUT reads 8, the pad map fills. revealed under the flash. */
 .is-flash .face--after,
-[data-state="sliced"] .face--after { opacity: 1; }
+[data-state="sliced"] .face--after,
+[data-state="released"] .face--after,
+[data-state="closing"] .face--after { opacity: 1; }
 
 /* the cut edge: white-hot at the moment of the cut, cooling afterwards */
 .slice::after {
@@ -282,7 +303,13 @@ body {
   border-bottom-color: transparent;
   background-image: linear-gradient(to bottom, rgba(201, 166, 102, .4), rgba(201, 166, 102, 0) 14px);
 }
-[data-state="sliced"] .slice::after { animation: cool 1800ms ease-out forwards; }
+[data-state="sliced"] .slice::after,
+[data-state="released"] .slice::after,
+[data-state="closing"] .slice::after { animation: cool 1800ms ease-out forwards; }
+/* once the core layers close back into one plate their shared edges are
+   internal, so the heat on them would only read as a defect */
+[data-state="released"] .slice--core::after,
+[data-state="closing"]  .slice--core::after { animation: none; opacity: 0; }
 
 @keyframes cool {
   0%, 20% { opacity: 1; }
@@ -313,34 +340,195 @@ body {
   transition-delay: calc((var(--i) - 1) * 36ms);
 }
 
-/* --- layer numbers, riding on their own layer ---------------------------- */
+/* ==========================================================================
+   THE DECK — the core is a magazine of states
 
-.marks { position: absolute; inset: 0; transform-style: preserve-3d; pointer-events: none; }
+   Station's chassis is byte-for-byte the same in every mode capture; only the
+   area below the view tabs changes. So that area is not one screen, it is six
+   lying exactly on top of one another. The cut opens the machine and they come
+   out of that single place.
 
-.mark {
+   Everything below is expressed in plate units — --pw across, --ph down — so
+   the whole composition scales with the object instead of with the viewport.
+   ========================================================================== */
+
+.deck {
+  list-style: none;
+  margin: 0;
+  padding: 0;
   position: absolute;
-  left: 100%;
-  top: calc((var(--t) + var(--h) / 2) * var(--frame-h));
-  margin: -0.75em 0 0 13px;
-  font-size: 10px;
-  letter-spacing: .18em;
-  color: var(--gold);
+  left: 0; right: 0;
+  top:    calc(var(--core-top) * var(--frame-h));
+  height: var(--ph);
+  transform-style: preserve-3d;
+  pointer-events: none;
+}
+
+.plate {
+  position: absolute;
+  inset: 0;
   opacity: 0;
   transform: translate3d(0, 0, 0);
-  transition: opacity 300ms ease, transform var(--t-open) var(--ease-open);
-}
-.mark::before {
-  content: "";
-  position: absolute;
-  right: calc(100% + 5px); top: 50%;
-  width: 8px; height: 1px;
-  background: rgba(185, 154, 98, .5);
+  transition: opacity 280ms ease, transform var(--t-open) var(--ease-open);
 }
 
-[data-state="sliced"] .mark {
-  opacity: 1;
-  transform: translate3d(var(--dx), calc((var(--i) - 4.5) * var(--gap)), var(--dz));
-  transition-delay: calc(260ms + (var(--i) - 1) * 36ms);
+.plate__face {
+  position: absolute;
+  inset: 0;
+  background-color: var(--ink-1);
+  background-repeat: no-repeat;
+  background-position: 0 0;
+  background-size: 100% 100%;
+}
+
+/* The four core layers already carry the LASER state. This plate holds no
+   image; it exists so the LASER label travels on exactly the same path they do. */
+/* Every mode leaves some empty chassis at the bottom. Ending a plate on that
+   hard rectangle is what would make it read as a card, so the tail is
+   dissolved instead — the layers come out of the dark rather than sitting on
+   top of it. The mask is on the face, not the plate, so the label survives it. */
+.plate__face {
+  -webkit-mask-image: linear-gradient(to bottom, #000 0 86%, transparent 100%);
+          mask-image: linear-gradient(to bottom, #000 0 86%, transparent 100%);
+}
+/* the LASER state is the four core layers, so its tail lives on the last one.
+   72% of the plate is 39% of that layer. */
+[data-state="released"] .slice--core.chop--8,
+[data-state="closing"]  .slice--core.chop--8 {
+  -webkit-mask-image: linear-gradient(to bottom, #000 0 53%, transparent 63%);
+          mask-image: linear-gradient(to bottom, #000 0 53%, transparent 63%);
+}
+
+/* The five hidden states are not part of the first paint. JavaScript adds
+   .deck-ready once the page is idle, which is when they get fetched — well
+   before anyone can read the trigger, and after LCP is settled. */
+.deck-ready .plate--pads .plate__face  { background-image: url("../media/station/final/station-mode-pads.webp"); }
+.deck-ready .plate--synth .plate__face { background-image: url("../media/station/final/station-mode-synth.webp"); }
+.deck-ready .plate--seq .plate__face   { background-image: url("../media/station/final/station-mode-seq.webp"); }
+.deck-ready .plate--song .plate__face  { background-image: url("../media/station/final/station-mode-song.webp"); }
+.deck-ready .plate--mix .plate__face   { background-image: url("../media/station/final/station-mode-mix.webp"); }
+
+/* the mode's own name, in the site's voice rather than Station's tab skin,
+   worded exactly as the selector words it so the two read as the same thing */
+.chip {
+  position: absolute;
+  left: 0; bottom: 100%;
+  margin-bottom: 10px;
+  padding-bottom: 5px;
+  border-bottom: 1px solid rgba(185, 154, 98, .45);
+  font-size: 9.5px;
+  letter-spacing: .28em;
+  text-transform: uppercase;
+  color: var(--sand-mid);
+  white-space: nowrap;
+  opacity: 0;
+  transition: opacity 300ms ease;
+}
+/* PADS takes the next scene, so it is the one that reads first */
+.plate--pads .chip { color: var(--sand); border-bottom-color: var(--gold); }
+
+/* --- where each layer lands ----------------------------------------------
+   --fx / --fy : offset in plate widths and plate heights
+   --fz        : depth. positive is toward the viewer, and under the scene's
+                 perspective that is also what makes a plate larger
+   --fr        : a degree or two, never more
+   --fo        : how present the layer stays
+
+   The chassis re-closes: all four of its layers take the same target, so the
+   shell reassembles, steps back and dims while its contents come forward.
+   The four core layers do the same, which is what turns them back into one
+   plate — the LASER state, whole again and now visibly one of six.
+   -------------------------------------------------------------------------- */
+
+.plate, .slice { --tx: calc(var(--fx) * var(--pw)); --ty: calc(var(--fy) * var(--ph)); }
+
+.slice--chassis            { --fx:  0;    --fy: -.60; --fz: -300px; --fr:  0deg;   --fo: .52; }
+.slice--chassis.chop--4    { --fo: .82; }   /* the selector stays the most legible part of the shell */
+
+/* A zig-zag, not a row: every other layer sits high, so no plate is squarely
+   behind its neighbour and each one keeps a free edge to be read by. */
+/* --fx and --fy are pre-perspective, so a layer pushed back needs a larger
+   offset than one pulled forward to land in the same place on screen. These are
+   back-solved from the screen positions the composition wants. */
+.slice--core, .plate--laser { --fx: -.19; --fy: -.35; --fz:  -60px; --fr:   .8deg; --fo: 1; }
+.plate--pads                { --fx:  .56; --fy:  .17; --fz:  215px; --fr: -1.2deg; --fo: 1; }
+.plate--synth               { --fx: -.90; --fy: -.05; --fz:   60px; --fr: -2.0deg; --fo: 1; }
+.plate--seq                 { --fx: 1.38; --fy: -.39; --fz: -200px; --fr:  2.4deg; --fo: .94; }
+.plate--song                { --fx: 1.83; --fy:  .36; --fz: -110px; --fr:  1.5deg; --fo: .92; }
+.plate--mix                 { --fx:-1.81; --fy:  .32; --fz: -170px; --fr: -3.0deg; --fo: .9; }
+
+/* --- the release ----------------------------------------------------------
+   Static end state for released and closing both. The animation drives the
+   path while released; dropping to closing removes the animation without
+   moving anything, which is what lets the composition transition back to the
+   intact object instead of snapping.
+   -------------------------------------------------------------------------- */
+
+[data-state="released"] .plate,
+[data-state="closing"]  .plate {
+  opacity: var(--fo);
+  transform: translate3d(var(--tx), var(--ty), var(--fz)) rotate(var(--fr));
+}
+[data-state="released"] .chip,
+[data-state="closing"]  .chip { opacity: 1; }
+
+[data-state="released"] .slice,
+[data-state="closing"]  .slice {
+  transform: translate3d(var(--tx), var(--ty), var(--fz)) rotate(var(--fr));
+}
+[data-state="released"] .slice--chassis,
+[data-state="closing"]  .slice--chassis { opacity: var(--fo); }
+
+[data-state="released"] .plate {
+  animation: deal var(--t-deal) both;
+  animation-delay: calc(var(--n) * 55ms);
+}
+[data-state="released"] .chip { transition-delay: calc(var(--n) * 55ms + var(--t-deal) * .55); }
+
+[data-state="released"] .slice--core    { animation: core-deal var(--t-deal) both; }
+[data-state="released"] .slice--chassis { animation: shell var(--t-deal) var(--ease-open) both; }
+
+/* Everything leaves the same place. The first fifth of the deal is a common
+   move toward the viewer that every layer shares; only after that do the
+   trajectories separate. */
+@keyframes deal {
+  0% {
+    opacity: 0;
+    transform: translate3d(0, 0, 0) rotate(0deg);
+    animation-timing-function: cubic-bezier(.4, 0, .6, 1);
+  }
+  14% { opacity: .6; }
+  20% {
+    transform: translate3d(0, calc(var(--ph) * -.03), 48px) rotate(0deg);
+    animation-timing-function: cubic-bezier(.16, 1, .3, 1);
+  }
+  100% {
+    opacity: var(--fo);
+    transform: translate3d(var(--tx), var(--ty), var(--fz)) rotate(var(--fr));
+  }
+}
+
+@keyframes core-deal {
+  0% {
+    transform: translate3d(var(--dx), calc((var(--i) - 4.5) * var(--gap)), var(--dz)) rotate(var(--rz));
+    animation-timing-function: cubic-bezier(.4, 0, .6, 1);
+  }
+  20% {
+    transform: translate3d(0, calc(var(--ph) * -.03), 48px) rotate(0deg);
+    animation-timing-function: cubic-bezier(.16, 1, .3, 1);
+  }
+  100% { transform: translate3d(var(--tx), var(--ty), var(--fz)) rotate(var(--fr)); }
+}
+
+@keyframes shell {
+  0% {
+    opacity: 1;
+    transform: translate3d(var(--dx), calc((var(--i) - 4.5) * var(--gap)), var(--dz)) rotate(var(--rz));
+  }
+  100% {
+    opacity: var(--fo);
+    transform: translate3d(var(--tx), var(--ty), var(--fz)) rotate(var(--fr));
+  }
 }
 
 /* ==========================================================================
@@ -432,54 +620,6 @@ body {
 }
 
 /* ==========================================================================
-   SLICE INDEX — four columns, two rows.
-   The shape pads 01-08 occupy in Station's own 4x4 map, and the hand-off
-   point for the PADS chapter. Not cards: numbers, names, one hairline.
-   ========================================================================== */
-
-.index {
-  list-style: none;
-  margin: 0;
-  padding: 0;
-  display: grid;
-  grid-template-columns: repeat(4, minmax(0, 1fr));
-  gap: 1px 0;
-  max-width: 30rem;
-  justify-self: start;
-  align-self: center;
-}
-
-.index__item {
-  padding: 11px 12px 12px 0;
-  border-top: 1px solid var(--rule);
-  opacity: 0;
-  transform: translateY(9px);
-  transition: opacity 380ms ease, transform 460ms var(--ease-open), border-color 460ms ease;
-}
-
-.index__n {
-  display: block;
-  font-size: 10px;
-  letter-spacing: .18em;
-  color: var(--gold);
-}
-.index__name {
-  display: block;
-  margin-top: 3px;
-  font-size: 10.5px;
-  letter-spacing: .1em;
-  text-transform: uppercase;
-  color: var(--sand-mid);
-}
-
-[data-state="sliced"] .index__item {
-  opacity: 1;
-  transform: none;
-  border-top-color: rgba(185, 154, 98, .34);
-  transition-delay: calc(420ms + (var(--i) - 1) * 42ms);
-}
-
-/* ==========================================================================
    TRIGGER
    ========================================================================== */
 
@@ -543,7 +683,9 @@ body {
 }
 [data-state="arming"]  .trigger__charge,
 [data-state="slicing"] .trigger__charge { transform: scaleX(1); }
-[data-state="sliced"]  .trigger { color: var(--sand-mid); }
+[data-state="sliced"]  .trigger,
+[data-state="released"] .trigger,
+[data-state="closing"]  .trigger { color: var(--sand-mid); }
 
 .hint {
   margin: 0;
@@ -567,6 +709,32 @@ body {
     --frame-h:   calc(var(--frame-w) * 900 / 451);
     --gap:       calc(var(--frame-h) * 0.024);
     --rig-scale: 0.88;
+    --fan-scale: 0.84;
+  }
+
+  /* A hand held close, not a table. There is no room sideways, so the six
+     states separate mostly in depth and in height, and the order of what
+     matters is carried by which one is nearest rather than by who has space. */
+  .slice--chassis             { --fx:  0;   --fy: -.49; --fz: -240px; --fr:  0deg;   --fo: .5; }
+  .slice--core, .plate--laser { --fx: -.17; --fy: -.27; --fz:  -60px; --fr:  .8deg;  --fo: 1; }
+  .plate--pads                { --fx:  .21; --fy:  .30; --fz:  170px; --fr: -1.2deg; --fo: 1; }
+  .plate--synth               { --fx: -.39; --fy:  .04; --fz:   50px; --fr: -2.0deg; --fo: 1; }
+  .plate--seq                 { --fx:  .48; --fy: -.15; --fz: -150px; --fr:  2.2deg; --fo: .94; }
+  .plate--song                { --fx:  .50; --fy:  .60; --fz: -100px; --fr:  1.5deg; --fo: .92; }
+  .plate--mix                 { --fx: -.44; --fy:  .66; --fz: -170px; --fr: -2.6deg; --fo: .9; }
+  .chip { font-size: 9px; letter-spacing: .22em; margin-bottom: 7px; }
+  /* Narrow screens stack the layers, so a label always belongs on whichever
+     edge of its layer nothing else is covering: right for the two on the right,
+     underneath for the one at the bottom of the left-hand cascade. */
+  .plate--seq .chip, .plate--song .chip { left: auto; right: 0; }
+  .plate--mix .chip {
+    /* 88%, not 100%: the plate has already faded out by then, and a label
+       floating below the fade reads as detached from the layer it names */
+    top: 88%; bottom: auto;
+    margin: 0;
+    padding: 5px 0 0;
+    border-top: 1px solid rgba(185, 154, 98, .45);
+    border-bottom: 0;
   }
   .theatre {
     grid-template-columns: minmax(0, 1fr);

@@ -4,7 +4,7 @@
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1">
 <title>Station — LASER IT</title>
-<meta name="description" content="Station is a music workstation that runs in a browser tab. Cut it open along its own seams and look inside.">
+<meta name="description" content="Station is a music workstation that runs in a browser tab. Cut it open along its own seams and every mode it holds comes out of the same place.">
 <meta name="color-scheme" content="dark">
 <script>document.documentElement.classList.remove('no-js')</script>
 <link rel="preload" as="image" type="image/webp" href="media/station/final/station-laser-loaded.webp" fetchpriority="high">
@@ -14,8 +14,13 @@
 <body>
 
 <!--
-  Scene 00 + Scene 01 only. Prototype of the riskiest interaction, per
-  TECHNICAL_PRINCIPLES.md §15: intact Station -> LASER IT -> meaningful layers.
+  Scene 00 + Scene 01. TECHNICAL_PRINCIPLES.md section 15: prove the riskiest
+  interaction before building page volume.
+
+  One LASER IT does the whole reveal. The chassis is identical in every mode
+  capture — verified pixel by pixel — and only the area below the view tabs
+  changes, so that area is treated as a magazine of states: six modes stacked
+  exactly on top of one another until the cut opens the machine.
 
   TODO(content): the masthead still needs the builder's byline. Left out rather
   than invented — ASSET_PLAN.md "Missing-content rule".
@@ -35,43 +40,49 @@
   </header>
 
   <div class="theatre">
-    <div class="theatre__void" aria-hidden="true"></div>
-
     <figure class="object">
       <div class="rig">
         <div class="frame" role="img"
-             aria-label="Station shown as one tall instrument: transport row, readout, project and bank row, the seven view tabs, a waveform display, the CUT slider, the manual-slice controls and a sixteen-pad slice map.">
+             aria-label="Station shown as one tall instrument: transport row, readout, project and bank row, the seven view tabs, a waveform display, the CUT slider and a sixteen-pad slice map.">
 
           <!--
-            Eight fragments. Each one holds a full copy of the same image and
-            shows only its own band of it, so untouched they tile the frame
-            exactly and read as a single screen. The cut lines fall in the real
-            gaps between Station's modules, so every fragment survives as a
-            complete part of the instrument rather than a strip of pixels.
+            Eight layers. Each holds a full copy of the same image and shows only
+            its own band of it, so untouched they tile the frame exactly and read
+            as one screen. Every cut falls in a real gap between Station's chassis
+            modules, so no control is bisected.
+
+            01-04 are the chassis, which is the same in every mode.
+            05-08 are the core: the area the active tab controls.
           -->
           <div class="slices">
-            <div class="slice chop chop--1 slice--first" style="--i:1"><i class="face face--before"></i><i class="face face--after"></i></div>
-            <div class="slice chop chop--2" style="--i:2"><i class="face face--before"></i><i class="face face--after"></i></div>
-            <div class="slice chop chop--3" style="--i:3"><i class="face face--before"></i><i class="face face--after"></i></div>
-            <div class="slice chop chop--4" style="--i:4"><i class="face face--before"></i><i class="face face--after"></i></div>
-            <div class="slice chop chop--5" style="--i:5"><i class="face face--before"></i><i class="face face--after"></i></div>
-            <div class="slice chop chop--6" style="--i:6"><i class="face face--before"></i><i class="face face--after"></i></div>
-            <div class="slice chop chop--7" style="--i:7"><i class="face face--before"></i><i class="face face--after"></i></div>
-            <div class="slice chop chop--8 slice--last" style="--i:8"><i class="face face--before"></i><i class="face face--after"></i></div>
+            <div class="slice slice--chassis chop chop--1 slice--first" style="--i:1"><i class="face face--before"></i><i class="face face--after"></i></div>
+            <div class="slice slice--chassis chop chop--2" style="--i:2"><i class="face face--before"></i><i class="face face--after"></i></div>
+            <div class="slice slice--chassis chop chop--3" style="--i:3"><i class="face face--before"></i><i class="face face--after"></i></div>
+            <div class="slice slice--chassis chop chop--4" style="--i:4"><i class="face face--before"></i><i class="face face--after"></i></div>
+            <div class="slice slice--core chop chop--5" style="--i:5"><i class="face face--before"></i><i class="face face--after"></i></div>
+            <div class="slice slice--core chop chop--6" style="--i:6"><i class="face face--before"></i><i class="face face--after"></i></div>
+            <div class="slice slice--core chop chop--7" style="--i:7"><i class="face face--before"></i><i class="face face--after"></i></div>
+            <div class="slice slice--core chop chop--8 slice--last" style="--i:8"><i class="face face--before"></i><i class="face face--after"></i></div>
           </div>
 
-          <div class="marks" aria-hidden="true">
-            <span class="mark chop chop--1" style="--i:1">01</span>
-            <span class="mark chop chop--2" style="--i:2">02</span>
-            <span class="mark chop chop--3" style="--i:3">03</span>
-            <span class="mark chop chop--4" style="--i:4">04</span>
-            <span class="mark chop chop--5" style="--i:5">05</span>
-            <span class="mark chop chop--6" style="--i:6">06</span>
-            <span class="mark chop chop--7" style="--i:7">07</span>
-            <span class="mark chop chop--8" style="--i:8">08</span>
-          </div>
+          <!--
+            The deck. Every plate is the same rectangle as the core, so before the
+            reveal all six lie exactly on top of one another and on top of the
+            core itself. --n is the deal order; PADS goes last so it lands in
+            front. The LASER plate carries no image: the four core layers already
+            hold that state, and this element only carries its label so the label
+            travels with them.
+          -->
+          <ul class="deck" id="deck">
+            <li class="plate plate--mix"   style="--n:1"><i class="plate__face"></i><span class="chip">Mix</span></li>
+            <li class="plate plate--song"  style="--n:2"><i class="plate__face"></i><span class="chip">Song</span></li>
+            <li class="plate plate--seq"   style="--n:3"><i class="plate__face"></i><span class="chip">Seq</span></li>
+            <li class="plate plate--synth" style="--n:4"><i class="plate__face"></i><span class="chip">Synth</span></li>
+            <li class="plate plate--pads"  style="--n:5"><i class="plate__face"></i><span class="chip">Pads</span></li>
+            <li class="plate plate--laser" style="--n:0"><span class="chip">Laser</span></li>
+          </ul>
 
-          <!-- the laser itself: target brackets, one travelling beam, seven cuts -->
+          <!-- the laser: target brackets, one travelling beam, seven cuts -->
           <svg class="beams" viewBox="0 0 451 900" aria-hidden="true" focusable="false">
             <g class="target">
               <path d="M5 31V5h26M420 5h26v26M446 869v26h-26M31 895H5v-26"/>
@@ -91,7 +102,7 @@
               <line class="cutline__core" x1="2" y1="156.83" x2="449" y2="156.83"/>
               <circle class="cutline__pin" cx="8" cy="156.83" r="3.6"/><circle class="cutline__pin" cx="443" cy="156.83" r="3.6"/>
             </g>
-            <g class="cutline" style="--p:.24589">
+            <g class="cutline cutline--core" style="--p:.24589">
               <line class="cutline__halo" x1="2" y1="221.3" x2="449" y2="221.3"/>
               <line class="cutline__core" x1="2" y1="221.3" x2="449" y2="221.3"/>
               <circle class="cutline__pin" cx="8" cy="221.3" r="3.6"/><circle class="cutline__pin" cx="443" cy="221.3" r="3.6"/>
@@ -120,23 +131,12 @@
       </div>
 
       <figcaption class="visually-hidden">
-        Station cut along its own construction seams into eight layers: transport,
-        readout, project, views, waveform, cut, slices and pads.
+        Station cut along its own construction seams into eight layers, four of
+        them chassis and four of them the area the active tab controls. That area
+        turns out to hold six states of the same machine: laser, pads, synth,
+        seq, song and mix.
       </figcaption>
     </figure>
-
-    <!-- the slice index. eight numbered layers in four columns and two rows —
-         the same shape pads 01 to 08 occupy in Station's own pad map. -->
-    <ol class="index" id="index">
-      <li class="index__item" style="--i:1"><span class="index__n">01</span><span class="index__name">Transport</span></li>
-      <li class="index__item" style="--i:2"><span class="index__n">02</span><span class="index__name">Display</span></li>
-      <li class="index__item" style="--i:3"><span class="index__n">03</span><span class="index__name">Project</span></li>
-      <li class="index__item" style="--i:4"><span class="index__n">04</span><span class="index__name">Views</span></li>
-      <li class="index__item" style="--i:5"><span class="index__n">05</span><span class="index__name">Waveform</span></li>
-      <li class="index__item" style="--i:6"><span class="index__n">06</span><span class="index__name">Cut</span></li>
-      <li class="index__item" style="--i:7"><span class="index__n">07</span><span class="index__name">Slices</span></li>
-      <li class="index__item" style="--i:8"><span class="index__n">08</span><span class="index__name">Pads</span></li>
-    </ol>
   </div>
 
   <div class="controls">
@@ -145,7 +145,7 @@
       <span class="trigger__meta" id="triggerMeta">cut 8</span>
       <span class="trigger__charge" aria-hidden="true"></span>
     </button>
-    <p class="hint" id="hint">One pass. Eight layers. Station opens along its own seams.</p>
+    <p class="hint" id="hint">One pass. Eight layers, and everything the tabs were keeping out of sight.</p>
   </div>
 
 </main>
