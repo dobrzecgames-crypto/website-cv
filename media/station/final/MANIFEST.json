@@ -1,0 +1,53 @@
+{
+  "generatedFrom": "assets/station/current",
+  "sourceSetId": "2026-08-21-0c64ac8",
+  "targetWidth": 1000,
+  "webpQuality": 0.86,
+  "tool": "tools/derive-media.mjs",
+  "files": [
+    {
+      "source": "laser/laser-loaded.png",
+      "sourceBytes": 620042,
+      "sourceSha256": "679b2e069163cdf830eef019e6f126eadb2cb8d905fd4652a71678f435f51e27",
+      "sourcePx": {
+        "width": 1353,
+        "height": 2700
+      },
+      "outputPx": {
+        "width": 1000,
+        "height": 1996
+      },
+      "role": "HERO, before the cut: break loaded, no slices, pads empty.",
+      "cssFallback": "assets/station/current/laser/laser-loaded.png",
+      "outputs": [
+        {
+          "file": "station-laser-loaded.webp",
+          "bytes": 70358,
+          "sha256": "5784b635f69b81d0918a3076152b6d46e0f139e689fa8f521e5a49c821ef7fff"
+        }
+      ]
+    },
+    {
+      "source": "overview/station-overview-01.png",
+      "sourceBytes": 707409,
+      "sourceSha256": "a90eda49237f97cb6190acc60744d07b2d2ae71b2c4eb273203769c849a6f0ef",
+      "sourcePx": {
+        "width": 1353,
+        "height": 2700
+      },
+      "outputPx": {
+        "width": 1000,
+        "height": 1996
+      },
+      "role": "HERO, after the cut: gold slice markers, CUT 8, pads 01-08 ready.",
+      "cssFallback": "assets/station/current/overview/station-overview-01.png",
+      "outputs": [
+        {
+          "file": "station-laser-cut.webp",
+          "bytes": 85454,
+          "sha256": "7ca3ad5df5c861a28b7a300940a37d26e7b3c2411ed17977ac6227d7f50f4b78"
+        }
+      ]
+    }
+  ]
+}
