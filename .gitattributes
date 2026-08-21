@@ -1,0 +1,13 @@
+# Store text as LF in the repository, check out native. Keeps the history clean
+# when the same files are edited on Windows and elsewhere.
+* text=auto
+
+# Station captures and everything derived from them are binary: never diff them,
+# never line-ending-convert them.
+*.png   binary
+*.webp  binary
+*.avif  binary
+*.jpg   binary
+*.wav   binary
+*.mp4   binary
+*.woff2 binary

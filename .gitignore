@@ -1,0 +1,22 @@
+# Local Claude Code tooling. Machine-specific, not project configuration:
+# the prototype runs with `node tools/serve.mjs` without any of this.
+.claude/launch.json
+.claude/settings.local.json
+
+# No dependencies yet — the project is dependency-free by design.
+node_modules/
+
+# tools/capture-station.mjs stages a capture run here and only moves it into
+# assets/station/current/ once the whole run succeeds. Never a committable state.
+assets/station/.staging/
+
+# Build output, once a stack is chosen.
+dist/
+.vite/
+
+# Logs, editor and OS artefacts.
+*.log
+npm-debug.log*
+.DS_Store
+Thumbs.db
+desktop.ini
