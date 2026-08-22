@@ -603,42 +603,34 @@ mode | width family/span | x | y | rotation | z-index | launch order | landing n
 
 That table will become the executable hero-layout contract.
 
-### Frozen dealer prototype contract — 2026-08-22
+### Dealer visual-correction contract — 2026-08-22
 
-The component pass was measured at `1440 × 1000` from checkpoint `97dd407`
-before motion work. The rendered pre-motion boxes were:
-
-```text
-LASER  321.16 × 412.08
-PADS   236.36 × 303.33
-SYNTH  236.36 × 303.33
-SEQ    236.36 × 303.33
-SONG   236.36 × 303.33
-MIX    151.58 × 194.52
-```
-
-The canonical dealer remap uses one measured central source slot at
-`x 560 / y 285 / 320 × 410.66`. Coordinates below are viewport coordinates
-on the `1440` canvas; every landing anchor is on the `16px` lattice and card
-widths are the exact `S / M / L` families. Scale is relative to the `320px`
-source slot.
+The correction pass keeps the same six-node deck and measured canonical source
+slot at `x 560 / y 285 / 320 × 410.66`, but reduces the dealt density and
+removes the compass-like frame. Coordinates below are viewport coordinates on
+the `1440 × 1000` canvas. Scale is relative to the `320px` source slot.
 
 | mode | width family/span | x | y | scale | rotation | z-index | launch order / delay | landing note |
 |---|---:|---:|---:|---:|---:|---:|---:|---|
-| LASER | M / 3 | 1064 | 544 | 1.000 | -2.2deg | 4 | 1 / 0ms | Right-lower rail; leaves the source first and clears the bay. |
-| PADS | S / 2 | 840 | 0 | 0.650 | 3.1deg | 7 | 2 / 100ms | High counterweight on column 8; top edge sits on the canvas edge. |
-| SYNTH | L / 4 | 56 | 160 | 1.350 | -3.4deg | 3 | 3 / 200ms | Dominant left field, aligned to the outer rail. |
-| SEQ | S / 2 | 840 | 720 | 0.650 | 1.6deg | 8 | 4 / 300ms | Low column-8 landing; keeps the central scroll-cue corridor clear. |
-| SONG | S / 2 | 280 | 704 | 0.650 | -1.2deg | 5 | 5 / 400ms | Low-left counterweight on column 3. |
-| MIX | M / 3 | 1064 | 128 | 1.000 | 2.4deg | 6 | 6 / 500ms | Right-upper rail; a controlled sub-8% visual contact with LASER. |
+| LASER | M / 3 | 952 | 352 | 1.000 | -1.8deg | 7 | 1 / 0ms | Lower-right throw with a controlled contact against MIX. |
+| PADS | S / 2 | 504 | 96 | 0.650 | -1.2deg | 4 | 2 / 100ms | Compact high card; shares the central-right edge axis with SONG. |
+| SYNTH | M / 3 | 56 | 176 | 1.000 | 1.1deg | 3 | 3 / 200ms | Left primary, reduced from the previous L family. |
+| SEQ | S / 2 | 728 | 464 | 0.650 | -0.6deg | 8 | 4 / 300ms | Small central-lower bridge rather than a south compass point. |
+| SONG | M / 3 | 392 | 416 | 1.000 | 0.7deg | 5 | 5 / 400ms | Lower-left body; closes the former empty ring around the source. |
+| MIX | S / 2 | 840 | 112 | 0.650 | 1.5deg | 6 | 6 / 500ms | Small upper-right counterweight, reduced from M. |
 
 Measured validation of this frame:
 
-- area-weighted centroid: `Cx 766.92 / Cy 520.70`, or `+46.92 / +20.70`
+- area-weighted centroid: `Cx 676.56 / Cy 471.73`, or `-43.44 / -28.27`
   from the hero center;
-- no unrotated or rotated card intersects the final central source slot;
-- largest rotated AABB contact is `LASER / MIX = 4.86%` of the smaller card;
-- mirror-pair rejection test passes for every pair;
+- three cards use M and three use S; no L card remains in the first deal;
+- the only intentional rotated AABB contact is the small `MIX / LASER` touch,
+  below the 8% overlap budget;
+- mirror-pair rejection passes for every pair;
+- short desktop and tablet viewports use the shared height-fit factor
+  `clamp(.72, (100svh - 160px) / 840px, 1)`: each card stays centred inside
+  its authored grid span while its size and vertical throw fit the available
+  height;
 - all six launch anchors are deterministic and runtime RNG is absent.
 
 ---

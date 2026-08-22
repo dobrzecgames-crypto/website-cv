@@ -26,6 +26,10 @@
   --source-y: calc(var(--object-y) + var(--core-y));
   --source-w: var(--frame-w);
   --source-h: calc(var(--source-w) * var(--ar-plate));
+  --source-fit-x: calc((var(--source-w) - var(--source-w) * var(--scene-fit)) / 2);
+  --source-fit-y: calc(var(--core-y) * (var(--scene-fit) - 1));
+  --empty-fit: calc(var(--scene-fit) * .56);
+  --empty-shift-x: calc((var(--source-w) - var(--source-w) * var(--empty-fit)) / 2);
   --gap: calc(var(--frame-h) * .024);
   height: 780px;
 }
@@ -39,6 +43,10 @@
   --ar: var(--ar-frame);
   --nudge: var(--source-nudge);
   z-index: 20;
+  opacity: 1;
+  transform: translate3d(var(--source-fit-x), 0, 0) scale(var(--scene-fit));
+  transform-origin: 0 0;
+  transition: transform 140ms cubic-bezier(.2, .9, .25, 1), opacity 140ms ease;
 }
 
 .station .frame::before {
@@ -54,6 +62,8 @@
     linear-gradient(90deg, rgba(255,255,255,.025), transparent 8% 92%, rgba(255,255,255,.02)),
     linear-gradient(180deg, #06060a, #0a0910 58%, #06060a);
   box-shadow: inset 0 12px 24px rgba(0,0,0,.52), inset 0 -10px 22px rgba(0,0,0,.4);
+  transform-origin: 50% 50%;
+  transition: transform 140ms cubic-bezier(.2, .9, .25, 1), opacity 140ms ease;
 }
 
 .slice--foot { --t: .8888889; --h: .1111111; }
@@ -68,6 +78,21 @@
 
 [data-state="dealing"] .slice--chassis,
 [data-state="released"] .slice--chassis { opacity: .54; }
+
+/* Once MIX clears the source, the chassis resolves into evidence rather than
+   a second hero object. It keeps the same physical bands and central seam,
+   but settles to a quiet, ruler-centred remnant before the cue appears. */
+[data-state="released"] .station .object {
+  opacity: .34;
+  transform:
+    translate3d(var(--empty-shift-x), calc(96px * var(--scene-fit)), 0)
+    scale(var(--empty-fit));
+}
+
+[data-state="released"] .station .frame::before {
+  opacity: .42;
+  transform: scaleY(.32);
+}
 
 [data-state="dealing"] .cast,
 [data-state="released"] .cast {
@@ -87,15 +112,22 @@
   margin: 0;
   padding: 0;
   pointer-events: none;
+  isolation: isolate;
 }
 
 .plate {
-  --final-w: calc(var(--s) * var(--cs) - var(--gutter));
+  --span-w: calc(var(--s) * var(--cs) - var(--gutter));
+  --final-w: calc(var(--span-w) * var(--scene-fit));
   --deal-scale: calc(var(--final-w) / var(--source-w));
-  --target-x: calc((var(--c) - 1) * var(--cs));
+  --target-x: calc(
+    (var(--c) - 1) * var(--cs) + (var(--span-w) - var(--final-w)) / 2
+  );
+  --target-y: calc(var(--py) * var(--scene-fit));
   --tx: calc(var(--target-x) - var(--source-x));
-  --ty: calc(var(--py) - var(--source-y));
-  --mid-scale: calc(1 + (var(--deal-scale) - 1) * .72);
+  --ty: calc(var(--target-y) - var(--source-y));
+  --mid-x: calc(var(--source-fit-x) + (var(--tx) - var(--source-fit-x)) * .76 + var(--bend-x));
+  --mid-y: calc(var(--source-fit-y) + (var(--ty) - var(--source-fit-y)) * .72 + var(--bend-y));
+  --mid-scale: calc(var(--scene-fit) + (var(--deal-scale) - var(--scene-fit)) * .72);
 
   position: absolute;
   left: var(--source-x);
@@ -105,9 +137,16 @@
   z-index: calc(70 - var(--n));
   opacity: 1;
   visibility: visible;
-  transform: translate3d(0, 0, 0) scale(1) rotate(0deg);
+  transform: translate3d(var(--source-fit-x), var(--source-fit-y), 0) scale(var(--scene-fit)) rotate(0deg);
   transform-origin: 0 0;
   will-change: transform;
+}
+
+/* GRID-EXCEPTION: the 1px inset is a raster containment guard, not authored
+   layout geometry. It prevents a lower transparent WebP edge from peeking
+   outside the active card while preserving the same six physical DOM nodes. */
+.plate:not(:first-child):not(.is-launching):not(.is-landed):not(.is-returning) {
+  clip-path: inset(1px);
 }
 
 .plate__face {
@@ -172,13 +211,15 @@
 }
 
 @keyframes dealer-flight {
-  0% { transform: translate3d(0, 0, 0) scale(1) rotate(0deg); }
+  0% {
+    transform:
+      translate3d(var(--source-fit-x), var(--source-fit-y), 0)
+      scale(var(--scene-fit))
+      rotate(0deg);
+  }
   68% {
     transform:
-      translate3d(
-        calc(var(--tx) * .76 + var(--bend-x)),
-        calc(var(--ty) * .72 + var(--bend-y)),
-        0)
+      translate3d(var(--mid-x), var(--mid-y), 0)
       scale(var(--mid-scale))
       rotate(var(--mid-r));
   }
@@ -187,7 +228,12 @@
 
 @keyframes dealer-return {
   from { transform: translate3d(var(--tx), var(--ty), 0) scale(var(--deal-scale)) rotate(var(--r)); }
-  to   { transform: translate3d(0, 0, 0) scale(1) rotate(0deg); }
+  to   {
+    transform:
+      translate3d(var(--source-fit-x), var(--source-fit-y), 0)
+      scale(var(--scene-fit))
+      rotate(0deg);
+  }
 }
 
 /* --------------------------------------------------------------------------
@@ -251,34 +297,41 @@
 
 @media (min-width: 1200px) and (max-width: 1439px) {
   .station { height: 760px; --object-y: 40px; }
-  .plate--pads  { --py: 16px !important; }
-  .plate--synth { --py: 24px !important; }
-  .plate--laser { --py: 248px !important; }
-  .plate--seq   { --py: 472px !important; }
-  .plate--song  { --py: 456px !important; }
-  .plate--mix   { --py: 32px !important; }
 }
 
 @media (min-width: 768px) and (max-width: 1199px) {
   .station { --core-c: 4; --core-s: 2; --source-nudge: 0px; --object-y: 72px; height: 840px; }
-  .plate--pads  { --c: 5 !important; --s: 2 !important; --py: -120px !important; }
-  .plate--synth { --c: 1 !important; --s: 3 !important; --py: 32px !important; }
-  .plate--mix   { --c: 7 !important; --s: 2 !important; --py: 32px !important; }
-  .plate--laser { --c: 7 !important; --s: 2 !important; --py: 360px !important; }
-  .plate--seq   { --c: 4 !important; --s: 2 !important; --py: 504px !important; }
-  .plate--song  { --c: 2 !important; --s: 2 !important; --py: 536px !important; }
+  .plate--pads  { --c: 4 !important; --s: 2 !important; --py: 0px !important; }
+  .plate--synth { --c: 1 !important; --s: 3 !important; --py: 80px !important; }
+  .plate--mix   { --c: 7 !important; --s: 2 !important; --py: 48px !important; }
+  .plate--laser { --c: 6 !important; --s: 3 !important; --py: 384px !important; }
+  .plate--seq   { --c: 4 !important; --s: 2 !important; --py: 328px !important; }
+  .plate--song  { --c: 2 !important; --s: 2 !important; --py: 544px !important; }
 }
 
 @media (max-width: 767px) {
   .station { --core-c: 2; --core-s: 2; --source-nudge: 0px; --object-y: 48px; height: 1320px; }
-  .plate--pads  { --c: 3 !important; --s: 2 !important; --py: -104px !important; }
-  .plate--synth { --c: 1 !important; --s: 3 !important; --py: 376px !important; }
-  .plate--mix   { --c: 1 !important; --s: 2 !important; --py: 720px !important; }
-  .plate--laser { --c: 3 !important; --s: 2 !important; --py: 784px !important; }
-  .plate--seq   { --c: 1 !important; --s: 2 !important; --py: 976px !important; }
-  .plate--song  { --c: 3 !important; --s: 2 !important; --py: 1048px !important; }
+  .plate--pads  { --c: 1 !important; --s: 2 !important; --py: 32px !important; }
+  .plate--synth { --c: 1 !important; --s: 3 !important; --py: 384px !important; }
+  .plate--mix   { --c: 3 !important; --s: 2 !important; --py: 144px !important; }
+  .plate--laser { --c: 3 !important; --s: 2 !important; --py: 944px !important; }
+  .plate--seq   { --c: 3 !important; --s: 2 !important; --py: 672px !important; }
+  .plate--song  { --c: 1 !important; --s: 2 !important; --py: 800px !important; }
+  .tag,
   .tag--before,
-  .tag--after { left: 0; right: auto; top: auto; bottom: 100%; margin: 0 0 8px; text-align: left; }
+  .tag--after,
+  .tag--below,
+  .tag--inside {
+    top: 12px;
+    right: auto;
+    bottom: auto;
+    left: 12px;
+    margin: 0;
+    padding: 6px 8px;
+    border: 1px solid rgba(185, 154, 98, .24);
+    background: rgba(7, 7, 11, .72);
+    text-align: left;
+  }
 }
 
 @media (prefers-reduced-motion: reduce) {
