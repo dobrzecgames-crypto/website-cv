@@ -18,6 +18,10 @@
  *                      it again when finished. Default http://localhost:5173
  *   --manifest-only    Do not shoot anything; just re-hash what is already in
  *                      assets/station/current/ and rewrite its MANIFEST.json.
+ *   --synth-supplement Capture the missing BASSIC, MONOGORG and DRUM SYNTH
+ *                      panels into the current set without replacing or
+ *                      archiving its existing screenshots. The source commit
+ *                      and viewport must match the current set.
  *
  * Requirements: Playwright + its Chromium come from the Station checkout's
  * node_modules (this project has none of its own), so the Station repo must be
@@ -27,7 +31,7 @@
 import { createHash } from 'node:crypto'
 import { spawn, execFileSync } from 'node:child_process'
 import { existsSync, readFileSync, readdirSync, renameSync, rmSync, statSync } from 'node:fs'
-import { mkdir, writeFile } from 'node:fs/promises'
+import { copyFile, mkdir, writeFile } from 'node:fs/promises'
 import { dirname, join, resolve } from 'node:path'
 import { fileURLToPath, pathToFileURL } from 'node:url'
 
@@ -46,6 +50,7 @@ const BASE = (flag('--base-url', 'http://localhost:5173') ?? '').replace(/\/$/, 
 const ASSETS = join(PROJECT, 'assets', 'station')
 const CURRENT = join(ASSETS, 'current')
 const ARCHIVE = join(ASSETS, 'archive')
+const SYNTH_SUPPLEMENT = has('--synth-supplement')
 // Everything is shot into a staging directory and only swapped in once the run
 // has finished. A crashed or half-finished run therefore cannot leave the set
 // on disk incomplete, and can never destroy the set that is already there.
@@ -75,14 +80,14 @@ const pngSize = (path) => {
 
 const stationCommit = () => {
   try {
-    return execFileSync('git', ['-C', STATION, 'rev-parse', '--short', 'HEAD'], { encoding: 'utf8' }).trim()
+    return execFileSync('git', ['-c', `safe.directory=${STATION.replaceAll('\\', '/')}`, '-C', STATION, 'rev-parse', '--short', 'HEAD'], { encoding: 'utf8' }).trim()
   } catch {
     return 'unknown'
   }
 }
 const stationDirty = () => {
   try {
-    return execFileSync('git', ['-C', STATION, 'status', '--porcelain'], { encoding: 'utf8' }).trim().length > 0
+    return execFileSync('git', ['-c', `safe.directory=${STATION.replaceAll('\\', '/')}`, '-C', STATION, 'status', '--porcelain'], { encoding: 'utf8' }).trim().length > 0
   } catch {
     return null
   }
@@ -103,8 +108,9 @@ const collectFiles = (dir, prefix = '') => {
   return out
 }
 
-const writeManifest = async (root, setId, capturedAt) => {
-  const described = new Map(shots.map((shot) => [shot.file, shot.description]))
+const writeManifest = async (root, setId, capturedAt, previous = null) => {
+  const described = new Map((previous?.files ?? []).map((file) => [file.file, file.description]))
+  for (const shot of shots) described.set(shot.file, shot.description)
   const files = collectFiles(root).sort().map((rel) => {
     const absolute = join(root, rel)
     return {
@@ -133,8 +139,9 @@ const writeManifest = async (root, setId, capturedAt) => {
       hidden: ['.type-lab (dev-only Typography Lab launcher, DEV builds only)'],
       cleanup: 'activeElement blurred and pointer parked at 2,2 before every shot',
       tool: 'tools/capture-station.mjs',
+      ...(previous?.capture?.supplements ? { supplements: previous.capture.supplements } : {}),
     },
-    content: 'Built-in break aalonbutler-gettinsoul.wav sliced into 8 LASER slices on pads 01-08; a 16-step pattern; pattern sections A-D; three banks; ZOLA-X on bank 02.',
+    content: 'Built-in break aalonbutler-gettinsoul.wav sliced into 8 LASER slices on pads 01-08; a 16-step pattern; pattern sections A-D; a three-bank SONG arrangement; instrument captures for BASSIC, MONOGORG, ZOLA-X and DRUM SYNTH KICK/SNARE.',
     fileCount: files.length,
     files,
   }
@@ -166,7 +173,7 @@ if (has('--manifest-only')) {
   const existing = existsSync(join(CURRENT, 'MANIFEST.json'))
     ? JSON.parse(readFileSync(join(CURRENT, 'MANIFEST.json'), 'utf8'))
     : {}
-  const manifest = await writeManifest(CURRENT, existing.setId ?? `unversioned-${stamp(new Date())}`, existing.capturedAt ?? new Date().toISOString())
+  const manifest = await writeManifest(CURRENT, existing.setId ?? `unversioned-${stamp(new Date())}`, existing.capturedAt ?? new Date().toISOString(), existing)
   console.log(`MANIFEST.json rewritten: ${manifest.fileCount} files, set ${manifest.setId}`)
   process.exit(0)
 }
@@ -210,11 +217,17 @@ const stopVite = () => {
 // --- browser ------------------------------------------------------------
 
 const playwright = await import(pathToFileURL(join(STATION, 'node_modules', '@playwright', 'test', 'index.mjs')).href)
-const browser = await playwright.chromium.launch({ args: ['--autoplay-policy=no-user-gesture-required', '--force-color-profile=srgb'] })
-const ctx = await browser.newContext({ viewport: VIEWPORT, deviceScaleFactor: SCALE, colorScheme: 'dark' })
-const page = await ctx.newPage()
+const bundledBrowser = playwright.chromium.executablePath()
+const browserExecutable = [
+  bundledBrowser,
+  'C:/Program Files/Google/Chrome/Application/chrome.exe',
+  'C:/Program Files (x86)/Microsoft/Edge/Application/msedge.exe',
+].find((candidate) => existsSync(candidate))
+if (!browserExecutable) throw new Error('No Playwright Chromium, Google Chrome or Microsoft Edge executable is available for capture.')
+let browser = null
+let ctx = null
+let page = null
 const pageErrors = []
-page.on('pageerror', (error) => pageErrors.push(String(error.message)))
 
 const capturedAt = new Date()
 const setId = `${stamp(capturedAt).slice(0, 10)}-${stationCommit()}`
@@ -251,7 +264,115 @@ const setRange = (locator, value) => locator.evaluate((el, v) => {
   el.dispatchEvent(new Event('change', { bubbles: true }))
 }, value)
 
+const openPadSynth = async (name) => {
+  await page.getByRole('button', { name: new RegExp(`^${name}\\b`) }).first().click()
+  await page.waitForTimeout(400)
+  const confirm = btn('OPEN ON NEW PATTERN')
+  if (await confirm.count() > 0) {
+    await confirm.click()
+    await page.waitForTimeout(1000)
+  }
+}
+
+const captureHeldAudition = async (audition, rel, description) => {
+  const box = await audition.boundingBox()
+  if (!box) throw new Error(`Cannot measure audition control for ${rel}.`)
+  await page.mouse.move(box.x + box.width / 2, box.y + box.height / 2)
+  await page.mouse.down()
+  await page.waitForTimeout(650)
+  await liveShot(rel, description)
+  await page.mouse.up()
+  await page.mouse.move(2, 2)
+  await page.waitForTimeout(250)
+}
+
+/**
+ * Capture the three instrument surfaces missing from the original set. ZOLA-X
+ * and the four-instrument picker are photographed earlier in a full run. This
+ * block deliberately runs after every narrative screenshot so opening fresh
+ * pattern groups cannot change the SONG or overview frames.
+ */
+const captureAdditionalSynths = async () => {
+  console.log('SYNTH SUPPLEMENT')
+  await nav('SYNTH')
+  await page.getByRole('region', { name: 'Choose a synthesizer', exact: true }).waitFor()
+
+  await openPadSynth('BASSIC')
+  await page.getByRole('region', { name: /^BASSIC editor/ }).waitFor()
+  await shot('synth/bassic-idle.png', 'BASSIC at rest: twin oscillators, SUB, MIX and FILTER arranged as a tactile monophonic control surface.', 700)
+  const bassicAudition = page.getByRole('button', { name: 'Hold to play synth', exact: true })
+  if (await bassicAudition.count() > 0) {
+    await captureHeldAudition(bassicAudition, 'synth/bassic-active.png', 'BASSIC sounding: the audition key is held while the full oscillator and filter surface remains visible.')
+  }
+
+  await btn('Back to synths').click()
+  await page.getByRole('region', { name: 'Choose a synthesizer', exact: true }).waitFor()
+  await openPadSynth('MONOGORG')
+  await page.getByRole('region', { name: /^MONOGORG editor/ }).waitFor()
+  await shot('synth/monogorg-idle.png', 'MONOGORG at rest: DRIVE, TONE, FILTER, ENV and MOD stages on its inlaid mono-bass panel.', 700)
+  const monogorgAudition = page.getByRole('button', { name: 'Hold to play MONOGORG', exact: true })
+  if (await monogorgAudition.count() > 0) {
+    await captureHeldAudition(monogorgAudition, 'synth/monogorg-active.png', 'MONOGORG sounding: the audition key is held on the complete character-bass control surface.')
+  }
+
+  await btn('Back to synths').click()
+  await page.getByRole('region', { name: 'Choose a synthesizer', exact: true }).waitFor()
+  await page.getByRole('button', { name: /^DRUM SYNTH\b/ }).first().click()
+  await page.getByRole('region', { name: 'DRUM SYNTH KICK editor', exact: true }).waitFor()
+  await shot('synth/drum-synth-kick.png', 'DRUM SYNTH KICK: eight vertical controls for TUNE, PUNCH, BODY, CLICK, DECAY, TONE, DRIVE and DUST.', 700)
+  await btn('SNARE').click()
+  await page.getByRole('region', { name: 'DRUM SYNTH SNARE editor', exact: true }).waitFor()
+  await shot('synth/drum-synth-snare.png', 'DRUM SYNTH SNARE: the alternate voice with SNAP, RATTLE and separate BODY/RATTLE decay controls.', 700)
+}
+
+/** Merge a successful supplement into current/ without touching existing PNGs. */
+const mergeSynthSupplement = async () => {
+  const manifestPath = join(CURRENT, 'MANIFEST.json')
+  if (!existsSync(manifestPath)) throw new Error('The current Station set has no MANIFEST.json to supplement.')
+  const manifest = JSON.parse(readFileSync(manifestPath, 'utf8'))
+  const commit = stationCommit()
+  const dirty = stationDirty()
+  if (commit === 'unknown' || manifest.source?.commit !== commit || dirty !== false) {
+    throw new Error(`Refusing to mix capture sources: current=${manifest.source?.commit ?? 'unknown'}, Station=${commit}, dirty=${dirty}.`)
+  }
+
+  const nextFiles = new Map((manifest.files ?? []).map((file) => [file.file, file]))
+  for (const captured of shots) {
+    const source = join(STAGING, captured.file)
+    const destination = join(CURRENT, captured.file)
+    await mkdir(dirname(destination), { recursive: true })
+    await copyFile(source, destination)
+    nextFiles.set(captured.file, {
+      file: captured.file,
+      description: captured.description,
+      bytes: statSync(source).size,
+      ...pngSize(source),
+      sha256: sha256(source),
+    })
+  }
+
+  manifest.capture.supplements = [
+    ...(manifest.capture.supplements ?? []),
+    {
+      capturedAt: capturedAt.toISOString(),
+      sourceCommit: commit,
+      workingTreeDirty: dirty,
+      files: shots.map(({ file }) => file),
+    },
+  ]
+  manifest.content = 'Built-in break aalonbutler-gettinsoul.wav sliced into 8 LASER slices on pads 01-08; a 16-step pattern; pattern sections A-D; a three-bank SONG arrangement; instrument captures for BASSIC, MONOGORG, ZOLA-X and DRUM SYNTH KICK/SNARE.'
+  manifest.files = [...nextFiles.values()].sort((a, b) => a.file.localeCompare(b.file))
+  manifest.fileCount = manifest.files.length
+  await writeFile(manifestPath, `${JSON.stringify(manifest, null, 2)}\n`, 'utf8')
+  return manifest
+}
+
 try {
+  browser = await playwright.chromium.launch({ executablePath: browserExecutable, args: ['--autoplay-policy=no-user-gesture-required', '--force-color-profile=srgb'] })
+  ctx = await browser.newContext({ viewport: VIEWPORT, deviceScaleFactor: SCALE, colorScheme: 'dark' })
+  page = await ctx.newPage()
+  page.on('pageerror', (error) => pageErrors.push(String(error.message)))
+
   // ---------------------------------------------------------------- boot
   await page.goto(BASE, { waitUntil: 'load' })
   await page.getByRole('region', { name: 'STATION', exact: true }).waitFor({ timeout: 30_000 })
@@ -261,6 +382,13 @@ try {
   await page.waitForTimeout(900)
   console.log(`booted (set ${setId})`)
 
+  if (SYNTH_SUPPLEMENT) {
+    await captureAdditionalSynths()
+    const manifest = await mergeSynthSupplement()
+    rmSync(STAGING, { recursive: true, force: true })
+    console.log(`\nsupplemented set ${manifest.setId} - ${shots.length} new synth shots, ${manifest.fileCount} files total`)
+    console.log('page errors:', pageErrors.length === 0 ? 'none' : JSON.stringify(pageErrors))
+  } else {
   // ---------------------------------------------------------------- LASER
   console.log('LASER')
   await nav('LASER')
@@ -456,6 +584,8 @@ try {
   await nav('PADS')
   await shot('overview/station-overview-02.png', 'Whole instrument in PADS with the loaded bank - the calmer product portrait.', 600)
 
+  await captureAdditionalSynths()
+
   // ---------------------------------------------------------------- manifest
   const manifest = await writeManifest(STAGING, setId, capturedAt.toISOString())
   await promoteStaging()
@@ -463,8 +593,9 @@ try {
   console.log('page errors:', pageErrors.length === 0 ? 'none' : JSON.stringify(pageErrors))
   console.log('\nNEXT: MANIFEST.json is machine truth and is now current. ASSET_INDEX.md is the')
   console.log('hand-written narrative doc - refresh its set id and any changed descriptions.')
+  }
 } finally {
-  await browser.close()
+  await browser?.close()
   stopVite()
   // Only a run that reached promoteStaging() leaves no staging directory; any
   // other outcome discards its partial work and leaves current/ untouched.

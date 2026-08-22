@@ -40,6 +40,7 @@ const ROOT = resolve(fileURLToPath(import.meta.url), '..', '..')
 const STATION = process.env.STATION_CHECKOUT || 'C:/Users/T470/Documents/station'
 const SRC = join(ROOT, 'assets', 'station', 'current')
 const OUT = join(ROOT, 'media', 'station')
+const CAPABILITY_ONLY = process.argv.includes('--capabilities-only')
 
 /* The instrument renders at most ~331 CSS px wide on desktop and ~310 on phones,
    so the hero width covers a 3x display with room to spare while dropping
@@ -61,6 +62,16 @@ const CORE_BOTTOM = 800 / 900
 
 const HERO_WIDTH = 1000   /* full chassis + core, used for the intact object */
 const PLATE_WIDTH = 720   /* core only, at the size a single plate renders */
+const CAPABILITY_WIDTH = 960
+
+/* HERO capability cards are not literal slices of Station. Each crop starts
+   below the shared view tabs and stops at the real bottom edge of that mode or
+   instrument. The values are measured in Station's 451 × 900 CSS capture
+   coordinate system. Keeping the per-card bottoms is what removes the repeated
+   empty chassis without turning the cards into arbitrary detail fragments. */
+const stationY = value => value / 900
+const CAPABILITY_TOP = stationY(218)
+const capabilityCrop = bottom => [CAPABILITY_TOP, stationY(bottom)]
 
 /* Chapter stills. These sources are already-cropped detail captures, so there
    is nothing to cut here - only a downscale. A chapter screen renders at
@@ -88,6 +99,19 @@ const JOBS = [
   { from: 'seq-song/song.png',           to: 'station-mode-song',  width: PLATE_WIDTH, crop: [CORE_TOP, CORE_BOTTOM], role: 'SONG plate: six lines of arrangement.' },
   { from: 'mix/mix-active.png',          to: 'station-mode-mix',   width: PLATE_WIDTH, crop: [CORE_TOP, CORE_BOTTOM], role: 'MIX plate: eight channels with live meters.' },
 
+  /* The complete capability field used by the rebuilt HERO. These are full
+     mode/instrument surfaces, not the redundant waveform/grid/meter details
+     used by the explanatory chapters below. */
+  { capability: true, from: 'laser/laser-preview-cut.png', to: 'capability-laser',          width: CAPABILITY_WIDTH, crop: capabilityCrop(878), role: 'HERO capability: complete LASER surface, without Station chrome or empty chassis.' },
+  { capability: true, from: 'pads/pads-active.png',        to: 'capability-pads',           width: CAPABILITY_WIDTH, crop: capabilityCrop(680), role: 'HERO capability: complete PADS surface, without Station chrome or empty chassis.' },
+  { capability: true, from: 'seq-song/seq.png',            to: 'capability-seq',            width: CAPABILITY_WIDTH, crop: capabilityCrop(732), role: 'HERO capability: complete SEQ surface, without Station chrome or empty chassis.' },
+  { capability: true, from: 'seq-song/song.png',           to: 'capability-song',           width: CAPABILITY_WIDTH, crop: capabilityCrop(606), role: 'HERO capability: complete SONG surface, without Station chrome or empty chassis.' },
+  { capability: true, from: 'mix/mix-active.png',          to: 'capability-mix',            width: CAPABILITY_WIDTH, crop: capabilityCrop(712), role: 'HERO capability: complete MIX surface, without Station chrome or empty chassis.' },
+  { capability: true, from: 'synth/bassic-idle.png',       to: 'capability-synth-bassic',   width: CAPABILITY_WIDTH, crop: capabilityCrop(780), role: 'HERO capability: complete BASSIC instrument, without Station chrome or empty chassis.' },
+  { capability: true, from: 'synth/monogorg-idle.png',     to: 'capability-synth-monogorg', width: CAPABILITY_WIDTH, crop: capabilityCrop(772), role: 'HERO capability: complete MONOGORG instrument, without Station chrome or empty chassis.' },
+  { capability: true, from: 'synth/zola-x-idle.png',       to: 'capability-synth-zola-x',   width: CAPABILITY_WIDTH, crop: capabilityCrop(760), role: 'HERO capability: complete ZOLA-X instrument, without Station chrome or empty chassis.' },
+  { capability: true, from: 'synth/drum-synth-kick.png',   to: 'capability-synth-drum',     width: CAPABILITY_WIDTH, crop: capabilityCrop(642), role: 'HERO capability: complete DRUM SYNTH instrument, without Station chrome or empty chassis.' },
+
   /* One still per chapter. Each has a partner capture in the same folder
      holding the module in its other state - pads at rest, meters idle,
      waveform uncut, wavetable sounding. Those partners are what the chapter
@@ -101,14 +125,20 @@ const JOBS = [
   { dir: 'details', from: 'details/song-arrangement.png', to: 'song-arrangement', width: DETAIL,      role: 'SONG chapter still: the arrangement grid, six lanes of clips.' }
 ]
 
+const selectedJobs = CAPABILITY_ONLY ? JOBS.filter(job => job.capability) : JOBS
+
 const sha256 = buf => createHash('sha256').update(buf).digest('hex')
 const kb = n => `${Math.round(n / 1024)} KB`
 
 const pw = await import(pathToFileURL(join(STATION, 'node_modules', '@playwright', 'test', 'index.mjs')).href)
-const browser = await pw.chromium.launch()
+const systemChromium = process.env.CHROMIUM_EXECUTABLE || [
+  'C:/Program Files/Google/Chrome/Application/chrome.exe',
+  'C:/Program Files (x86)/Microsoft/Edge/Application/msedge.exe'
+].find(existsSync)
+const browser = await pw.chromium.launch(systemChromium ? { executablePath: systemChromium } : {})
 const page = await browser.newPage()
 await page.goto('about:blank')
-for (const dir of new Set(JOBS.map(j => j.dir || 'final'))) await mkdir(join(OUT, dir), { recursive: true })
+for (const dir of new Set(selectedJobs.map(j => j.dir || 'final'))) await mkdir(join(OUT, dir), { recursive: true })
 
 /* one manifest per output folder */
 const manifests = {}
@@ -122,7 +152,7 @@ const manifestFor = dir => (manifests[dir] ||= {
   files: []
 })
 
-for (const job of JOBS) {
+for (const job of selectedJobs) {
   const srcPath = join(SRC, job.from)
   if (!existsSync(srcPath)) throw new Error(`missing source: ${job.from}`)
   const srcBuf = readFileSync(srcPath)
@@ -170,7 +200,8 @@ for (const job of JOBS) {
 }
 
 for (const [dir, manifest] of Object.entries(manifests)) {
-  writeFileSync(join(OUT, dir, 'MANIFEST.json'), JSON.stringify(manifest, null, 2) + String.fromCharCode(10))
-  console.log(`manifest -> media/station/${dir}/MANIFEST.json  (${manifest.files.length} files, source set ${manifest.sourceSetId})`)
+  const manifestName = CAPABILITY_ONLY && dir === 'final' ? 'CAPABILITY_MANIFEST.json' : 'MANIFEST.json'
+  writeFileSync(join(OUT, dir, manifestName), JSON.stringify(manifest, null, 2) + String.fromCharCode(10))
+  console.log(`manifest -> media/station/${dir}/${manifestName}  (${manifest.files.length} files, source set ${manifest.sourceSetId})`)
 }
 await browser.close()

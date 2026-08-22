@@ -34,19 +34,19 @@ node C:/Users/T470/Documents/WEBSITE-CV/tools/capture-station.mjs
 Tyle. Skrypt sam:
 
 1. startuje Vite z checkoutu Station, jeśli dev server nie działa (i gasi go po sobie),
-2. przechodzi całą ścieżkę produktu — LASER → cięcie → PADS → SEQ → MIX → ZOLA-X → SONG → OVERVIEW,
+2. przechodzi całą ścieżkę produktu — LASER → cięcie → PADS → SEQ → MIX → ZOLA-X → SONG → OVERVIEW, a na końcu otwiera pozostałe instrumenty SYNTH,
 3. zrzuca wszystko do `assets/station/.staging/`,
 4. dopiero po **udanym** przejściu przenosi poprzedni `current/` do `archive/<jego setId>/` i wstawia nowy zestaw na jego miejsce.
 
 Przerwany albo wywalony przebieg kasuje staging i **nie rusza** `current/`. Nie ma stanu pośredniego, w którym połowa zestawu jest nowa, a połowa stara.
 
-Opcje: `--base-url <url>` (użyj już działającego serwera), `--station <ścieżka>` (inny checkout Station), `--manifest-only` (nic nie zrzucaj, tylko przelicz hashe i odśwież manifest).
+Opcje: `--base-url <url>` (użyj już działającego serwera), `--station <ścieżka>` (inny checkout Station), `--manifest-only` (nic nie zrzucaj, tylko przelicz hashe i odśwież manifest), `--synth-supplement` (bez archiwizowania obecnego zestawu dopisz brakujące panele BASSIC, MONOGORG i DRUM SYNTH; skrypt odmawia pracy, jeśli commit lub stan working tree nie zgadza się z `current/`).
 
 **Po każdym nowym zestawie odśwież `ASSET_INDEX.md`** — `MANIFEST.json` generuje się sam, ale narracyjny opis i typy na HERO są pisane ręcznie.
 
 ## Wymagania
 
-Playwright i Chromium biorą się z `node_modules` checkoutu Station (`C:\Users\T470\Documents\station`) — ten projekt nie ma własnych zależności. Station musi być zainstalowany. Skrypt **niczego nie zapisuje w repo Station**; startuje tylko dev server i czyta commit przez `git`.
+Playwright bierze się z `node_modules` checkoutu Station (`C:\Users\T470\Documents\station`) — ten projekt nie ma własnych zależności. Do renderowania skrypt używa dołączonego Chromium, a jeśli tej binarki nie ma, lokalnego Google Chrome lub Microsoft Edge. Station musi być zainstalowany. Skrypt **niczego nie zapisuje w repo Station**; startuje tylko dev server i czyta commit przez `git`.
 
 ## Warunki kadrowania — dlaczego nie 1440×900
 

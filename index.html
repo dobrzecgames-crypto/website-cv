@@ -11,7 +11,7 @@
 <link rel="preload" as="image" type="image/webp" href="media/station/final/station-laser-cut.webp">
 <link rel="stylesheet" href="styles/grid.css">
 <link rel="stylesheet" href="styles/site.css">
-<link rel="stylesheet" href="styles/station.css">
+<link rel="stylesheet" href="styles/hero.css">
 <link rel="stylesheet" href="styles/chapters.css">
 </head>
 <body>
@@ -19,211 +19,117 @@
 <!--
   The page has two gears.
 
-  The overview is a poster: the machine, the six modules it holds, and a name
-  for each. It answers "what is this" at a glance and explains nothing. One
-  LASER IT does the whole reveal — the chassis is identical in every mode
-  capture, verified pixel by pixel, and only the area below the view tabs
-  changes, so that area is treated as a magazine of states.
+  The overview is the poster: Station intact, one LASER IT, and everything the
+  product can do. The beam changes the Station state, then five complete mode
+  surfaces and four complete synth instruments leave the same source and land
+  in a deterministic 12-column capability field.
 
   Past it the page slows down and reads like a magazine: one module per
   chapter, at reading speed, each with a screen big enough to become the real
   thing later.
 
-  The dealer hero resolves through the binding 12-column grid in
-  GRID_BIBLE.md; the reading chapters retain their checkpointed placement in
-  this hero-only pass. Press Shift+G to inspect the dealer canvas.
-
   TODO(content): the masthead still needs the builder's byline, and every lede
-  and spec list below is provisional — written from what the captures actually
-  show, so nothing is invented, but none of it is the builder's own words yet.
-  ASSET_PLAN.md "Missing-content rule".
+  and spec list below is provisional. ASSET_PLAN.md "Missing-content rule".
 -->
 
 <main>
 
-<section class="stage" id="stage" data-state="intact">
+<section class="hero" id="stage" data-state="intact" aria-labelledby="heroTitle">
+  <h1 class="visually-hidden" id="heroTitle">Station — a music workstation in a browser tab</h1>
+  <p class="visually-hidden" id="heroStatus" role="status" aria-live="polite">Station is ready.</p>
 
-  <header class="masthead grid">
-    <div class="masthead__object" style="--c:1; --s:6">
-      <h1 class="wordmark">Station</h1>
-      <p class="tagline">A music workstation that runs in a browser tab</p>
-    </div>
-    <p class="readout" style="--c:10; --s:3" role="status" aria-live="polite" aria-atomic="true">
-      <span class="readout__lamp" aria-hidden="true"></span>
-      <span id="readoutText">Source loaded · 1 slice</span>
-    </p>
-  </header>
-
-  <div class="theatre plot-host">
-
-    <!--
-      The overview. .plot resolves every child's box from the column step, so a
-      module can start on column 11, stand in its own air, or run off the
-      viewport edge and still be exactly on the grid. Nothing here is rotated
-      or in perspective, and no two modules overlap: three empty corridors do
-      the separating, shared lines do the holding together.
-    -->
-    <div class="plot station" id="plot">
-
-      <figure class="object placed">
-        <div class="rig">
-          <div class="frame" role="img"
-               aria-label="Station shown as one tall instrument: transport row, readout, project and bank row, the seven view tabs, a waveform display, the CUT slider and a sixteen-pad slice map.">
-
-            <!--
-              Five stationary bands keep only the chassis above the mode slot and
-              its physical foot below. The core is no longer baked into these image
-              slices: the six real deck nodes complete that gap while intact, then
-              leave it one by one.
-            -->
-            <div class="slices">
-              <div class="slice slice--chassis chop chop--1 slice--first" style="--i:1"><i class="face face--before"></i><i class="face face--after"></i></div>
-              <div class="slice slice--chassis chop chop--2" style="--i:2"><i class="face face--before"></i><i class="face face--after"></i></div>
-              <div class="slice slice--chassis chop chop--3" style="--i:3"><i class="face face--before"></i><i class="face face--after"></i></div>
-              <div class="slice slice--chassis chop chop--4" style="--i:4"><i class="face face--before"></i><i class="face face--after"></i></div>
-              <div class="slice slice--chassis slice--foot slice--last" style="--i:5"><i class="face face--before"></i><i class="face face--after"></i></div>
-            </div>
-
-            <!-- the laser: target brackets, one travelling beam, seven cuts -->
-            <svg class="beams" viewBox="0 0 451 900" aria-hidden="true" focusable="false">
-              <g class="target">
-                <path d="M5 31V5h26M420 5h26v26M446 869v26h-26M31 895H5v-26"/>
-              </g>
-              <g class="cutline" style="--p:.06644">
-                <line class="cutline__halo" x1="2" y1="59.8" x2="449" y2="59.8"/>
-                <line class="cutline__core" x1="2" y1="59.8" x2="449" y2="59.8"/>
-                <circle class="cutline__pin" cx="8" cy="59.8" r="3.6"/><circle class="cutline__pin" cx="443" cy="59.8" r="3.6"/>
-              </g>
-              <g class="cutline" style="--p:.11500">
-                <line class="cutline__halo" x1="2" y1="103.5" x2="449" y2="103.5"/>
-                <line class="cutline__core" x1="2" y1="103.5" x2="449" y2="103.5"/>
-                <circle class="cutline__pin" cx="8" cy="103.5" r="3.6"/><circle class="cutline__pin" cx="443" cy="103.5" r="3.6"/>
-              </g>
-              <g class="cutline" style="--p:.17426">
-                <line class="cutline__halo" x1="2" y1="156.83" x2="449" y2="156.83"/>
-                <line class="cutline__core" x1="2" y1="156.83" x2="449" y2="156.83"/>
-                <circle class="cutline__pin" cx="8" cy="156.83" r="3.6"/><circle class="cutline__pin" cx="443" cy="156.83" r="3.6"/>
-              </g>
-              <g class="cutline cutline--core" style="--p:.24589">
-                <line class="cutline__halo" x1="2" y1="221.3" x2="449" y2="221.3"/>
-                <line class="cutline__core" x1="2" y1="221.3" x2="449" y2="221.3"/>
-                <circle class="cutline__pin" cx="8" cy="221.3" r="3.6"/><circle class="cutline__pin" cx="443" cy="221.3" r="3.6"/>
-              </g>
-              <g class="cutline" style="--p:.44422">
-                <line class="cutline__halo" x1="2" y1="399.8" x2="449" y2="399.8"/>
-                <line class="cutline__core" x1="2" y1="399.8" x2="449" y2="399.8"/>
-                <circle class="cutline__pin" cx="8" cy="399.8" r="3.6"/><circle class="cutline__pin" cx="443" cy="399.8" r="3.6"/>
-              </g>
-              <g class="cutline" style="--p:.51500">
-                <line class="cutline__halo" x1="2" y1="463.5" x2="449" y2="463.5"/>
-                <line class="cutline__core" x1="2" y1="463.5" x2="449" y2="463.5"/>
-                <circle class="cutline__pin" cx="8" cy="463.5" r="3.6"/><circle class="cutline__pin" cx="443" cy="463.5" r="3.6"/>
-              </g>
-              <g class="cutline" style="--p:.70367">
-                <line class="cutline__halo" x1="2" y1="633.3" x2="449" y2="633.3"/>
-                <line class="cutline__core" x1="2" y1="633.3" x2="449" y2="633.3"/>
-                <circle class="cutline__pin" cx="8" cy="633.3" r="3.6"/><circle class="cutline__pin" cx="443" cy="633.3" r="3.6"/>
-              </g>
-            </svg>
-
-            <div class="beam" aria-hidden="true"></div>
-            <div class="flash" aria-hidden="true"></div>
-          </div>
-          <div class="cast" aria-hidden="true"></div>
+  <div class="hero__canvas">
+    <div class="hero__source" id="heroSource">
+      <figure class="hero__station">
+        <div class="hero__station-media" id="stationMedia">
+          <img class="hero__station-before"
+               src="media/station/final/station-laser-loaded.webp"
+               width="1000" height="1996" fetchpriority="high" decoding="sync"
+               alt="The complete Station music workstation in its Laser view.">
+          <img class="hero__station-after"
+               src="media/station/final/station-laser-cut.webp"
+               width="1000" height="1996" decoding="async" alt="">
+          <span class="hero__laser" aria-hidden="true"></span>
+          <span class="hero__laser-trail" aria-hidden="true"></span>
         </div>
-
-        <figcaption class="visually-hidden">
-          Station with one central deck holding six states of the same machine:
-          laser, pads, synth, seq, song and mix. The same six layers leave that
-          slot and expose the empty chassis behind them.
-        </figcaption>
+        <figcaption class="visually-hidden">One complete Station hides sampling, pads, synthesis, sequencing, arrangement and mixing.</figcaption>
       </figure>
 
-      <!--
-        One physical deck, not Station plus six copies. All six cards occupy
-        the same core-sized box in the intact state. JS launches these exact
-        nodes in narrative order; removing the top card exposes the next node
-        underneath and the empty slot bed is revealed after MIX.
+      <button class="hero__trigger" id="laserIt" type="button" aria-describedby="heroActionHint">
+        <span>Laser it</span>
+        <i aria-hidden="true"></i>
+      </button>
+      <p class="visually-hidden" id="heroActionHint">Reveal everything inside Station.</p>
+    </div>
 
-        --c / --s / --py are the authored final landing contract. At canonical
-        1440 they resolve through the 12-column geometry in GRID_BIBLE.md.
-        --n is launch order; timing and trajectory remain motion variables.
-      -->
-      <ul class="deck" id="deck">
+    <ol class="hero__cards" id="capabilityCards" aria-label="Station capabilities" aria-hidden="true">
+      <li class="capability capability--laser" data-mode="laser">
+        <figure>
+          <img data-src="media/station/final/capability-laser.webp" width="960" height="1405" alt="The complete Laser mode with sliced waveform, cut controls and live slice map.">
+          <figcaption><span>01</span> Laser</figcaption>
+        </figure>
+      </li>
+      <li class="capability capability--pads" data-mode="pads">
+        <figure>
+          <img data-src="media/station/final/capability-pads.webp" width="960" height="983" alt="The complete Pads mode with sixteen performance pads.">
+          <figcaption><span>02</span> Pads</figcaption>
+        </figure>
+      </li>
+      <li class="capability capability--bassic" data-mode="synth-bassic">
+        <figure>
+          <img data-src="media/station/final/capability-synth-bassic.webp" width="960" height="1196" alt="The complete BASSIC synthesizer panel.">
+          <figcaption><span>03A · Synth</span> Bassic</figcaption>
+        </figure>
+      </li>
+      <li class="capability capability--monogorg" data-mode="synth-monogorg">
+        <figure>
+          <img data-src="media/station/final/capability-synth-monogorg.webp" width="960" height="1179" alt="The complete MONOGORG synthesizer panel.">
+          <figcaption><span>03B · Synth</span> Monogorg</figcaption>
+        </figure>
+      </li>
+      <li class="capability capability--zola" data-mode="synth-zola-x">
+        <figure>
+          <img data-src="media/station/final/capability-synth-zola-x.webp" width="960" height="1154" alt="The complete ZOLA-X wavetable synthesizer panel.">
+          <figcaption><span>03C · Synth</span> Zola-X</figcaption>
+        </figure>
+      </li>
+      <li class="capability capability--drum" data-mode="synth-drum">
+        <figure>
+          <img data-src="media/station/final/capability-synth-drum.webp" width="960" height="903" alt="The complete Drum Synth panel in its kick voice.">
+          <figcaption><span>03D · Synth</span> Drum Synth</figcaption>
+        </figure>
+      </li>
+      <li class="capability capability--seq" data-mode="seq">
+        <figure>
+          <img data-src="media/station/final/capability-seq.webp" width="960" height="1094" alt="The complete step sequencer matrix.">
+          <figcaption><span>04</span> Seq</figcaption>
+        </figure>
+      </li>
+      <li class="capability capability--song" data-mode="song">
+        <figure>
+          <img data-src="media/station/final/capability-song.webp" width="960" height="826" alt="The complete Song arrangement with six lanes.">
+          <figcaption><span>05</span> Song</figcaption>
+        </figure>
+      </li>
+      <li class="capability capability--mix" data-mode="mix">
+        <figure>
+          <img data-src="media/station/final/capability-mix.webp" width="960" height="1052" alt="The complete Mix surface with eight channels and bus controls.">
+          <figcaption><span>06</span> Mix</figcaption>
+        </figure>
+      </li>
+    </ol>
 
-        <li class="plate plate--laser" data-mode="laser"
-            style="--n:0; --c:9; --s:3; --py:256px; --r:-1.8deg; --z:7; --flight:440ms; --bend-x:18px; --bend-y:-34px; --mid-r:-3.2deg">
-          <i class="plate__face"></i>
-          <p class="tag tag--before">
-            <span class="tag__n">01</span>
-            <span class="tag__name">Laser</span>
-          </p>
-        </li>
-
-        <li class="plate plate--pads" data-mode="pads"
-            style="--n:1; --c:5; --s:2; --py:0px; --r:-1.2deg; --z:4; --flight:400ms; --bend-x:30px; --bend-y:-26px; --mid-r:2.8deg">
-          <i class="plate__face"></i>
-          <p class="tag tag--inside">
-            <span class="tag__n">02</span>
-            <span class="tag__name">Pads</span>
-          </p>
-        </li>
-
-        <li class="plate plate--synth" data-mode="synth"
-            style="--n:2; --c:1; --s:3; --py:80px; --r:1.1deg; --z:3; --flight:480ms; --bend-x:-34px; --bend-y:-44px; --mid-r:-2.6deg">
-          <i class="plate__face"></i>
-          <p class="tag tag--inside">
-            <span class="tag__n">03</span>
-            <span class="tag__name">Synth</span>
-          </p>
-        </li>
-
-        <li class="plate plate--seq" data-mode="seq"
-            style="--n:3; --c:7; --s:2; --py:368px; --r:-0.6deg; --z:8; --flight:380ms; --bend-x:-18px; --bend-y:30px; --mid-r:2.2deg">
-          <i class="plate__face"></i>
-          <p class="tag tag--inside">
-            <span class="tag__n">04</span>
-            <span class="tag__name">Seq</span>
-          </p>
-        </li>
-
-        <li class="plate plate--song" data-mode="song"
-            style="--n:4; --c:4; --s:3; --py:320px; --r:0.7deg; --z:5; --flight:420ms; --bend-x:32px; --bend-y:22px; --mid-r:-2.4deg">
-          <i class="plate__face"></i>
-          <p class="tag tag--after">
-            <span class="tag__n">05</span>
-            <span class="tag__name">Song</span>
-          </p>
-        </li>
-
-        <li class="plate plate--mix" data-mode="mix"
-            style="--n:5; --c:8; --s:2; --py:16px; --r:1.5deg; --z:6; --flight:450ms; --bend-x:-10px; --bend-y:-38px; --mid-r:3.4deg">
-          <i class="plate__face"></i>
-          <p class="tag">
-            <span class="tag__n">06</span>
-            <span class="tag__name">Mix</span>
-          </p>
-        </li>
-
-      </ul>
+    <div class="hero__flash" aria-hidden="true"></div>
+    <div class="hero__grid-guide" aria-hidden="true">
+      <i></i><i></i><i></i><i></i><i></i><i></i>
+      <i></i><i></i><i></i><i></i><i></i><i></i>
     </div>
   </div>
 
-  <div class="controls grid">
-    <button class="trigger" id="laserIt" type="button" style="--c:1; --s:3">
-      <span class="trigger__label" id="triggerLabel">Laser it</span>
-      <span class="trigger__meta" id="triggerMeta">cut 8</span>
-      <span class="trigger__charge" aria-hidden="true"></span>
-    </button>
-    <p class="hint" id="hint" style="--c:5; --s:6">One pass. Six modes, all held in the same central slot.</p>
-  </div>
-
-  <a class="scroll-cue" id="scrollCue" href="#ch-laser-title" aria-label="Continue to the Laser chapter">
-    <svg viewBox="0 0 24 24" aria-hidden="true" focusable="false">
-      <path d="M12 3v16M6.5 13.5 12 19l5.5-5.5"/>
-    </svg>
+  <a class="hero__scroll-cue" id="scrollCue" href="#ch-laser-title"
+     aria-label="Continue to the detailed Station features" aria-hidden="true" tabindex="-1">
+    <span aria-hidden="true"></span>
   </a>
-
 </section>
 
 
@@ -425,7 +331,6 @@
 
 </main>
 
-<script src="scripts/laser.js?v=dealer-2" defer></script>
-<script src="scripts/grid-debug.js?v=dealer-2" defer></script>
+<script src="scripts/laser.js" defer></script>
 </body>
 </html>

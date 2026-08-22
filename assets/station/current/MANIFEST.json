@@ -23,10 +23,25 @@
       ".type-lab (dev-only Typography Lab launcher, DEV builds only)"
     ],
     "cleanup": "activeElement blurred and pointer parked at 2,2 before every shot",
-    "tool": "tools/capture-station.mjs"
+    "tool": "tools/capture-station.mjs",
+    "supplements": [
+      {
+        "capturedAt": "2026-08-22T15:05:43.124Z",
+        "sourceCommit": "0c64ac8",
+        "workingTreeDirty": false,
+        "files": [
+          "synth/bassic-idle.png",
+          "synth/bassic-active.png",
+          "synth/monogorg-idle.png",
+          "synth/monogorg-active.png",
+          "synth/drum-synth-kick.png",
+          "synth/drum-synth-snare.png"
+        ]
+      }
+    ]
   },
-  "content": "Built-in break aalonbutler-gettinsoul.wav sliced into 8 LASER slices on pads 01-08; a 16-step pattern; pattern sections A-D; three banks; ZOLA-X on bank 02.",
-  "fileCount": 30,
+  "content": "Built-in break aalonbutler-gettinsoul.wav sliced into 8 LASER slices on pads 01-08; a 16-step pattern; pattern sections A-D; a three-bank SONG arrangement; instrument captures for BASSIC, MONOGORG, ZOLA-X and DRUM SYNTH KICK/SNARE.",
+  "fileCount": 36,
   "files": [
     {
       "file": "details/mix-faders.png",
@@ -243,6 +258,54 @@
       "width": 1353,
       "height": 2700,
       "sha256": "1914d758eb4cf7d2bf768ad6338394f87bd45ae4fa951c23f7579f220363b7f8"
+    },
+    {
+      "file": "synth/bassic-active.png",
+      "description": "BASSIC sounding: the audition key is held while the full oscillator and filter surface remains visible.",
+      "bytes": 570704,
+      "width": 1353,
+      "height": 2700,
+      "sha256": "0a71ec271c721b3eb70cba23c9c71d1a7458e153f433d7ae6005cbb64669c18a"
+    },
+    {
+      "file": "synth/bassic-idle.png",
+      "description": "BASSIC at rest: twin oscillators, SUB, MIX and FILTER arranged as a tactile monophonic control surface.",
+      "bytes": 571850,
+      "width": 1353,
+      "height": 2700,
+      "sha256": "dd434a5befa404441bbb9a2d05ed9f9829390943671d372e6059923b29b31da3"
+    },
+    {
+      "file": "synth/drum-synth-kick.png",
+      "description": "DRUM SYNTH KICK: eight vertical controls for TUNE, PUNCH, BODY, CLICK, DECAY, TONE, DRIVE and DUST.",
+      "bytes": 526499,
+      "width": 1353,
+      "height": 2700,
+      "sha256": "0722bad3f5645d809bcdcc685b4ae6ba242385b8a341667a7779901fd800f36b"
+    },
+    {
+      "file": "synth/drum-synth-snare.png",
+      "description": "DRUM SYNTH SNARE: the alternate voice with SNAP, RATTLE and separate BODY/RATTLE decay controls.",
+      "bytes": 528068,
+      "width": 1353,
+      "height": 2700,
+      "sha256": "a182362b31f8d847f8a188687d022a38af1a58acda6bea7ff228ea4a28dfb782"
+    },
+    {
+      "file": "synth/monogorg-active.png",
+      "description": "MONOGORG sounding: the audition key is held on the complete character-bass control surface.",
+      "bytes": 556614,
+      "width": 1353,
+      "height": 2700,
+      "sha256": "2e8ae9eb81dcc2ebfbea6394b3c515ea9d5b54bb02c81b09770abab432aca750"
+    },
+    {
+      "file": "synth/monogorg-idle.png",
+      "description": "MONOGORG at rest: DRIVE, TONE, FILTER, ENV and MOD stages on its inlaid mono-bass panel.",
+      "bytes": 560370,
+      "width": 1353,
+      "height": 2700,
+      "sha256": "3e5799bdf0ddb89d72c5e7839876cccb036b811dd04a0cba0ee40048291c69a6"
     },
     {
       "file": "synth/synth-picker.png",

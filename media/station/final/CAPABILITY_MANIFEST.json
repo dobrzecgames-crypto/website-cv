@@ -1,0 +1,244 @@
+{
+  "generatedFrom": "assets/station/current",
+  "sourceSetId": "2026-08-21-0c64ac8",
+  "coreTop": 0.2458888888888889,
+  "coreBottom": 0.8888888888888888,
+  "webpQuality": 0.86,
+  "tool": "tools/derive-media.mjs",
+  "files": [
+    {
+      "source": "laser/laser-preview-cut.png",
+      "sourceBytes": 650637,
+      "sourceSha256": "cac30e70fa83f96f4369ff6bb3e933515620426145fb59413a40af0360300d95",
+      "sourcePx": {
+        "width": 1353,
+        "height": 2700
+      },
+      "croppedY": [
+        654,
+        2634
+      ],
+      "outputPx": {
+        "width": 960,
+        "height": 1405
+      },
+      "role": "HERO capability: complete LASER surface, without Station chrome or empty chassis.",
+      "cssFallback": "assets/station/current/laser/laser-preview-cut.png",
+      "outputs": [
+        {
+          "file": "capability-laser.webp",
+          "bytes": 51092,
+          "sha256": "a98ec6398d1434fcd9219d6e79c19f09685eeb17e5f2842ec4b140344486c1a8"
+        }
+      ]
+    },
+    {
+      "source": "pads/pads-active.png",
+      "sourceBytes": 898299,
+      "sourceSha256": "509132e5be6fa270a65935bf91a5203948d6bb55be312dd5b8d4b0b8b178a5b2",
+      "sourcePx": {
+        "width": 1353,
+        "height": 2700
+      },
+      "croppedY": [
+        654,
+        2040
+      ],
+      "outputPx": {
+        "width": 960,
+        "height": 983
+      },
+      "role": "HERO capability: complete PADS surface, without Station chrome or empty chassis.",
+      "cssFallback": "assets/station/current/pads/pads-active.png",
+      "outputs": [
+        {
+          "file": "capability-pads.webp",
+          "bytes": 45714,
+          "sha256": "455bc5bde961ac6ee8ea3ac0bec856f1d53dc602ad7bfb3d5248abdb9d524a04"
+        }
+      ]
+    },
+    {
+      "source": "seq-song/seq.png",
+      "sourceBytes": 358041,
+      "sourceSha256": "312430a1db4cccdb64612b9761d8d921ac3b9456f40dff4d3c18b8bb8e40a929",
+      "sourcePx": {
+        "width": 1353,
+        "height": 2700
+      },
+      "croppedY": [
+        654,
+        2196
+      ],
+      "outputPx": {
+        "width": 960,
+        "height": 1094
+      },
+      "role": "HERO capability: complete SEQ surface, without Station chrome or empty chassis.",
+      "cssFallback": "assets/station/current/seq-song/seq.png",
+      "outputs": [
+        {
+          "file": "capability-seq.webp",
+          "bytes": 18938,
+          "sha256": "ee3c1b450552dfa90d43471c132170b82cd70d44d02e5cbabcaf91ede3a9f35b"
+        }
+      ]
+    },
+    {
+      "source": "seq-song/song.png",
+      "sourceBytes": 362413,
+      "sourceSha256": "1914d758eb4cf7d2bf768ad6338394f87bd45ae4fa951c23f7579f220363b7f8",
+      "sourcePx": {
+        "width": 1353,
+        "height": 2700
+      },
+      "croppedY": [
+        654,
+        1818
+      ],
+      "outputPx": {
+        "width": 960,
+        "height": 826
+      },
+      "role": "HERO capability: complete SONG surface, without Station chrome or empty chassis.",
+      "cssFallback": "assets/station/current/seq-song/song.png",
+      "outputs": [
+        {
+          "file": "capability-song.webp",
+          "bytes": 14296,
+          "sha256": "ba08734ca620b74dfd6cea6ce4edef16d0a1e262be00c3141b59439f7af0633d"
+        }
+      ]
+    },
+    {
+      "source": "mix/mix-active.png",
+      "sourceBytes": 487684,
+      "sourceSha256": "8fb6af0e473fd6385061b4777c2a0e89b55345c8c10cb4e1cae08046befabc41",
+      "sourcePx": {
+        "width": 1353,
+        "height": 2700
+      },
+      "croppedY": [
+        654,
+        2136
+      ],
+      "outputPx": {
+        "width": 960,
+        "height": 1052
+      },
+      "role": "HERO capability: complete MIX surface, without Station chrome or empty chassis.",
+      "cssFallback": "assets/station/current/mix/mix-active.png",
+      "outputs": [
+        {
+          "file": "capability-mix.webp",
+          "bytes": 32002,
+          "sha256": "2b6400c25670d59f8453d5b0b1662abd9b096f3fb6276de67492a35af8a6ad9e"
+        }
+      ]
+    },
+    {
+      "source": "synth/bassic-idle.png",
+      "sourceBytes": 571850,
+      "sourceSha256": "dd434a5befa404441bbb9a2d05ed9f9829390943671d372e6059923b29b31da3",
+      "sourcePx": {
+        "width": 1353,
+        "height": 2700
+      },
+      "croppedY": [
+        654,
+        2340
+      ],
+      "outputPx": {
+        "width": 960,
+        "height": 1196
+      },
+      "role": "HERO capability: complete BASSIC instrument, without Station chrome or empty chassis.",
+      "cssFallback": "assets/station/current/synth/bassic-idle.png",
+      "outputs": [
+        {
+          "file": "capability-synth-bassic.webp",
+          "bytes": 30228,
+          "sha256": "462f5921fe038ffdb4907c0275655e3fadc08aeab856a9b901d3e2a6bc181ceb"
+        }
+      ]
+    },
+    {
+      "source": "synth/monogorg-idle.png",
+      "sourceBytes": 560370,
+      "sourceSha256": "3e5799bdf0ddb89d72c5e7839876cccb036b811dd04a0cba0ee40048291c69a6",
+      "sourcePx": {
+        "width": 1353,
+        "height": 2700
+      },
+      "croppedY": [
+        654,
+        2316
+      ],
+      "outputPx": {
+        "width": 960,
+        "height": 1179
+      },
+      "role": "HERO capability: complete MONOGORG instrument, without Station chrome or empty chassis.",
+      "cssFallback": "assets/station/current/synth/monogorg-idle.png",
+      "outputs": [
+        {
+          "file": "capability-synth-monogorg.webp",
+          "bytes": 28014,
+          "sha256": "0dc7d94b5576837ab6151471e3d80dd69c3fcdd50df87c62bb185645eaf72b55"
+        }
+      ]
+    },
+    {
+      "source": "synth/zola-x-idle.png",
+      "sourceBytes": 507414,
+      "sourceSha256": "78aef14835519352586ff9128cfe52338d0db879f2e825ada2a280d3d3460dc6",
+      "sourcePx": {
+        "width": 1353,
+        "height": 2700
+      },
+      "croppedY": [
+        654,
+        2280
+      ],
+      "outputPx": {
+        "width": 960,
+        "height": 1154
+      },
+      "role": "HERO capability: complete ZOLA-X instrument, without Station chrome or empty chassis.",
+      "cssFallback": "assets/station/current/synth/zola-x-idle.png",
+      "outputs": [
+        {
+          "file": "capability-synth-zola-x.webp",
+          "bytes": 40790,
+          "sha256": "b1a9ed72978816b6369c8541855bb8f6d063ad1b635c3c5c73bbc7abcc21d428"
+        }
+      ]
+    },
+    {
+      "source": "synth/drum-synth-kick.png",
+      "sourceBytes": 526499,
+      "sourceSha256": "0722bad3f5645d809bcdcc685b4ae6ba242385b8a341667a7779901fd800f36b",
+      "sourcePx": {
+        "width": 1353,
+        "height": 2700
+      },
+      "croppedY": [
+        654,
+        1926
+      ],
+      "outputPx": {
+        "width": 960,
+        "height": 903
+      },
+      "role": "HERO capability: complete DRUM SYNTH instrument, without Station chrome or empty chassis.",
+      "cssFallback": "assets/station/current/synth/drum-synth-kick.png",
+      "outputs": [
+        {
+          "file": "capability-synth-drum.webp",
+          "bytes": 21040,
+          "sha256": "67bce60817b5e6e485daeeb5dd5a82d267621b8ea40cee069f604a02807a6c7a"
+        }
+      ]
+    }
+  ]
+}

@@ -1,11 +1,11 @@
 # Station — aktualne materiały wizualne (asset collection)
 
-> **ZESTAW `2026-08-21-0c64ac8`** — zebrany 2026-08-21, Station `main` @ `0c64ac8`, working tree czysty.
+> **ZESTAW `2026-08-21-0c64ac8`** — zebrany 2026-08-21 i uzupełniony 2026-08-22, Station `main` @ `0c64ac8`, working tree czysty.
 > Twarde dane o tym zestawie (hashe, wymiary, warunki kadrowania) siedzą w [`MANIFEST.json`](MANIFEST.json).
 > Zasady wersjonowania, komenda do przestrzelenia zestawu od nowa i archiwum poprzednich zestawów: [`../README.md`](../README.md).
 > **Kolejne zestawy będą miały te same nazwy plików** — rozróżnia je wyłącznie `setId` w manifeście i nazwa folderu w `../archive/`.
 
-Nic w Station nie było zmieniane — to wyłącznie zrzuty aktualnego, niezmodyfikowanego interfejsu. Zestaw powstał w całości z jednego przebiegu `tools/capture-station.mjs`, więc wszystkie kadry pokazują ten sam stan projektu.
+Nic w Station nie było zmieniane — to wyłącznie zrzuty aktualnego, niezmodyfikowanego interfejsu. Główny zestaw powstał z jednego przebiegu `tools/capture-station.mjs`; sześć brakujących ujęć instrumentów dopisał tryb `--synth-supplement` z dokładnie tego samego czystego commita, viewportu i skali. Szczegóły obu przebiegów zapisuje manifest.
 
 ## Warunki zrzutów
 
@@ -14,7 +14,7 @@ Nic w Station nie było zmieniane — to wyłącznie zrzuty aktualnego, niezmody
 - Jeden viewport i jedna skala UI dla **wszystkich** plików — nic nie było skalowane po fakcie.
 - Bez DevTools, bez paneli Claude, bez popupów systemowych, bez kursora w kadrze (mysz odsuwana przed każdym zrzutem), bez przypadkowego hoveru i bez ringu focusu (aktywny element blurowany przed zrzutem).
 - Ukryty jest wyłącznie dev-only launcher „TYPE" (Typography Lab, `.type-lab`, renderowany tylko w `import.meta.env.DEV`) — nie jest częścią produktu.
-- Materiał muzyczny: wbudowany break `aalonbutler-gettinsoul.wav` pocięty w LASER na 8 slice'ów (pady 01–08), własny 16-krokowy pattern, trzy banki, sześć linii w SONG, ZOLA-X na banku 02.
+- Materiał muzyczny: wbudowany break `aalonbutler-gettinsoul.wav` pocięty w LASER na 8 slice'ów (pady 01–08), własny 16-krokowy pattern, trzy banki i sześć linii w SONG. Część SYNTH pokazuje komplet instrumentów: BASSIC, MONOGORG, ZOLA-X oraz głosy KICK/SNARE w DRUM SYNTH.
 
 ---
 
@@ -46,8 +46,14 @@ Nic w Station nie było zmieniane — to wyłącznie zrzuty aktualnego, niezmody
 
 | Plik | Opis |
 |---|---|
+| `synth/bassic-idle.png` | **BASSIC, pełny panel.** Dwa oscylatory, SUB, MIX i FILTER na ciężkiej, dotykowej powierzchni monofonicznego syntezatora. |
+| `synth/bassic-active.png` | BASSIC podczas grania — ten sam panel z wciśniętym i podświetlonym przyciskiem audition. |
+| `synth/monogorg-idle.png` | **MONOGORG, pełny panel.** Duże DRIVE oraz sekcje TONE, FILTER, ENV i MOD na ciemnej, inkrustowanej powierzchni. |
+| `synth/monogorg-active.png` | MONOGORG podczas grania — wariant z wciśniętym przyciskiem audition. |
 | `synth/zola-x-idle.png` | **ZOLA-X, kadr główny.** Duży ekran wavetable (stos krzywych OSC 1 / BLOOM), zakładki OSC / FILTER / ENV / MOD, TABLE, UNISON, POSITION, LEVEL, OSC MIX. |
 | `synth/zola-x-active.png` | ZOLA-X w trakcie grania: wavetable przechodzi w żywy, rozedrgany odczyt, przycisk audition podświetlony. |
+| `synth/drum-synth-kick.png` | **DRUM SYNTH / KICK.** Osiem pionowych faderów: TUNE, PUNCH, BODY, CLICK, DECAY, TONE, DRIVE i DUST. |
+| `synth/drum-synth-snare.png` | **DRUM SYNTH / SNARE.** Drugi głos tego samego instrumentu: SNAP, RATTLE oraz osobne czasy BODY/RATTLE DECAY. |
 | `synth/synth-picker.png` | Ekran wyboru instrumentu (BASSIC / MONOGORG / ZOLA-X / DRUM SYNTH) z autorskimi glifami. Kontekst, że ZOLA-X to jeden z czterech instrumentów. |
 
 ## SEQ / SONG
@@ -92,9 +98,11 @@ Nic w Station nie było zmieniane — to wyłącznie zrzuty aktualnego, niezmody
 | **HERO** | `overview/station-overview-01.png` |
 | **LASER transition** | `details/waveform-laser.png` → `details/slice-markers.png` (klatka „przed" → „po"), a jako pełny kadr `laser/laser-preview-cut.png` |
 | **PADS** | `pads/pads-active.png`, wycinek `details/pads-grid-active.png` |
-| **SYNTH** | `synth/zola-x-idle.png`, wycinek `details/wavetable-zola-x.png` |
+| **SYNTH** | `synth/zola-x-idle.png`, `synth/bassic-idle.png`, `synth/monogorg-idle.png`, `synth/drum-synth-kick.png`, `synth/drum-synth-snare.png`; wycinek `details/wavetable-zola-x.png` |
 | **SEQ / SONG** | `seq-song/song.png` (hierarchia) + `seq-song/seq.png` (rytm) |
 | **MIX** | `mix/mix-active.png`, wycinek `details/mix-meters.png` |
+
+Do planowanego drugiego rozdania małych kart możliwości w HERO nadaje się zestaw: picker → BASSIC → MONOGORG → ZOLA-X → DRUM KICK → DRUM SNARE. Warianty `*-active.png` są alternatywnymi klatkami do krótkiego błysku/zmiany stanu, nie obowiązkiem użycia obu wersji naraz.
 
 ## 5–8 assetów, od których warto zacząć budowę website-CV
 

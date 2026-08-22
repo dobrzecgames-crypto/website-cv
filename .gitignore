@@ -23,3 +23,5 @@ desktop.ini
 
 # Review artefacts rendered from the site. Regenerate with tools/export-pdf.mjs.
 exports/
+
+.vercel

@@ -23,6 +23,13 @@ _Source: `AGENTS.md` → "Hero interaction", `CLAUDE.md` → "LASER"._
 - Final positions land on the grid; motion paths may leave it.
 - Exact landing coordinates stay unfrozen until all six real component bounds are measured.
 
+_Source: user direction in Codex session, 2026-08-22._
+
+- HERO is an emotional spectacle: after LASER IT, real mode and synth capability cards rapidly fill the full hero with controlled overlap and depth.
+- The reveal represents Station's complete capability set, not a literal slicing of one Station PNG; SYNTH may expose its four distinct instruments.
+- Do not use redundant detail crops such as waveforms, grids, meters or faders as standalone HERO cards; complete mode views are sufficient.
+- The down-arrow cue appears only after the full deal settles; structured explanations and the already-approved interactive demonstrations belong below HERO.
+
 ## Agent communication
 
 _Source: user instruction, 2026-08-22._
