@@ -12,13 +12,16 @@ Before changing code, read:
 
 1. `PROJECT_BRIEF.md`
 2. `DESIGN_PRINCIPLES.md`
-3. `STORYBOARD.md`
-4. `CONTENT_STRUCTURE.md`
-5. `TECHNICAL_PRINCIPLES.md`
-6. `ASSET_PLAN.md`
-7. `DECISIONS.md`
+3. `GRID_BIBLE.md`
+4. `STORYBOARD.md`
+5. `CONTENT_STRUCTURE.md`
+6. `TECHNICAL_PRINCIPLES.md`
+7. `ASSET_PLAN.md`
+8. `DECISIONS.md`
 
 Treat these files as product requirements, not decorative notes.
+
+`GRID_BIBLE.md` is the binding geometry/composition specification. Do not replace its grid with arbitrary pixel offsets, symmetric gallery placement, random hero landing coordinates or a generic card layout unless the document is explicitly revised first.
 
 ## Product priority
 
