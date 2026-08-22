@@ -154,8 +154,10 @@
    disagreed with the composition, the composition would be the thing at fault */
 .gridlab__cols {
   position: absolute;
-  inset: 0;
-  padding-inline: var(--grid-margin);
+  top: 0;
+  bottom: 0;
+  left: var(--grid-margin);
+  width: var(--hero-width);
   display: grid;
   grid-template-columns: repeat(var(--grid-cols), minmax(0, 1fr));
   column-gap: var(--gutter);

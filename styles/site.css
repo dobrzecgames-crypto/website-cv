@@ -30,7 +30,7 @@
   --gold-hot:   #fff4dd;
 
   /* Object geometry used to be height-driven and centred. It is now width-
-     driven off the 16-column grid — --frame-w, --frame-h and the core lines
+     driven off the dealer grid — --frame-w, --frame-h and the core lines
      are declared on .station in styles/station.css, so the machine stands on
      the same column lines as the type and the modes beside it. Everything
      below still derives from --frame-h exactly as before. */
@@ -38,9 +38,9 @@
   --rig-scale:  0.90;
 
   /* timeline — mirrored in scripts/laser.js */
-  --t-arm:      140ms;
-  --t-sweep:    620ms;
-  --t-flash:    150ms;
+  --t-arm:      50ms;
+  --t-sweep:    110ms;
+  --t-flash:    70ms;
   --t-open:     980ms;
   --t-heal:     520ms;
   --t-deal:     1000ms;
@@ -188,9 +188,8 @@ body::after {
   display: grid;
   align-content: center;
   min-height: 0;
-  /* Perspective is only ever used by the cut itself, where the eight layers
-     lift out of the object for a moment. The composition it resolves into is
-     flat: nothing in the released state carries a Z or a rotation. */
+  /* Perspective is reserved for the short laser prelude. The dealt landing
+     frame is authored in the flat grid coordinate system. */
   perspective: 1500px;
   perspective-origin: 50% 44%;
 }
@@ -229,7 +228,7 @@ body::after {
 [data-state="released"] .cast,
 [data-state="closing"]  .cast { transform: translate(-50%, -6%) scale(1.1, .7); opacity: .22; }
 
-/* --- the eight layers --------------------------------------------------- */
+/* --- the stationary chassis bands -------------------------------------- */
 
 .slices { position: absolute; inset: 0; transform-style: preserve-3d; }
 
@@ -347,7 +346,7 @@ body::after {
 
    Where the six of them land is a layout question, not a motion question, so
    the whole deck — placement, size, labels and the retargeted deal — lives in
-   styles/station.css on the 16-column grid.
+   styles/station.css on the binding dealer grid.
    ========================================================================== */
 
 /* ==========================================================================
@@ -579,4 +578,147 @@ body::after {
   .slice::after { opacity: 0; }
   [data-state="sliced"] .slice::after { opacity: .36; animation: none !important; }
   [data-state="slicing"] .cutline { opacity: 1; transform: scaleX(1); }
+}
+
+/* ===========================================================================
+   DEALER HERO CANVAS
+
+   GRID-EXCEPTION: this task is explicitly HERO-only. The checkpointed reading
+   chapters below retain their existing 16-track placements until their own
+   migration pass; only .stage switches to the binding 12/8/4-column system.
+   ========================================================================== */
+
+.stage {
+  --grid-cols: 12;
+  --gutter: 16px;
+  --hero-width: min(1328px, calc(100vw - 80px));
+  --hero-rail: max(40px, calc((100vw - 1328px) / 2));
+  display: block;
+  min-height: 1000px;
+  height: max(100svh, 1000px);
+  padding: 30px var(--hero-rail) 24px;
+  overflow: hidden;
+}
+
+.stage .masthead {
+  position: relative;
+  z-index: 120;
+  width: var(--hero-width);
+}
+
+.stage .theatre {
+  position: absolute;
+  inset: 96px auto auto var(--hero-rail);
+  display: block;
+  width: var(--hero-width);
+  height: 780px;
+  min-height: 0;
+}
+
+.stage .station { width: 100%; }
+
+.stage .controls {
+  position: absolute;
+  z-index: 130;
+  left: var(--hero-rail);
+  bottom: 24px;
+  width: var(--hero-width);
+  padding: 0;
+}
+
+[data-state="dealing"] .readout,
+[data-state="released"] .readout { color: var(--sand); border-color: rgba(185, 154, 98, .3); }
+[data-state="dealing"] .readout__lamp,
+[data-state="released"] .readout__lamp { background: var(--gold); box-shadow: 0 0 7px rgba(185, 154, 98, .7); }
+
+[data-state="dealing"] .face--after,
+[data-state="released"] .face--after { opacity: 1; }
+[data-state="dealing"] .cutline,
+[data-state="released"] .cutline { opacity: 0; transform: scaleX(1); transition: opacity 90ms linear; }
+
+[data-state="dealing"] .trigger,
+[data-state="released"] .trigger { color: var(--sand-mid); }
+
+.scroll-cue {
+  position: absolute;
+  z-index: 140;
+  left: 50%;
+  bottom: 20px;
+  display: grid;
+  place-items: center;
+  width: 32px;
+  height: 40px;
+  color: var(--sand-mid);
+  opacity: 0;
+  visibility: hidden;
+  transform: translate(-50%, -5px);
+  transition: opacity 180ms ease, transform 180ms ease, visibility 0s 180ms;
+}
+
+.scroll-cue svg { width: 22px; height: 22px; overflow: visible; }
+.scroll-cue path { fill: none; stroke: currentColor; stroke-width: 1.25; stroke-linecap: square; stroke-linejoin: miter; }
+.scroll-cue:focus-visible { outline: 1px solid var(--gold-lit); outline-offset: 4px; }
+
+.is-cue-ready .scroll-cue {
+  opacity: 1;
+  visibility: visible;
+  transform: translate(-50%, 0);
+  transition-delay: 0s;
+}
+
+.no-motion .beam,
+.no-motion .flash { display: none; }
+
+@media (min-width: 1440px) {
+  .stage { --hero-width: 1328px; --hero-rail: calc((100vw - 1328px) / 2); }
+}
+
+@media (min-width: 768px) and (max-width: 1199px) {
+  .stage {
+    --grid-cols: 8;
+    --hero-width: calc(100vw - 64px);
+    --hero-rail: 32px;
+    min-height: 1080px;
+    height: max(100svh, 1080px);
+  }
+  .stage .theatre { top: 136px; height: 840px; }
+  .stage .masthead__object { grid-column: 1 / span 4; }
+  .stage .readout { grid-column: 6 / span 3; }
+  .stage .trigger { grid-column: 1 / span 3; }
+  .stage .hint { grid-column: 4 / span 5; }
+}
+
+@media (max-width: 767px) {
+  .stage {
+    --grid-cols: 4;
+    --gutter: 12px;
+    --hero-width: calc(100vw - 40px);
+    --hero-rail: 20px;
+    min-height: 1490px;
+    height: 1490px;
+    padding-top: 20px;
+  }
+  .stage .theatre { top: 144px; height: 1320px; }
+  .stage .masthead { row-gap: 12px; }
+  .stage .masthead__object,
+  .stage .readout { grid-column: 1 / span 4; }
+  .stage .readout { grid-row: 2; justify-self: start; }
+  .stage .controls { bottom: auto; top: 552px; }
+  .stage .trigger { grid-column: 1 / span 4; }
+  .stage .hint { display: none; }
+  [data-state="dealing"] .controls,
+  [data-state="released"] .controls { opacity: 0; visibility: hidden; }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .scroll-cue { transition-duration: 1ms; }
+
+  /* Development/review escape hatch: ?motion=on lets the authored dealer be
+     inspected on a machine whose OS preference is reduced motion. Normal page
+     loads continue to respect that preference. */
+  .force-motion .plate.is-launching { animation-duration: var(--flight) !important; }
+  .force-motion .plate.is-returning { animation-duration: 280ms !important; }
+  .force-motion [data-state="slicing"] .beam { display: block; animation-duration: var(--t-sweep) !important; }
+  .force-motion .flash { display: block; animation-duration: var(--t-flash) !important; }
+  .force-motion .scroll-cue { transition-duration: 180ms !important; }
 }

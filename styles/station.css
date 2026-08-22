@@ -1,150 +1,197 @@
-/* ==========================================================================
-   website — the Station overview
+/* ===========================================================================
+   website — Station dealer HERO
 
-   The hero. Six modules and the machine they live in, placed on the 16-column
-   grid from grid.css. Nothing rotates, tilts or sits in perspective: every
-   screen is front-facing and rectangular.
+   The chassis and the deck are separate physical layers. The chassis keeps
+   only the controls above the mode slot and the foot below it. The six mode
+   cards are the content that completes Station at rest; those same DOM nodes
+   leave the slot, so an outgoing mode cannot remain duplicated in the center.
 
-   This is an overview, not a case study. Each module gets its own space and a
-   name; what any of them actually does belongs to the chapters below, in
-   styles/chapters.css. Nothing up here carries a description.
-
-   COLUMNS                  1  2  3  4  5  6  7  8  9 10 11 12 13 14 15 16
-     SYNTH    c  1  s 3   [-- -- x]
-     MIX      c  2  s 2       [-- x]
-     LASER    c  5  s 4               [x -- -- x]                        the machine
-     SEQ      c 11  s 3                                 [-- -- x]
-     PADS     c 11  s 3                                 [-- -- x]
-     SONG     c 16  s 3                                             [x --  cut by the right edge
-
-   Three empty corridors run top to bottom — column 4, columns 9-10 and
-   columns 14-15. They are the reason six screens read as six modules rather
-   than as one pile. No two modules overlap. What holds the composition
-   together is that they share lines, not that they touch.
-
-   LINES
-     top      SYNTH, the machine and SEQ all start on it
-     line A   the bottom edge of the machine's active area, the box the modes
-              live in. SONG ends on it, across the corridor.
-     line B   the foot of the machine and the foot of the composition. MIX and
-              PADS end on it.
-
-   Both lines are read off the object's own geometry rather than typed in, so
-   they stay exact at every viewport width.
+   Canonical 1440 geometry follows GRID_BIBLE.md:
+     canvas 1440 · rails 56 · 12 × 96 columns · 16 gutters
+     source deck c5 / span 3 · final widths S2 / M3 / L4
    ========================================================================== */
 
 .station {
-  --ar-plate: 1.283333;         /* 924 / 720 — the mode crop */
-  --ar-frame: 1.995565;         /* 900 / 451 — the whole machine */
-
-  /* Where the machine stands. Everything else is measured from here, including
-     where the five hidden states come out of during the cut. */
+  --ar-frame: 1.995565;       /* 900 / 451 */
+  --ar-plate: 1.283333;       /* derived 720 × 924 core crop */
   --core-c: 5;
-  --core-s: 4;
-
+  --core-s: 3;
+  --source-nudge: calc(var(--cs) / 2);
+  --object-y: 32px;
   --frame-w: calc(var(--core-s) * var(--cs) - var(--gutter));
   --frame-h: calc(var(--frame-w) * var(--ar-frame));
-  --core-y:  calc(var(--frame-h) * .24589);
-  --core-h:  calc(var(--frame-h) * .64300);
-  --line-a:  calc(var(--core-y) + var(--core-h));
-  --line-b:  var(--frame-h);
-
-  /* how far the eight layers separate during the cut — frozen motion layer,
-     styles/site.css, kept here because it is derived from the object's height */
-  --gap: calc(var(--frame-h) * 0.024);
-
-  height: var(--frame-h);
+  --core-y: calc(var(--frame-h) * .24589);
+  --core-h: calc(var(--frame-h) * .64300);
+  --source-x: calc((var(--core-c) - 1) * var(--cs) + var(--source-nudge));
+  --source-y: calc(var(--object-y) + var(--core-y));
+  --source-w: var(--frame-w);
+  --source-h: calc(var(--source-w) * var(--ar-plate));
+  --gap: calc(var(--frame-h) * .024);
+  height: 780px;
 }
 
-/* height of a module of span --s, used to hang one from a line */
-.station .plate { --h: calc((var(--s) * var(--cs) - var(--gutter)) * var(--ar-plate)); }
+/* The full instrument is centered before the cut. Its top and foot stay as
+   chassis after the cards leave; the dark bay between them is the empty slot. */
+.station .object {
+  --c: var(--core-c);
+  --s: var(--core-s);
+  --py: var(--object-y);
+  --ar: var(--ar-frame);
+  --nudge: var(--source-nudge);
+  z-index: 20;
+}
+
+.station .frame::before {
+  content: "";
+  position: absolute;
+  z-index: -1;
+  left: 0;
+  top: var(--core-y);
+  width: 100%;
+  height: var(--core-h);
+  border-inline: 1px solid rgba(90, 82, 96, .24);
+  background:
+    linear-gradient(90deg, rgba(255,255,255,.025), transparent 8% 92%, rgba(255,255,255,.02)),
+    linear-gradient(180deg, #06060a, #0a0910 58%, #06060a);
+  box-shadow: inset 0 12px 24px rgba(0,0,0,.52), inset 0 -10px 22px rgba(0,0,0,.4);
+}
+
+.slice--foot { --t: .8888889; --h: .1111111; }
+
+/* The old cut spread is intentionally suppressed here. LASER IT is now the
+   fast dealer prelude; exploding the chassis first would reintroduce a second
+   visual event and obscure the single-slot mechanism. */
+[data-state="sliced"] .rig,
+[data-state="dealing"] .rig,
+[data-state="released"] .rig,
+[data-state="closing"] .rig { transform: none; }
+
+[data-state="dealing"] .slice--chassis,
+[data-state="released"] .slice--chassis { opacity: .54; }
+
+[data-state="dealing"] .cast,
+[data-state="released"] .cast {
+  opacity: .18;
+  transform: translate(-50%, -5%) scale(1.04, .62);
+}
 
 /* --------------------------------------------------------------------------
-   PLACEMENT
-
-   Read each line as: which column it starts on, how many it spans, and which
-   line it hangs from.
+   ONE CENTRAL DECK
    -------------------------------------------------------------------------- */
 
-/* the machine is the only large object up here — one product, six modules */
-.object       { --c:  5; --s: 4; --py: 0px; --ar: var(--ar-frame); z-index: 3; }
-
-.plate        { --ar: var(--ar-plate); }
-.plate--synth { --c:  1; --s: 3; --py: 0px; }
-.plate--mix   { --c:  2; --s: 2; --py: calc(var(--line-b) - var(--h)); --fo: .82; }
-.plate--seq   { --c: 11; --s: 3; --py: 0px; }
-.plate--pads  { --c: 11; --s: 3; --py: calc(var(--line-b) - var(--h)); }
-
-/* the one module that runs off the page. --nudge keeps it cut when a viewport
-   that is wide relative to its height widens the page margin — see
-   --bleed-nudge in styles/grid.css. */
-.plate--song  { --c: 16; --s: 3; --py: calc(var(--line-a) - var(--h));
-                --nudge: var(--bleed-nudge); --fo: .82; }
-
-/* LASER is not a module of its own: it is the machine's own core, already on
-   screen. This element carries no image — it only marks that box so the label
-   hangs off exactly the rectangle the four core layers occupy. */
-.station .plate--laser { --c: 5; --s: 4; --py: var(--core-y); --ph: var(--core-h); z-index: 6; }
-.plate--laser .plate__face { display: none; }
-
-/* the deck shares the plot's coordinate space rather than nesting inside the
-   object, which is what lets a module stand beside the machine instead of on it */
 .deck {
   list-style: none;
-  margin: 0;
-  padding: 0;
   position: absolute;
   inset: 0;
+  z-index: 30;
+  margin: 0;
+  padding: 0;
   pointer-events: none;
 }
 
-/* --------------------------------------------------------------------------
-   THE MODULES
-   -------------------------------------------------------------------------- */
-
-/* Hidden, not merely transparent: before the cut these six states have not
-   been revealed yet, and a screen reader should not be reading their labels
-   out over an object that still looks whole. visibility flips back only after
-   the fade has finished, so it costs the transition nothing. */
 .plate {
-  opacity: 0;
-  visibility: hidden;
+  --final-w: calc(var(--s) * var(--cs) - var(--gutter));
+  --deal-scale: calc(var(--final-w) / var(--source-w));
+  --target-x: calc((var(--c) - 1) * var(--cs));
+  --tx: calc(var(--target-x) - var(--source-x));
+  --ty: calc(var(--py) - var(--source-y));
+  --mid-scale: calc(1 + (var(--deal-scale) - 1) * .72);
+
+  position: absolute;
+  left: var(--source-x);
+  top: var(--source-y);
+  width: var(--source-w);
+  height: var(--source-h);
+  z-index: calc(70 - var(--n));
+  opacity: 1;
+  visibility: visible;
+  transform: translate3d(0, 0, 0) scale(1) rotate(0deg);
   transform-origin: 0 0;
-  transition: opacity 280ms ease, visibility 0s 280ms;
+  will-change: transform;
 }
 
-/* --fo is how present a module stays once it has landed. It sits on the face
-   rather than on the plate, so a quieter module can recede without taking its
-   own label down with it. */
 .plate__face {
   position: absolute;
   inset: 0;
-  opacity: var(--fo, 1);
+  overflow: hidden;
   background-color: var(--ink-1);
   background-repeat: no-repeat;
   background-position: 0 0;
   background-size: 100% 100%;
-  /* Every mode leaves empty chassis at the bottom of its crop. Ending on that
-     hard rectangle is what would make a plate read as a card, so the tail is
-     dissolved: the modules come out of the dark rather than sitting on it. */
-  -webkit-mask-image: linear-gradient(to bottom, #000 0 86%, transparent 100%);
-          mask-image: linear-gradient(to bottom, #000 0 86%, transparent 100%);
+  box-shadow: 0 1px 0 rgba(255,255,255,.04), 0 16px 32px rgba(0,0,0,.22);
 }
 
-/* Not part of the first paint. scripts/laser.js adds .deck-ready once the page
-   is idle, which is what gives these their background-image and fetches them. */
+/* LASER is required for first paint; the five lower cards are fetched at idle
+   or at the first sign of intent by scripts/laser.js. */
+.plate--laser .plate__face {
+  background-image: url("../media/station/final/station-mode-laser-loaded.webp");
+}
+
+.plate--laser .plate__face::after {
+  content: "";
+  position: absolute;
+  inset: 0;
+  opacity: 0;
+  background: url("../media/station/final/station-mode-laser.webp") 0 0 / 100% 100% no-repeat;
+  transition: opacity 70ms linear;
+}
+
+[data-state="slicing"] .plate--laser .plate__face::after,
+[data-state="dealing"] .plate--laser .plate__face::after,
+[data-state="released"] .plate--laser .plate__face::after { opacity: 1; }
+
 .deck-ready .plate--pads  .plate__face { background-image: url("../media/station/final/station-mode-pads.webp"); }
 .deck-ready .plate--synth .plate__face { background-image: url("../media/station/final/station-mode-synth.webp"); }
 .deck-ready .plate--seq   .plate__face { background-image: url("../media/station/final/station-mode-seq.webp"); }
 .deck-ready .plate--song  .plate__face { background-image: url("../media/station/final/station-mode-song.webp"); }
 .deck-ready .plate--mix   .plate__face { background-image: url("../media/station/final/station-mode-mix.webp"); }
 
-/* --------------------------------------------------------------------------
-   LABELS
+/* Once a card leaves the chassis, dissolve its unused lower panel exactly as
+   the checkpointed component treatment did. Inside the slot it stays solid so
+   six equal physical layers cover one another without seams. */
+.plate.is-launching .plate__face,
+.plate.is-landed .plate__face {
+  -webkit-mask-image: linear-gradient(to bottom, #000 0 86%, transparent 100%);
+          mask-image: linear-gradient(to bottom, #000 0 86%, transparent 100%);
+}
 
-   Name and number, nothing else — an overview that reads like a specification
-   is not an overview. Each label hangs off a column line of the module it
-   names and sits in that module's own air, so none of them lands on a picture.
+.plate.is-launching {
+  z-index: calc(80 + var(--n));
+  animation: dealer-flight var(--flight) cubic-bezier(.18, .76, .2, 1) both;
+}
+
+.plate.is-landed {
+  z-index: var(--z);
+  transform: translate3d(var(--tx), var(--ty), 0) scale(var(--deal-scale)) rotate(var(--r));
+  will-change: auto;
+}
+
+.plate.is-returning {
+  z-index: calc(90 + var(--n));
+  animation: dealer-return 280ms cubic-bezier(.42, 0, .55, 1) both;
+}
+
+@keyframes dealer-flight {
+  0% { transform: translate3d(0, 0, 0) scale(1) rotate(0deg); }
+  68% {
+    transform:
+      translate3d(
+        calc(var(--tx) * .76 + var(--bend-x)),
+        calc(var(--ty) * .72 + var(--bend-y)),
+        0)
+      scale(var(--mid-scale))
+      rotate(var(--mid-r));
+  }
+  100% { transform: translate3d(var(--tx), var(--ty), 0) scale(var(--deal-scale)) rotate(var(--r)); }
+}
+
+@keyframes dealer-return {
+  from { transform: translate3d(var(--tx), var(--ty), 0) scale(var(--deal-scale)) rotate(var(--r)); }
+  to   { transform: translate3d(0, 0, 0) scale(1) rotate(0deg); }
+}
+
+/* --------------------------------------------------------------------------
+   LABELS — inherited visual voice, attached to the moving physical card
    -------------------------------------------------------------------------- */
 
 .tag {
@@ -156,16 +203,9 @@
   border-bottom: 1px solid rgba(185, 154, 98, .35);
   white-space: nowrap;
   opacity: 0;
-  transition: opacity 300ms ease;
 }
 
-.tag__n {
-  display: block;
-  font-size: 9px;
-  letter-spacing: .22em;
-  color: var(--sand-low);
-}
-
+.tag__n { display: block; font-size: 9px; letter-spacing: .22em; color: var(--sand-low); }
 .tag__name {
   display: block;
   margin-top: 3px;
@@ -177,152 +217,79 @@
   color: var(--sand-mid);
 }
 
-/* the machine's own state reads first — it is the one already on screen */
 .plate--laser .tag { border-bottom-color: var(--gold); }
 .plate--laser .tag__name { font-size: 17px; color: var(--sand); }
 
-/* where a label cannot sit above its own module */
-.tag--below  { bottom: auto; top: 100%; margin: 10px 0 0; padding: 6px 0 0;
-               border-bottom: 0; border-top: 1px solid rgba(185, 154, 98, .35); }
-/* into the corridor to the left of the module, reading toward it */
-.tag--before { left: auto; right: 100%; bottom: auto; top: 0; margin: 0 14px 0 0; text-align: right; }
-/* into the corridor to its right */
-.tag--after  { left: 100%; bottom: auto; top: 0; margin: 0 0 0 14px; }
+.tag--below {
+  top: 100%; bottom: auto; margin: 10px 0 0; padding: 6px 0 0;
+  border-top: 1px solid rgba(185, 154, 98, .35); border-bottom: 0;
+}
+.tag--before { left: auto; right: 100%; top: 0; bottom: auto; margin: 0 14px 0 0; text-align: right; }
+.tag--after  { left: 100%; top: 0; bottom: auto; margin: 0 0 0 14px; }
+.tag--inside {
+  top: 16px;
+  bottom: auto;
+  left: 16px;
+  margin: 0;
+  padding: 6px 8px;
+  border: 1px solid rgba(185, 154, 98, .24);
+  background: rgba(7, 7, 11, .72);
+}
+
+.plate.is-launching .tag {
+  animation: dealer-tag-in calc(var(--flight) * .42) ease calc(var(--flight) * .48) both;
+}
+.plate.is-landed .tag { opacity: 1; }
+@keyframes dealer-tag-in { from { opacity: 0 } to { opacity: 1 } }
 
 /* --------------------------------------------------------------------------
-   RELEASED — the static composition
+   BREAKPOINT-SPECIFIC LANDING MAPS
 
-   This is the state the whole layout is designed for. No transform, no depth,
-   no rotation: each element simply occupies the box the grid gave it.
+   Desktop is the measured canonical contract. Tablet and mobile are authored
+   recompositions; they do not proportionally shrink the 1440 coordinates.
    -------------------------------------------------------------------------- */
 
-[data-state="released"] .plate,
-[data-state="closing"]  .plate { opacity: 1; visibility: visible; transform: none; transition-delay: 0s; }
-
-[data-state="released"] .tag,
-[data-state="closing"]  .tag { opacity: 1; }
-
-/* The machine's own state is the four core layers, so its tail has to be
-   dissolved the same way every other module's is — otherwise the pad map runs
-   to the bottom edge of the frame and the LASER label lands on top of it.
-   line A sits at 88.9% of the frame; on the last core layer, which spans
-   70.4% to 100%, that is 63% of the way down. */
-[data-state="released"] .slice--core.chop--8,
-[data-state="closing"]  .slice--core.chop--8 {
-  -webkit-mask-image: linear-gradient(to bottom, #000 0 53%, transparent 63%);
-          mask-image: linear-gradient(to bottom, #000 0 53%, transparent 63%);
+@media (min-width: 1200px) and (max-width: 1439px) {
+  .station { height: 760px; --object-y: 40px; }
+  .plate--pads  { --py: 16px !important; }
+  .plate--synth { --py: 24px !important; }
+  .plate--laser { --py: 248px !important; }
+  .plate--seq   { --py: 472px !important; }
+  .plate--song  { --py: 456px !important; }
+  .plate--mix   { --py: 32px !important; }
 }
 
-/* the shell stays as evidence, dimmed: the machine the modules came out of */
-[data-state="released"] .slice--chassis,
-[data-state="closing"]  .slice--chassis { opacity: .32; }
-
-/* --------------------------------------------------------------------------
-   THE DEAL — motion retargeted, not redesigned
-
-   The frozen animation still means what it meant: every module comes out of
-   the one place under the tabs. Only the destination changed, from a fanned
-   stack to a grid position. The start offset is the distance from the core's
-   box to the module's own box in column steps; the scale is the span ratio,
-   which ignores one gutter and is close enough for a first frame.
-   -------------------------------------------------------------------------- */
-
-.plate {
-  --from-x: calc((var(--core-c) - var(--c)) * var(--cs) - var(--nudge, 0px));
-  --from-y: calc(var(--core-y) - var(--py));
-  --from-s: calc(var(--core-s) / var(--s));
+@media (min-width: 768px) and (max-width: 1199px) {
+  .station { --core-c: 4; --core-s: 2; --source-nudge: 0px; --object-y: 72px; height: 840px; }
+  .plate--pads  { --c: 5 !important; --s: 2 !important; --py: -120px !important; }
+  .plate--synth { --c: 1 !important; --s: 3 !important; --py: 32px !important; }
+  .plate--mix   { --c: 7 !important; --s: 2 !important; --py: 32px !important; }
+  .plate--laser { --c: 7 !important; --s: 2 !important; --py: 360px !important; }
+  .plate--seq   { --c: 4 !important; --s: 2 !important; --py: 504px !important; }
+  .plate--song  { --c: 2 !important; --s: 2 !important; --py: 536px !important; }
 }
 
-[data-state="released"] .plate {
-  /* backwards, not both: the 0% frame covers the stagger delay, and once the
-     deal is over the element falls back to the static rule above rather than
-     being held in place by a finished animation. The grid owns the end state;
-     the motion only borrows the element on the way there. */
-  animation: deal var(--t-deal) var(--ease-open) backwards;
-  animation-delay: calc(var(--n) * 55ms);
+@media (max-width: 767px) {
+  .station { --core-c: 2; --core-s: 2; --source-nudge: 0px; --object-y: 48px; height: 1320px; }
+  .plate--pads  { --c: 3 !important; --s: 2 !important; --py: -104px !important; }
+  .plate--synth { --c: 1 !important; --s: 3 !important; --py: 376px !important; }
+  .plate--mix   { --c: 1 !important; --s: 2 !important; --py: 720px !important; }
+  .plate--laser { --c: 3 !important; --s: 2 !important; --py: 784px !important; }
+  .plate--seq   { --c: 1 !important; --s: 2 !important; --py: 976px !important; }
+  .plate--song  { --c: 3 !important; --s: 2 !important; --py: 1048px !important; }
+  .tag--before,
+  .tag--after { left: 0; right: auto; top: auto; bottom: 100%; margin: 0 0 8px; text-align: left; }
 }
-[data-state="released"] .tag { transition-delay: calc(var(--n) * 55ms + var(--t-deal) * .5); }
 
-/* ?motion=off puts the scene straight into its static state with the motion
-   layer switched off, which is how the composition is judged on its own.
-   Development only — see scripts/laser.js. */
-.no-motion .plate { animation: none; }
-.no-motion .tag   { transition: none; }
-
-@keyframes deal {
-  0% {
-    opacity: 0;
-    transform: translate(var(--from-x), var(--from-y)) scale(var(--from-s));
+@media (prefers-reduced-motion: reduce) {
+  html:not(.force-motion) .plate { animation: none !important; }
+  html:not(.force-motion) [data-state="released"] .plate,
+  html:not(.force-motion) [data-state="dealing"] .plate {
+    z-index: var(--z);
+    transform: translate3d(var(--tx), var(--ty), 0) scale(var(--deal-scale)) rotate(var(--r));
   }
-  18%  { opacity: .55; }
-  100% { opacity: 1; transform: none; }
+  html:not(.force-motion) [data-state="released"] .tag,
+  html:not(.force-motion) [data-state="dealing"] .tag { opacity: 1; }
 }
 
-/* --------------------------------------------------------------------------
-   NARROWER VIEWPORTS
-
-   Below desktop the overview stops being a composition. The modules leave the
-   plot and flow down the grid in narrative order, each with its label above
-   it, so nothing can overlap anything. A designed narrow scene is its own
-   piece of work; this one is correct, legible and honest about being a
-   holding position.
-   -------------------------------------------------------------------------- */
-
-@media (max-width: 1099px) {
-  /* the machine keeps its place at the top and simply gets wider */
-  .station { height: auto; --frame-w: calc(8 * var(--cs) - var(--gutter)); }
-  .station .placed { position: static; }
-  .station .object { --s: 8; margin-inline: auto; }
-  .theatre { align-content: start; }
-
-  /* before the cut there is nothing to list, and an empty column of reserved
-     space under the machine would read as a loading state */
-  .deck { position: static; display: none; }
-  [data-state="released"] .deck,
-  [data-state="closing"]  .deck {
-    display: grid;
-    grid-template-columns: repeat(2, minmax(0, 1fr));
-    gap: calc(7 * var(--rhythm)) var(--gutter);
-    margin-top: calc(6 * var(--rhythm));
-  }
-
-  .station .plate {
-    display: flex;
-    flex-direction: column;
-    width: auto;
-    height: auto;
-    --nudge: 0px;
-  }
-  .plate__face { position: relative; inset: auto; width: 100%; aspect-ratio: 720 / 924; }
-
-  /* the machine above is already showing the LASER state, so this entry keeps
-     only its number and name, on its own line under the object */
-  .plate--laser { order: -1; grid-column: 1 / -1; }
-  .plate--pads  { order: 1; }
-  .plate--synth { order: 2; }
-  .plate--seq   { order: 3; }
-  .plate--song  { order: 4; }
-  .plate--mix   { order: 5; }
-
-  .tag {
-    position: static;
-    order: -1;
-    opacity: 1;
-    transition: none;
-    text-align: left;
-    margin: 0 0 calc(1.5 * var(--rhythm));
-    padding: 0 0 6px;
-    border-top: 0;
-    border-bottom: 1px solid rgba(185, 154, 98, .35);
-  }
-
-  /* nothing moves, so nothing needs a start frame */
-  [data-state="released"] .plate { animation: none; }
-}
-
-@media (max-width: 640px) {
-  .station { --frame-w: calc(11 * var(--cs) - var(--gutter)); }
-  .station .object { --s: 11; }
-  [data-state="released"] .deck,
-  [data-state="closing"]  .deck { grid-template-columns: minmax(0, 1fr); }
-}
+.no-motion .plate { animation: none !important; }

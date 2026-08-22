@@ -603,6 +603,44 @@ mode | width family/span | x | y | rotation | z-index | launch order | landing n
 
 That table will become the executable hero-layout contract.
 
+### Frozen dealer prototype contract — 2026-08-22
+
+The component pass was measured at `1440 × 1000` from checkpoint `97dd407`
+before motion work. The rendered pre-motion boxes were:
+
+```text
+LASER  321.16 × 412.08
+PADS   236.36 × 303.33
+SYNTH  236.36 × 303.33
+SEQ    236.36 × 303.33
+SONG   236.36 × 303.33
+MIX    151.58 × 194.52
+```
+
+The canonical dealer remap uses one measured central source slot at
+`x 560 / y 285 / 320 × 410.66`. Coordinates below are viewport coordinates
+on the `1440` canvas; every landing anchor is on the `16px` lattice and card
+widths are the exact `S / M / L` families. Scale is relative to the `320px`
+source slot.
+
+| mode | width family/span | x | y | scale | rotation | z-index | launch order / delay | landing note |
+|---|---:|---:|---:|---:|---:|---:|---:|---|
+| LASER | M / 3 | 1064 | 544 | 1.000 | -2.2deg | 4 | 1 / 0ms | Right-lower rail; leaves the source first and clears the bay. |
+| PADS | S / 2 | 840 | 0 | 0.650 | 3.1deg | 7 | 2 / 100ms | High counterweight on column 8; top edge sits on the canvas edge. |
+| SYNTH | L / 4 | 56 | 160 | 1.350 | -3.4deg | 3 | 3 / 200ms | Dominant left field, aligned to the outer rail. |
+| SEQ | S / 2 | 840 | 720 | 0.650 | 1.6deg | 8 | 4 / 300ms | Low column-8 landing; keeps the central scroll-cue corridor clear. |
+| SONG | S / 2 | 280 | 704 | 0.650 | -1.2deg | 5 | 5 / 400ms | Low-left counterweight on column 3. |
+| MIX | M / 3 | 1064 | 128 | 1.000 | 2.4deg | 6 | 6 / 500ms | Right-upper rail; a controlled sub-8% visual contact with LASER. |
+
+Measured validation of this frame:
+
+- area-weighted centroid: `Cx 766.92 / Cy 520.70`, or `+46.92 / +20.70`
+  from the hero center;
+- no unrotated or rotated card intersects the final central source slot;
+- largest rotated AABB contact is `LASER / MIX = 4.86%` of the smaller card;
+- mirror-pair rejection test passes for every pair;
+- all six launch anchors are deterministic and runtime RNG is absent.
+
 ---
 
 ## 20. One-sentence test

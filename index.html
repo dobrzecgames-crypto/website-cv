@@ -29,8 +29,9 @@
   chapter, at reading speed, each with a screen big enough to become the real
   thing later.
 
-  Everything on both gears resolves through one 16-column editorial grid —
-  styles/grid.css. Start column, span, row. Press Shift+G to see it.
+  The dealer hero resolves through the binding 12-column grid in
+  GRID_BIBLE.md; the reading chapters retain their checkpointed placement in
+  this hero-only pass. Press Shift+G to inspect the dealer canvas.
 
   TODO(content): the masthead still needs the builder's byline, and every lede
   and spec list below is provisional — written from what the captures actually
@@ -43,11 +44,11 @@
 <section class="stage" id="stage" data-state="intact">
 
   <header class="masthead grid">
-    <div class="masthead__object" style="--c:1; --s:7">
+    <div class="masthead__object" style="--c:1; --s:6">
       <h1 class="wordmark">Station</h1>
       <p class="tagline">A music workstation that runs in a browser tab</p>
     </div>
-    <p class="readout" style="--c:13; --s:4" role="status" aria-live="polite" aria-atomic="true">
+    <p class="readout" style="--c:10; --s:3" role="status" aria-live="polite" aria-atomic="true">
       <span class="readout__lamp" aria-hidden="true"></span>
       <span id="readoutText">Source loaded · 1 slice</span>
     </p>
@@ -70,24 +71,17 @@
                aria-label="Station shown as one tall instrument: transport row, readout, project and bank row, the seven view tabs, a waveform display, the CUT slider and a sixteen-pad slice map.">
 
             <!--
-              Eight layers. Each holds a full copy of the same image and shows only
-              its own band of it, so untouched they tile the frame exactly and read
-              as one screen. Every cut falls in a real gap between Station's chassis
-              modules, so no control is bisected.
-
-              01-04 are the chassis, which is the same in every mode.
-              05-08 are the core: the area the active tab controls, and the
-              rectangle the LASER label hangs off in the overview.
+              Five stationary bands keep only the chassis above the mode slot and
+              its physical foot below. The core is no longer baked into these image
+              slices: the six real deck nodes complete that gap while intact, then
+              leave it one by one.
             -->
             <div class="slices">
               <div class="slice slice--chassis chop chop--1 slice--first" style="--i:1"><i class="face face--before"></i><i class="face face--after"></i></div>
               <div class="slice slice--chassis chop chop--2" style="--i:2"><i class="face face--before"></i><i class="face face--after"></i></div>
               <div class="slice slice--chassis chop chop--3" style="--i:3"><i class="face face--before"></i><i class="face face--after"></i></div>
               <div class="slice slice--chassis chop chop--4" style="--i:4"><i class="face face--before"></i><i class="face face--after"></i></div>
-              <div class="slice slice--core chop chop--5" style="--i:5"><i class="face face--before"></i><i class="face face--after"></i></div>
-              <div class="slice slice--core chop chop--6" style="--i:6"><i class="face face--before"></i><i class="face face--after"></i></div>
-              <div class="slice slice--core chop chop--7" style="--i:7"><i class="face face--before"></i><i class="face face--after"></i></div>
-              <div class="slice slice--core chop chop--8 slice--last" style="--i:8"><i class="face face--before"></i><i class="face face--after"></i></div>
+              <div class="slice slice--chassis slice--foot slice--last" style="--i:5"><i class="face face--before"></i><i class="face face--after"></i></div>
             </div>
 
             <!-- the laser: target brackets, one travelling beam, seven cuts -->
@@ -139,42 +133,53 @@
         </div>
 
         <figcaption class="visually-hidden">
-          Station cut along its own construction seams into eight layers, four of
-          them chassis and four of them the area the active tab controls. That area
-          turns out to hold six states of the same machine: laser, pads, synth,
-          seq, song and mix.
+          Station with one central deck holding six states of the same machine:
+          laser, pads, synth, seq, song and mix. The same six layers leave that
+          slot and expose the empty chassis behind them.
         </figcaption>
       </figure>
 
       <!--
-        The six modules. --n is the deal order the frozen motion layer uses;
-        where each one lands is set in styles/station.css. The LASER entry
-        carries no image: the four core layers above already hold that state,
-        so the element only marks its box and carries the label.
+        One physical deck, not Station plus six copies. All six cards occupy
+        the same core-sized box in the intact state. JS launches these exact
+        nodes in narrative order; removing the top card exposes the next node
+        underneath and the empty slot bed is revealed after MIX.
 
-        Names and numbers only. The numbers follow the site's narrative
-        backbone — LASER, PADS, SYNTH, SEQ / SONG, MIX — which is also the
-        order of the chapters below, so the overview doubles as the contents.
+        --c / --s / --py are the authored final landing contract. At canonical
+        1440 they resolve through the 12-column geometry in GRID_BIBLE.md.
+        --n is launch order; timing and trajectory remain motion variables.
       -->
       <ul class="deck" id="deck">
 
-        <li class="plate plate--mix placed" style="--n:1">
+        <li class="plate plate--laser" data-mode="laser"
+            style="--n:0; --c:10; --s:3; --py:448px; --r:-2.2deg; --z:4; --flight:440ms; --bend-x:18px; --bend-y:-34px; --mid-r:-4deg">
           <i class="plate__face"></i>
-          <p class="tag">
-            <span class="tag__n">06</span>
-            <span class="tag__name">Mix</span>
+          <p class="tag tag--before">
+            <span class="tag__n">01</span>
+            <span class="tag__name">Laser</span>
           </p>
         </li>
 
-        <li class="plate plate--song placed" style="--n:2">
+        <li class="plate plate--pads" data-mode="pads"
+            style="--n:1; --c:8; --s:2; --py:-96px; --r:3.1deg; --z:7; --flight:400ms; --bend-x:30px; --bend-y:-26px; --mid-r:4.6deg">
           <i class="plate__face"></i>
-          <p class="tag">
-            <span class="tag__n">05</span>
-            <span class="tag__name">Song</span>
+          <p class="tag tag--below">
+            <span class="tag__n">02</span>
+            <span class="tag__name">Pads</span>
           </p>
         </li>
 
-        <li class="plate plate--seq placed" style="--n:3">
+        <li class="plate plate--synth" data-mode="synth"
+            style="--n:2; --c:1; --s:4; --py:64px; --r:-3.4deg; --z:3; --flight:480ms; --bend-x:-34px; --bend-y:-44px; --mid-r:-5deg">
+          <i class="plate__face"></i>
+          <p class="tag tag--inside">
+            <span class="tag__n">03</span>
+            <span class="tag__name">Synth</span>
+          </p>
+        </li>
+
+        <li class="plate plate--seq" data-mode="seq"
+            style="--n:3; --c:8; --s:2; --py:624px; --r:1.6deg; --z:8; --flight:380ms; --bend-x:-18px; --bend-y:30px; --mid-r:3.2deg">
           <i class="plate__face"></i>
           <p class="tag tag--before">
             <span class="tag__n">04</span>
@@ -182,27 +187,21 @@
           </p>
         </li>
 
-        <li class="plate plate--synth placed" style="--n:4">
-          <i class="plate__face"></i>
-          <p class="tag tag--below">
-            <span class="tag__n">03</span>
-            <span class="tag__name">Synth</span>
-          </p>
-        </li>
-
-        <li class="plate plate--pads placed" style="--n:5">
+        <li class="plate plate--song" data-mode="song"
+            style="--n:4; --c:3; --s:2; --py:608px; --r:-1.2deg; --z:5; --flight:420ms; --bend-x:32px; --bend-y:22px; --mid-r:-3deg">
           <i class="plate__face"></i>
           <p class="tag tag--after">
-            <span class="tag__n">02</span>
-            <span class="tag__name">Pads</span>
+            <span class="tag__n">05</span>
+            <span class="tag__name">Song</span>
           </p>
         </li>
 
-        <li class="plate plate--laser placed" style="--n:0">
+        <li class="plate plate--mix" data-mode="mix"
+            style="--n:5; --c:10; --s:3; --py:32px; --r:2.4deg; --z:6; --flight:450ms; --bend-x:-10px; --bend-y:-38px; --mid-r:4deg">
           <i class="plate__face"></i>
-          <p class="tag tag--below">
-            <span class="tag__n">01</span>
-            <span class="tag__name">Laser</span>
+          <p class="tag">
+            <span class="tag__n">06</span>
+            <span class="tag__name">Mix</span>
           </p>
         </li>
 
@@ -211,13 +210,19 @@
   </div>
 
   <div class="controls grid">
-    <button class="trigger" id="laserIt" type="button" style="--c:1; --s:4">
+    <button class="trigger" id="laserIt" type="button" style="--c:1; --s:3">
       <span class="trigger__label" id="triggerLabel">Laser it</span>
       <span class="trigger__meta" id="triggerMeta">cut 8</span>
       <span class="trigger__charge" aria-hidden="true"></span>
     </button>
-    <p class="hint" id="hint" style="--c:6; --s:8">One pass. Eight layers, and everything the tabs were keeping out of sight.</p>
+    <p class="hint" id="hint" style="--c:5; --s:6">One pass. Six modes, all held in the same central slot.</p>
   </div>
+
+  <a class="scroll-cue" id="scrollCue" href="#ch-laser-title" aria-label="Continue to the Laser chapter">
+    <svg viewBox="0 0 24 24" aria-hidden="true" focusable="false">
+      <path d="M12 3v16M6.5 13.5 12 19l5.5-5.5"/>
+    </svg>
+  </a>
 
 </section>
 
@@ -420,7 +425,7 @@
 
 </main>
 
-<script src="scripts/laser.js" defer></script>
-<script src="scripts/grid-debug.js" defer></script>
+<script src="scripts/laser.js?v=dealer-2" defer></script>
+<script src="scripts/grid-debug.js?v=dealer-2" defer></script>
 </body>
 </html>

@@ -1,20 +1,14 @@
-/* ==========================================================================
-   LASER IT — the one interaction on this scene.
+/* ===========================================================================
+   LASER IT — one chassis, one six-card deck, one fast deal.
 
-   The JavaScript does two things: it moves the scene between named narrative
-   states, and it decides when the five hidden mode plates are worth fetching.
-   CSS owns every pixel of the result.
+     intact -> arming -> slicing -> dealing -> released
+                                                |
+                                           closing -> intact
 
-       intact -> arming -> slicing -> sliced -> released
-                                                   |
-                                            closing -> intact
-
-   One pass opens the whole machine. The chassis closes back into a shell and
-   steps away; the core closes back into one plate and then deals itself out
-   alongside the five states that were lying underneath it the whole time.
-
-   Timings below mirror the custom properties in styles/site.css. Keep them in
-   step if either side changes.
+   CSS owns geometry and each trajectory. JS owns only narrative state and
+   the launch clock. Every departing card is the exact node that occupied the
+   central slot; revealing the next card is therefore a consequence of motion,
+   not a screenshot swap or a duplicate appearing elsewhere.
    ========================================================================== */
 
 (function () {
@@ -23,49 +17,49 @@
   var root = document.documentElement;
   var stage = document.getElementById('stage');
   var trigger = document.getElementById('laserIt');
-  if (!stage || !trigger) return;
+  var deck = document.getElementById('deck');
+  if (!stage || !trigger || !deck) return;
 
+  var cards = Array.prototype.slice.call(deck.querySelectorAll('.plate'));
   var label = document.getElementById('triggerLabel');
   var meta = document.getElementById('triggerMeta');
   var readout = document.getElementById('readoutText');
   var hint = document.getElementById('hint');
-
   var calmQuery = window.matchMedia('(prefers-reduced-motion: reduce)');
-
-  /* --- development flags -------------------------------------------------
-     ?motion=off   freezes the motion layer, exactly the way the reduced-motion
-                   preference does. Layout work needs the scene to hold still.
-     ?state=<name> opens straight into a named state. ?state=released is the
-                   finished composition, which is how the static layout is
-                   judged on its own rather than at the end of a cut.
-     Neither does anything on a normal load, and neither is a design surface.
-     ------------------------------------------------------------------------ */
 
   var flags = new URLSearchParams(window.location.search);
   var frozen = flags.get('motion') === 'off';
+  var forcedMotion = flags.get('motion') === 'on';
+  var audit = flags.get('audit') !== null ? [] : null;
+  var runStart = 0;
   if (frozen) root.classList.add('no-motion');
-  function calm() { return frozen || calmQuery.matches; }
+  if (forcedMotion) root.classList.add('force-motion');
+  if (audit) stage.dataset.audit = '[]';
+  function calm() { return frozen || (!forcedMotion && calmQuery.matches); }
 
-  /* --- timeline --------------------------------------------------------- */
+  function mark(event, mode) {
+    if (!audit) return;
+    audit.push({ event: event, mode: mode || null, at: Math.round(performance.now() - runStart) });
+    stage.dataset.audit = JSON.stringify(audit);
+  }
 
-  var MOVED = {
-    arm: 140,          /* brackets acquire the object */
-    sweep: 620,        /* the beam travels it, cuts igniting as it passes */
-    flashHold: 40,     /* the layers start moving inside the flash */
-    flashClear: 300,
-    open: 350,         /* how long the eight layers get on their own */
-    restore: 620
+  /* Six starts in 500ms; the final MIX settle is 950ms after the first
+     launch. Including the 160ms LASER prelude, the visible sequence resolves
+     at 1110ms. The cue follows 160ms later. */
+  var CLOCK = {
+    arm: 50,
+    sweep: 110,
+    interval: 100,
+    cueDelay: 160,
+    restore: 280
   };
-  var CALM = { arm: 0, sweep: 0, flashHold: 0, flashClear: 0, open: 0, restore: 200 };
-
-  /* --- copy per state --------------------------------------------------- */
 
   var COPY = {
     intact: {
       readout: 'Source loaded · 1 slice',
       label: 'Laser it',
-      meta: 'cut 8',
-      hint: 'One pass. Eight layers, and everything the tabs were keeping out of sight.'
+      meta: 'deal 6',
+      hint: 'One pass. Six modes, all held in the same central slot.'
     },
     cutting: {
       readout: 'Cutting',
@@ -73,11 +67,17 @@
       meta: '···',
       hint: ''
     },
+    dealing: {
+      readout: 'Dealing · 6 modes',
+      label: 'Dealing',
+      meta: 'bach · bach',
+      hint: ''
+    },
     released: {
-      readout: '6 modes · one chassis',
-      label: 'Restore',
-      meta: 'close up',
-      hint: 'Every mode came out of the same place under the tabs. Pads is nearest.'
+      readout: '6 modes · slot empty',
+      label: 'Replay',
+      meta: 'deal again',
+      hint: 'Six modes left one chassis. The central slot is empty.'
     }
   };
 
@@ -90,8 +90,6 @@
     hint.textContent = copy.hint;
   }
 
-  /* --- plumbing --------------------------------------------------------- */
-
   var timers = [];
   function at(ms, fn) { timers.push(window.setTimeout(fn, ms)); }
   function cancelPending() {
@@ -102,112 +100,176 @@
   var busy = false;
   function setBusy(value) {
     busy = value;
-    /* aria-disabled rather than disabled: a disabled button drops keyboard
-       focus mid-interaction, which is worse than a button that is briefly inert */
     trigger.setAttribute('aria-disabled', value ? 'true' : 'false');
   }
-
   function state(name) { stage.dataset.state = name; }
 
-  /* --- the five hidden states ------------------------------------------
-     They are not part of the first paint. Marking the document ready is what
-     gives them their background-image, and therefore what fetches them. Idle
-     time is the normal path; the first sign of intent is the safety net. */
-
+  /* Load the five cards under LASER before they are needed. They are small
+     derived WebP assets; intent is the safety net for an immediate click. */
   var deckReady = false;
+  var deckUrls = ['pads', 'synth', 'seq', 'song', 'mix'].map(function (mode) {
+    return 'media/station/final/station-mode-' + mode + '.webp';
+  });
   function readyDeck() {
     if (deckReady) return;
     deckReady = true;
     root.classList.add('deck-ready');
+    deckUrls.forEach(function (src) { var image = new Image(); image.src = src; });
   }
-
   function scheduleDeck() {
-    if (window.requestIdleCallback) window.requestIdleCallback(readyDeck, { timeout: 2500 });
-    else window.setTimeout(readyDeck, 1200);
+    if (window.requestIdleCallback) window.requestIdleCallback(readyDeck, { timeout: 1600 });
+    else window.setTimeout(readyDeck, 700);
   }
   if (document.readyState === 'complete') scheduleDeck();
   else window.addEventListener('load', scheduleDeck, { once: true });
-
   trigger.addEventListener('pointerenter', readyDeck, { once: true });
   trigger.addEventListener('focus', readyDeck, { once: true });
 
-  /* --- the cut ---------------------------------------------------------- */
+  function milliseconds(card) {
+    var value = getComputedStyle(card).getPropertyValue('--flight').trim();
+    return value.slice(-2) === 'ms' ? parseFloat(value) : parseFloat(value) * 1000;
+  }
+
+  function clearCard(card) {
+    card.classList.remove('is-launching', 'is-landed', 'is-returning');
+  }
+  function resetCards() {
+    cards.forEach(clearCard);
+    deck.setAttribute('aria-hidden', 'true');
+  }
+  function land(card) {
+    card.classList.remove('is-launching', 'is-returning');
+    card.classList.add('is-landed');
+  }
+  function landAll() {
+    cards.forEach(land);
+    deck.removeAttribute('aria-hidden');
+  }
+
+  function finishDeal() {
+    landAll();
+    state('released');
+    say('released');
+    setBusy(false);
+    mark('settled');
+    at(CLOCK.cueDelay, function () {
+      stage.classList.add('is-cue-ready');
+      mark('cue');
+    });
+  }
+
+  function startDeal() {
+    state('dealing');
+    say('dealing');
+    deck.removeAttribute('aria-hidden');
+    mark('deal-start');
+
+    var lastSettle = 0;
+    cards.forEach(function (card, index) {
+      var launch = index * CLOCK.interval;
+      var flight = milliseconds(card);
+      var settle = launch + flight;
+      lastSettle = Math.max(lastSettle, settle);
+      at(launch, function () {
+        card.classList.add('is-launching');
+        mark('launch', card.dataset.mode);
+      });
+      at(settle, function () {
+        land(card);
+        mark('land', card.dataset.mode);
+      });
+    });
+    at(lastSettle, finishDeal);
+  }
 
   function cut() {
+    cancelPending();
+    if (audit) {
+      audit = [];
+      runStart = performance.now();
+      mark('click');
+    }
     readyDeck();
+    resetCards();
+    stage.classList.remove('is-cue-ready', 'is-flash');
     setBusy(true);
 
     if (calm()) {
-      /* no travelling beam, no flash, no fan-out: the same arrangement,
-         arrived at directly */
-      say('released');
+      landAll();
       state('released');
+      say('released');
       setBusy(false);
+      stage.classList.add('is-cue-ready');
+      mark('reduced-final');
       return;
     }
 
-    var t = MOVED;
     say('cutting');
     state('arming');
-
-    at(t.arm, function () { state('slicing'); });
-    at(t.arm + t.sweep, function () { stage.classList.add('is-flash'); });
-    at(t.arm + t.sweep + t.flashHold, function () { state('sliced'); });
-    at(t.arm + t.sweep + t.flashClear, function () { stage.classList.remove('is-flash'); });
-
-    /* the eight layers get a moment to read as eight layers, then the core
-       closes up and everything it was hiding comes out of it */
-    at(t.arm + t.sweep + t.flashHold + t.open, function () {
-      state('released');
-      say('released');
-      setBusy(false);
+    at(CLOCK.arm, function () { state('slicing'); });
+    at(CLOCK.arm + CLOCK.sweep, function () {
+      stage.classList.add('is-flash');
+      startDeal();
+      at(70, function () { stage.classList.remove('is-flash'); });
     });
   }
 
   function restore() {
-    var t = calm() ? CALM : MOVED;
-    setBusy(true);
     cancelPending();
-    stage.classList.remove('is-flash');
-
-    /* closing holds exactly the same geometry as released but without the
-       animations, so the next frame can transition out of it instead of
-       snapping when the animations are dropped */
+    stage.classList.remove('is-cue-ready', 'is-flash');
+    setBusy(true);
     state('closing');
-    requestAnimationFrame(function () {
-      requestAnimationFrame(function () {
-        state('intact');
-        say('intact');
-        at(t.restore, function () { setBusy(false); });
-      });
+
+    if (calm()) {
+      resetCards();
+      state('intact');
+      say('intact');
+      setBusy(false);
+      return;
+    }
+
+    cards.forEach(function (card) {
+      card.classList.remove('is-launching', 'is-landed');
+      card.classList.add('is-returning');
+    });
+    at(CLOCK.restore, function () {
+      resetCards();
+      state('intact');
+      say('intact');
+      setBusy(false);
     });
   }
 
   trigger.addEventListener('click', function () {
     if (busy) return;
-    cancelPending();
     if (stage.dataset.state === 'released' || stage.dataset.state === 'closing') restore();
     else cut();
   });
 
-  /* if the motion preference flips mid-scene, settle immediately into the
-     final arrangement rather than finishing motion the user opted out of */
   var onCalmChange = function () {
     if (!calmQuery.matches || !busy) return;
     cancelPending();
     stage.classList.remove('is-flash');
+    landAll();
     state('released');
     say('released');
     setBusy(false);
+    stage.classList.add('is-cue-ready');
   };
   if (calmQuery.addEventListener) calmQuery.addEventListener('change', onCalmChange);
   else if (calmQuery.addListener) calmQuery.addListener(onCalmChange);
 
-  /* the dev entry point, applied last so it wins over the initial markup */
+  deck.setAttribute('aria-hidden', 'true');
   var wanted = flags.get('state');
-  if (wanted && ['intact', 'sliced', 'released'].indexOf(wanted) >= 0) {
+  if (wanted === 'released') {
     readyDeck();
-    state(wanted);
-    say(wanted === 'released' ? 'released' : 'intact');
+    landAll();
+    state('released');
+    say('released');
+    stage.classList.add('is-cue-ready');
+  } else {
+    resetCards();
+    state('intact');
+    say('intact');
   }
 }());

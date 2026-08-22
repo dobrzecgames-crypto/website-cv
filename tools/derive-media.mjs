@@ -75,7 +75,13 @@ const JOBS = [
   { from: 'laser/laser-loaded.png',           to: 'station-laser-loaded', width: HERO_WIDTH, role: 'HERO, before the cut: break loaded, no slices, pads empty.' },
   { from: 'overview/station-overview-01.png', to: 'station-laser-cut',    width: HERO_WIDTH, role: 'HERO, after the cut: gold slice markers, CUT 8, pads 01-08 ready.' },
 
-  /* the five states hiding behind the one the viewer arrived at */
+  /* The same LASER core twice: the intact top card and its post-cut face. The
+     dealer uses the cropped cards themselves as the central deck, so there is
+     never a second copy left inside the chassis after a card departs. */
+  { from: 'laser/laser-loaded.png',           to: 'station-mode-laser-loaded', width: PLATE_WIDTH, crop: [CORE_TOP, CORE_BOTTOM], role: 'LASER plate before LASER IT: one loaded break, unsliced.' },
+  { from: 'overview/station-overview-01.png', to: 'station-mode-laser',        width: PLATE_WIDTH, crop: [CORE_TOP, CORE_BOTTOM], role: 'LASER plate after LASER IT: eight slices ready to deal.' },
+
+  /* the five states hiding behind LASER */
   { from: 'pads/pads-active.png',        to: 'station-mode-pads',  width: PLATE_WIDTH, crop: [CORE_TOP, CORE_BOTTOM], role: 'PADS plate: sixteen pads, three struck.' },
   { from: 'synth/zola-x-idle.png',       to: 'station-mode-synth', width: PLATE_WIDTH, crop: [CORE_TOP, CORE_BOTTOM], role: 'SYNTH plate: the ZOLA-X wavetable screen.' },
   { from: 'seq-song/seq.png',            to: 'station-mode-seq',   width: PLATE_WIDTH, crop: [CORE_TOP, CORE_BOTTOM], role: 'SEQ plate: the step matrix.' },
