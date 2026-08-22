@@ -608,17 +608,47 @@
      MIXER — repeatable transient streams with attack/release smoothing.
      ------------------------------------------------------------------- */
 
-  var channels = Array.from(document.querySelectorAll('.channel')).map(function (node, index) {
-    return { node: node, output: node.querySelector('.channel-db'), index: index, level: .08 + index * .018, peak: .12 + index * .02 };
-  });
-
   var channelShape = [
     { gain: .72, period: .52, offset: .03, release: 4.8 },
     { gain: .58, period: .81, offset: .17, release: 3.9 },
     { gain: .82, period: .66, offset: .31, release: 5.5 },
     { gain: .47, period: 1.08, offset: .09, release: 3.2 },
-    { gain: .68, period: .73, offset: .42, release: 4.4 }
+    { gain: .68, period: .73, offset: .42, release: 4.4 },
+    { gain: .55, period: .91, offset: .26, release: 3.7 },
+    { gain: .76, period: .59, offset: .38, release: 5.1 },
+    { gain: .43, period: 1.13, offset: .14, release: 3.1 },
+    { gain: .70, period: .57, offset: .22, release: 4.6 },
+    { gain: .61, period: .86, offset: .36, release: 4.1 },
+    { gain: .79, period: .64, offset: .08, release: 5.3 },
+    { gain: .49, period: 1.02, offset: .47, release: 3.4 },
+    { gain: .66, period: .76, offset: .19, release: 4.5 },
+    { gain: .53, period: .95, offset: .33, release: 3.6 },
+    { gain: .74, period: .61, offset: .44, release: 5.0 },
+    { gain: .45, period: 1.11, offset: .12, release: 3.0 }
   ];
+
+  var mixerVolumes = [.82, .68, .74, .56, .79, .64, .71, .59, .77, .62, .69, .53, .81, .66, .72, .57];
+  var mixerSources = ['KICK_01.WAV', 'SNARE_02.WAV', 'HAT_03.WAV', 'PERC_04.WAV', 'CHORD_05.WAV', 'BASS_06.WAV', 'TEXTURE_07.WAV', 'FX_08.WAV', 'KICK_09.WAV', 'SNARE_10.WAV', 'HAT_11.WAV', 'PERC_12.WAV', 'CHORD_13.WAV', 'BASS_14.WAV', 'TEXTURE_15.WAV', 'FX_16.WAV'];
+  var reducedMeterLevel = [.36, .24, .48, .19, .31, .27, .41, .22, .34, .26, .45, .18, .32, .25, .39, .21];
+  var mixerChannelState = channelShape.map(function (_, index) {
+    return { index: index, level: .08 + (index % 8) * .018, peak: .12 + (index % 8) * .02, muted: false, soloed: false };
+  });
+  var mixerSlots = Array.from(document.querySelectorAll('.mixer-strip')).map(function (node, slotIndex) {
+    return {
+      node: node,
+      slotIndex: slotIndex,
+      channelIndex: slotIndex,
+      label: node.querySelector('.mixer-strip-label'),
+      status: node.querySelector('.mixer-strip-status'),
+      pump: node.querySelector('.mixer-strip-pump'),
+      meter: node.querySelector('.channel-meter'),
+      fader: node.querySelector('.mixer-strip-fader'),
+      output: node.querySelector('output'),
+      mute: node.querySelector('[data-mixer-action="mute"]'),
+      solo: node.querySelector('[data-mixer-action="solo"]'),
+      peak: node.querySelector('.meter-peak')
+    };
+  });
 
   function stableUnit(value) {
     var raw = Math.sin(value * 91.733 + 17.17) * 43758.5453;
@@ -630,7 +660,7 @@
     var cycle = Math.floor(shifted / period);
     var age = shifted - cycle * period;
     var amplitude = .52 + stableUnit(cycle + channelIndex * 19.7) * .43;
-    var attack = .022 + channelIndex * .002;
+    var attack = .022 + (channelIndex % 8) * .002;
     var envelope = age < attack
       ? age / attack
       : Math.exp(-(age - attack) * release);
@@ -647,10 +677,48 @@
     return Math.min(.96, shape.gain * (rms + main + secondary));
   }
 
+  function channelIsAudible(channel) {
+    var hasSolo = mixerChannelState.some(function (candidate) { return candidate.soloed; });
+    return !channel.muted && (!hasSolo || channel.soloed);
+  }
+
+  function syncMixerSlot(slot) {
+    var channel = mixerChannelState[slot.channelIndex];
+    var channelNumber = String(channel.index + 1).padStart(2, '0');
+    var padLabel = 'PAD ' + channelNumber;
+    var isPumpSource = channel.index === 2 || channel.index === 11;
+
+    slot.node.dataset.channel = String(channel.index);
+    slot.node.dataset.muted = String(channel.muted);
+    slot.node.dataset.solo = String(channel.soloed);
+    slot.label.textContent = channelNumber;
+    slot.status.title = mixerSources[channel.index];
+    slot.status.setAttribute('aria-label', mixerSources[channel.index] + ' loaded');
+    slot.pump.classList.toggle('mixer-strip-pump-source', isPumpSource);
+    if (isPumpSource) {
+      slot.pump.removeAttribute('aria-hidden');
+      slot.pump.setAttribute('aria-label', 'Sidechain source');
+    } else {
+      slot.pump.setAttribute('aria-hidden', 'true');
+      slot.pump.removeAttribute('aria-label');
+    }
+    slot.meter.setAttribute('aria-label', padLabel + ' signal level');
+    slot.fader.style.setProperty('--mixer-fader-position', String(mixerVolumes[channel.index] * 100) + '%');
+    slot.output.value = mixerVolumes[channel.index].toFixed(2);
+    slot.mute.setAttribute('aria-label', padLabel + ' mute');
+    slot.solo.setAttribute('aria-label', padLabel + ' solo');
+    slot.mute.classList.toggle('mixer-toggle-active', channel.muted);
+    slot.solo.classList.toggle('mixer-toggle-active', channel.soloed);
+    slot.mute.setAttribute('aria-pressed', String(channel.muted));
+    slot.solo.setAttribute('aria-pressed', String(channel.soloed));
+  }
+
   function renderMeters(now, deltaSeconds) {
     var time = now / 1000;
-    channels.forEach(function (channel) {
-      var target = reduceMotion.matches ? [.36, .24, .48, .19, .31][channel.index] : meterTarget(time, channel.index);
+    mixerSlots.forEach(function (slot) {
+      var channel = mixerChannelState[slot.channelIndex];
+      var audible = channelIsAudible(channel);
+      var target = audible ? (reduceMotion.matches ? reducedMeterLevel[channel.index] : meterTarget(time, channel.index)) : 0;
       if (reduceMotion.matches) {
         channel.level = target;
         channel.peak = target;
@@ -661,13 +729,63 @@
 
         if (channel.level >= channel.peak) channel.peak = channel.level;
         else channel.peak = Math.max(channel.level, channel.peak - deltaSeconds * .13);
+        if (!audible && channel.level < .001) channel.level = 0;
+        if (!audible && channel.peak < .001) channel.peak = 0;
       }
 
-      channel.node.style.setProperty('--level', channel.level.toFixed(4));
-      channel.node.style.setProperty('--peak', channel.peak.toFixed(4));
-      channel.output.value = (20 * Math.log10(Math.max(.001, channel.level))).toFixed(1).replace('-', '−');
+      slot.node.style.setProperty('--level', channel.level.toFixed(4));
+      slot.node.style.setProperty('--peak', channel.peak.toFixed(4));
+      slot.node.dataset.signal = audible ? 'active' : 'silent';
+      var dbfs = Math.max(-60, 20 * Math.log10(Math.max(.001, channel.level)));
+      var roundedDbfs = Math.round(dbfs);
+      slot.meter.setAttribute('aria-valuenow', String(roundedDbfs));
+      slot.meter.setAttribute('aria-valuetext', channel.level > .001 ? String(roundedDbfs).replace('-', '−') + ' dBFS' : 'Silence');
+      slot.peak.style.opacity = channel.peak > .001 ? '1' : '0';
     });
   }
+
+  mixerSlots.forEach(function (slot) {
+    slot.mute.addEventListener('click', function () {
+      var channel = mixerChannelState[slot.channelIndex];
+      channel.muted = !channel.muted;
+      syncMixerSlot(slot);
+      renderMeters(performance.now(), .016);
+    });
+    slot.solo.addEventListener('click', function () {
+      var channel = mixerChannelState[slot.channelIndex];
+      channel.soloed = !channel.soloed;
+      syncMixerSlot(slot);
+      renderMeters(performance.now(), .016);
+    });
+  });
+
+  var mixerPageButtons = Array.from(document.querySelectorAll('.mixer-page-button'));
+  function selectMixerPage(pageIndex) {
+    mixerSlots.forEach(function (slot) {
+      slot.channelIndex = pageIndex * 8 + slot.slotIndex;
+      syncMixerSlot(slot);
+    });
+    mixerPageButtons.forEach(function (button) {
+      var selected = Number(button.dataset.mixerPage) === pageIndex;
+      button.classList.toggle('mixer-selector-active', selected);
+      button.setAttribute('aria-pressed', String(selected));
+    });
+    renderMeters(performance.now(), .016);
+  }
+  mixerPageButtons.forEach(function (button) {
+    button.addEventListener('click', function () { selectMixerPage(Number(button.dataset.mixerPage)); });
+  });
+
+  Array.from(document.querySelectorAll('#mixerBank .mixer-toggle')).forEach(function (button) {
+    button.addEventListener('pointerdown', function (event) {
+      if (event.pointerType === 'mouse' && event.button !== 0) return;
+      button.classList.add('is-pressed');
+    });
+    ['pointerup', 'pointercancel', 'pointerleave', 'lostpointercapture'].forEach(function (eventName) {
+      button.addEventListener(eventName, function () { button.classList.remove('is-pressed'); });
+    });
+  });
+  selectMixerPage(0);
 
   /* ----------------------------------------------------------------------
      LASER — pointer position and short, bounded confirmation.
