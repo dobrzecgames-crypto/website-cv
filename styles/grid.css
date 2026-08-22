@@ -1,0 +1,210 @@
+/* ==========================================================================
+   website — the editorial grid
+
+   One 16-column system for the whole site. Everything that gets placed on the
+   page — masthead, running text, a Station plate, a control — resolves its
+   position through the same three numbers: which column it starts on, how many
+   it spans, and where its top edge sits.
+
+   Two consumers, one arithmetic:
+
+     .grid   flow layout. Real CSS Grid, 16 tracks. For anything that should
+             stack and reflow: text, headers, lists.
+
+     .plot   free composition. Children are absolutely positioned from the same
+             column arithmetic, which is what lets a plate overlap its
+             neighbour, start on column -1 or run off the right edge without
+             leaving the system.
+
+   The overlay at the bottom of this file draws the construction. It is a
+   development tool and nothing in the finished design depends on it.
+   ========================================================================== */
+
+:root {
+  /* --- the system ------------------------------------------------------ */
+  --grid-cols:   16;
+
+  /* Side margins hold the type away from the edge without turning the page
+     into a centred column. They grow with the viewport so a 2560px screen does
+     not get 32px of air beside a 2400px composition. */
+  /* Side margins hold the type away from the edge without turning the page
+     into a centred column.
+
+     The second term keeps a viewport that is wide relative to its height
+     honest. The Station composition is anchored on an object twice as tall as
+     it is wide and sized from the columns, so its height is roughly half the
+     grid width, while the room for it is the viewport height less the strip,
+     the control and the padding — about 0.89 of it. Where the first outgrows
+     the second, this term takes up the difference.
+
+     The whole grid narrows together, so masthead, composition and control
+     shorten on the same lines and nothing steps outside the system. Measured
+     against the real page rather than derived: 1280x800, 1366x768, 1440x900,
+     1920x900, 1920x1080 and 2560x1400 all resolve with no overflow. */
+  --grid-margin-base: clamp(24px, 3vw, 56px);
+  --grid-margin: clamp(20px, max(var(--grid-margin-base), calc(50vw - 89.2vh + 134px)), 720px);
+
+  /* How much margin the wide-short rule added on top of the normal one. An
+     element that is meant to be cut by the viewport edge moves out by this
+     much, so it stays cut instead of drifting into the widened margin. */
+  --bleed-nudge: max(0px, calc(var(--grid-margin) - var(--grid-margin-base)));
+
+  /* Gutter is deliberately narrow. At 16 columns a wide gutter eats more width
+     than the columns it separates: 15 gutters against 16 tracks. */
+  --gutter:      clamp(12px, 1.25vw, 20px);
+
+  /* Vertical rhythm. Type, spacing and control heights are multiples of this;
+     the Station composition anchors on shared baselines instead, which is a
+     different and stronger kind of order — see styles/station.css. */
+  --rhythm:      8px;
+}
+
+/* ==========================================================================
+   FLOW — .grid
+   ========================================================================== */
+
+.grid {
+  display: grid;
+  grid-template-columns: repeat(var(--grid-cols), minmax(0, 1fr));
+  column-gap: var(--gutter);
+}
+
+/* Default: full width. Any child can claim its own run of columns with --c
+   (start, 1-based) and --s (span) — the same two names .plot uses — and its
+   own row with --r, which is what lets two items share a band instead of
+   queueing one under the other. */
+.grid > * {
+  grid-column: var(--c, 1) / span var(--s, 16);
+  grid-row: var(--r, auto);
+}
+
+/* ==========================================================================
+   COMPOSITION — .plot
+
+   The column step --cs is the distance from one column's left edge to the
+   next: one column plus one gutter. Every horizontal number in a composition
+   is a multiple of it, which is what makes "move PADS one column right" a
+   one-character edit.
+
+     x(c) = (c - 1) * cs                 left edge of column c
+     w(s) = s * cs - gutter              width of a run of s columns
+
+   c may be 0, negative, or larger than 16. That is not an escape from the
+   system — it is how an element gets cut by the viewport edge while its
+   visible edge still lands exactly on a column line.
+
+   cqw rather than % because these numbers are used for vertical placement too,
+   where a percentage would resolve against height instead of width.
+   ========================================================================== */
+
+/* A plot needs its own width as a resolvable length, and it needs it twice:
+   its children read it to find their columns, and the plot itself reads it to
+   work out how tall the composition is. An element is not its own container
+   query container, so the wrapper carries .plot-host for the second case. */
+.plot-host { container-type: inline-size; }
+
+.plot {
+  position: relative;
+  container-type: inline-size;
+  --cs: calc((100cqw + var(--gutter)) / var(--grid-cols));
+  --grid-col: calc(var(--cs) - var(--gutter));
+}
+
+/* --c start column · --s span · --py top edge · --ar height ÷ width
+   --nudge  a deliberate step outside the grid, for elements that are meant to
+            be cut by the viewport rather than to sit on a line */
+.plot .placed {
+  position: absolute;
+  left:   calc((var(--c) - 1) * var(--cs) + var(--nudge, 0px));
+  top:    var(--py, 0px);
+  width:  var(--pw);
+  height: var(--ph);
+  --pw: calc(var(--s) * var(--cs) - var(--gutter));
+  --ph: calc(var(--pw) * var(--ar, 1));
+}
+
+/* ==========================================================================
+   DEVELOPMENT OVERLAY
+
+   Toggle: Shift+G, or load with ?grid — see scripts/grid-debug.js. Nothing
+   here renders until that script builds the markup, so the shipped document
+   contains no trace of it.
+
+   It is fixed, inert and painted above everything, so it can never move a
+   single pixel of the layout it is measuring.
+   ========================================================================== */
+
+.gridlab {
+  position: fixed;
+  inset: 0;
+  z-index: 9999;
+  pointer-events: none;
+  contain: strict;
+  font-family: var(--mono, monospace);
+}
+
+/* the margins, shown as what they are: space the grid does not own */
+.gridlab__bleed {
+  position: absolute;
+  inset: 0;
+  border-inline: var(--grid-margin) solid rgba(120, 90, 200, .10);
+}
+
+/* the 16 columns, laid out by the same .grid the page uses — so if this ever
+   disagreed with the composition, the composition would be the thing at fault */
+.gridlab__cols {
+  position: absolute;
+  inset: 0;
+  padding-inline: var(--grid-margin);
+  display: grid;
+  grid-template-columns: repeat(var(--grid-cols), minmax(0, 1fr));
+  column-gap: var(--gutter);
+}
+
+.gridlab__col {
+  position: relative;
+  background: rgba(150, 110, 255, .10);
+  border-inline: 1px solid rgba(160, 120, 255, .22);
+}
+
+.gridlab__col::before {
+  content: attr(data-n);
+  position: absolute;
+  top: 4px; left: 0; right: 0;
+  text-align: center;
+  font-size: 9px;
+  letter-spacing: .05em;
+  color: rgba(190, 165, 255, .75);
+}
+
+/* every fourth line reads stronger, so column runs are countable at a glance */
+.gridlab__col:nth-child(4n + 1) { border-left-color: rgba(190, 150, 255, .55); }
+
+.gridlab__rhythm {
+  position: absolute;
+  inset: 0;
+  background-image: repeating-linear-gradient(
+    to bottom,
+    rgba(150, 110, 255, .16) 0 1px,
+    transparent 1px var(--rhythm));
+}
+
+.gridlab__meta {
+  position: absolute;
+  left: var(--grid-margin);
+  bottom: 6px;
+  margin: 0;
+  padding: 4px 8px;
+  background: rgba(20, 12, 34, .88);
+  border: 1px solid rgba(160, 120, 255, .35);
+  font-size: 9.5px;
+  letter-spacing: .12em;
+  text-transform: uppercase;
+  color: rgba(205, 185, 255, .9);
+  white-space: nowrap;
+}
+
+@media (prefers-reduced-motion: no-preference) {
+  .gridlab { animation: gridlab-in 140ms ease both; }
+  @keyframes gridlab-in { from { opacity: 0 } to { opacity: 1 } }
+}

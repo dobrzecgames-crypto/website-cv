@@ -5,7 +5,10 @@
  *   node tools/derive-media.mjs
  *
  * Reads the curated source captures in assets/station/current/ and writes
- * display-sized WebP into media/station/final/.
+ * display-sized WebP into media/station/:
+ *
+ *   final/     the object and the six modes, as the hero composition shows them
+ *   details/   one close-up per chapter, as the reading sections show them
  *
  * WebP only, deliberately. Re-encoding the downscale to PNG through canvas comes
  * back RGBA and unoptimised — larger than the source it was meant to replace — so
@@ -17,10 +20,10 @@
  * optimize source assets destructively before the final compositions are known."
  * TECHNICAL_PRINCIPLES.md §6: "avoid giant source PNGs in production delivery."
  *
- * Folder note: TECHNICAL_PRINCIPLES.md §13 asks for `public/media/station/final/`.
- * There is no bundler yet, so the folder sits at `media/station/final/` and is
- * served from the repository root. Moving it under `public/` when a bundler is
- * chosen keeps the public URL `/media/station/final/...` exactly as it is now.
+ * Folder note: TECHNICAL_PRINCIPLES.md §13 asks for `public/media/station/...`.
+ * There is no bundler yet, so the tree sits at `media/station/` and is served
+ * from the repository root. Moving it under `public/` when a bundler is chosen
+ * keeps the public URLs exactly as they are now.
  *
  * No new dependencies: the resampler is Chromium's own canvas, reached through
  * the Playwright install that already lives in the Station checkout — the same
@@ -36,7 +39,7 @@ import { fileURLToPath, pathToFileURL } from 'node:url'
 const ROOT = resolve(fileURLToPath(import.meta.url), '..', '..')
 const STATION = process.env.STATION_CHECKOUT || 'C:/Users/T470/Documents/station'
 const SRC = join(ROOT, 'assets', 'station', 'current')
-const OUT = join(ROOT, 'media', 'station', 'final')
+const OUT = join(ROOT, 'media', 'station')
 
 /* The instrument renders at most ~331 CSS px wide on desktop and ~310 on phones,
    so the hero width covers a 3x display with room to spare while dropping
@@ -59,6 +62,15 @@ const CORE_BOTTOM = 800 / 900
 const HERO_WIDTH = 1000   /* full chassis + core, used for the intact object */
 const PLATE_WIDTH = 720   /* core only, at the size a single plate renders */
 
+/* Chapter stills. These sources are already-cropped detail captures, so there
+   is nothing to cut here - only a downscale. A chapter screen renders at
+   roughly 500-700 CSS px wide, so these cover a 2x display.
+
+   ASSET_PLAN.md Priority B, and TECHNICAL_PRINCIPLES.md 13 asks for detail
+   assets to sit apart from the final set, so they go to media/station/details/. */
+const DETAIL_WIDE = 1200  /* the two landscape panels */
+const DETAIL = 1000
+
 const JOBS = [
   { from: 'laser/laser-loaded.png',           to: 'station-laser-loaded', width: HERO_WIDTH, role: 'HERO, before the cut: break loaded, no slices, pads empty.' },
   { from: 'overview/station-overview-01.png', to: 'station-laser-cut',    width: HERO_WIDTH, role: 'HERO, after the cut: gold slice markers, CUT 8, pads 01-08 ready.' },
@@ -68,7 +80,19 @@ const JOBS = [
   { from: 'synth/zola-x-idle.png',       to: 'station-mode-synth', width: PLATE_WIDTH, crop: [CORE_TOP, CORE_BOTTOM], role: 'SYNTH plate: the ZOLA-X wavetable screen.' },
   { from: 'seq-song/seq.png',            to: 'station-mode-seq',   width: PLATE_WIDTH, crop: [CORE_TOP, CORE_BOTTOM], role: 'SEQ plate: the step matrix.' },
   { from: 'seq-song/song.png',           to: 'station-mode-song',  width: PLATE_WIDTH, crop: [CORE_TOP, CORE_BOTTOM], role: 'SONG plate: six lines of arrangement.' },
-  { from: 'mix/mix-active.png',          to: 'station-mode-mix',   width: PLATE_WIDTH, crop: [CORE_TOP, CORE_BOTTOM], role: 'MIX plate: eight channels with live meters.' }
+  { from: 'mix/mix-active.png',          to: 'station-mode-mix',   width: PLATE_WIDTH, crop: [CORE_TOP, CORE_BOTTOM], role: 'MIX plate: eight channels with live meters.' },
+
+  /* One still per chapter. Each has a partner capture in the same folder
+     holding the module in its other state - pads at rest, meters idle,
+     waveform uncut, wavetable sounding. Those partners are what the chapter
+     demos will cross into once the micro-interactions exist; they are not
+     derived yet because nothing renders them. */
+  { dir: 'details', from: 'details/wavetable-zola-x.png', to: 'zola-x-wavetable', width: DETAIL_WIDE, role: 'ZOLA-X chapter still: the wavetable screen at rest. Partner: wavetable-zola-x-active.png.' },
+  { dir: 'details', from: 'details/slice-markers.png',    to: 'laser-slices',     width: DETAIL_WIDE, role: 'LASER chapter still: the waveform with gold cut markers. Partners: waveform-laser.png (uncut), waveform-playhead.png (playing).' },
+  { dir: 'details', from: 'details/pads-grid-active.png', to: 'pads-grid',        width: DETAIL,      role: 'PADS chapter still: the 16-pad grid, three struck. Partner: pads-grid.png (at rest).' },
+  { dir: 'details', from: 'details/seq-grid.png',         to: 'seq-grid',         width: DETAIL,      role: 'SEQ chapter still: the step matrix without app chrome.' },
+  { dir: 'details', from: 'details/mix-meters.png',       to: 'mix-channels',     width: DETAIL,      role: 'MIX chapter still: the eight-channel bank, meters moving. Partner: mix-faders.png (idle).' },
+  { dir: 'details', from: 'details/song-arrangement.png', to: 'song-arrangement', width: DETAIL,      role: 'SONG chapter still: the arrangement grid, six lanes of clips.' }
 ]
 
 const sha256 = buf => createHash('sha256').update(buf).digest('hex')
@@ -78,9 +102,11 @@ const pw = await import(pathToFileURL(join(STATION, 'node_modules', '@playwright
 const browser = await pw.chromium.launch()
 const page = await browser.newPage()
 await page.goto('about:blank')
-await mkdir(OUT, { recursive: true })
+for (const dir of new Set(JOBS.map(j => j.dir || 'final'))) await mkdir(join(OUT, dir), { recursive: true })
 
-const manifest = {
+/* one manifest per output folder */
+const manifests = {}
+const manifestFor = dir => (manifests[dir] ||= {
   generatedFrom: 'assets/station/current',
   sourceSetId: JSON.parse(readFileSync(join(SRC, 'MANIFEST.json'), 'utf8')).setId,
   coreTop: CORE_TOP,
@@ -88,7 +114,7 @@ const manifest = {
   webpQuality: WEBP_QUALITY,
   tool: 'tools/derive-media.mjs',
   files: []
-}
+})
 
 for (const job of JOBS) {
   const srcPath = join(SRC, job.from)
@@ -117,10 +143,11 @@ for (const job of JOBS) {
   }, { b64: srcBuf.toString('base64'), width: job.width, quality: WEBP_QUALITY, crop: job.crop || null })
 
   const buf = Buffer.from(encoded.webp, 'base64')
-  writeFileSync(join(OUT, `${job.to}.webp`), buf)
+  const dir = job.dir || 'final'
+  writeFileSync(join(OUT, dir, `${job.to}.webp`), buf)
   const out = [{ file: `${job.to}.webp`, bytes: buf.length, sha256: sha256(buf) }]
 
-  manifest.files.push({
+  manifestFor(dir).files.push({
     source: job.from,
     sourceBytes: srcBuf.length,
     sourceSha256: sha256(srcBuf),
@@ -133,9 +160,11 @@ for (const job of JOBS) {
   })
 
   const saved = 1 - out[0].bytes / srcBuf.length
-  console.log(`${job.from}\n  -> ${job.to}.webp  ${kb(out[0].bytes)}  (${(saved * 100).toFixed(0)}% smaller than source ${kb(srcBuf.length)})`)
+  console.log(`${job.from}\n  -> ${dir}/${job.to}.webp  ${kb(out[0].bytes)}  (${(saved * 100).toFixed(0)}% smaller than source ${kb(srcBuf.length)})`)
 }
 
-writeFileSync(join(OUT, 'MANIFEST.json'), JSON.stringify(manifest, null, 2) + '\n')
-console.log(`\nmanifest -> media/station/final/MANIFEST.json  (source set ${manifest.sourceSetId})`)
+for (const [dir, manifest] of Object.entries(manifests)) {
+  writeFileSync(join(OUT, dir, 'MANIFEST.json'), JSON.stringify(manifest, null, 2) + String.fromCharCode(10))
+  console.log(`manifest -> media/station/${dir}/MANIFEST.json  (${manifest.files.length} files, source set ${manifest.sourceSetId})`)
+}
 await browser.close()

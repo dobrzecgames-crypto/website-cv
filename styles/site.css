@@ -29,22 +29,13 @@
   --gold-lit:   #e8cb92;
   --gold-hot:   #fff4dd;
 
-  /* object geometry — desktop is height-driven */
-  --frame-h:    clamp(320px, 58vh, 660px);
-  --frame-h:    clamp(320px, 58svh, 660px);
-  --frame-w:    calc(var(--frame-h) * 451 / 900);
-  --gap:        calc(var(--frame-h) * 0.024);
+  /* Object geometry used to be height-driven and centred. It is now width-
+     driven off the 16-column grid — --frame-w, --frame-h and the core lines
+     are declared on .station in styles/station.css, so the machine stands on
+     the same column lines as the type and the modes beside it. Everything
+     below still derives from --frame-h exactly as before. */
   --bleed:      0.75px;   /* removes sub-pixel hairlines between untouched bands */
   --rig-scale:  0.90;
-
-  /* the core: everything below the view tabs, which is the part that changes
-     with the active mode. measured off the capture, not guessed. */
-  --core-top:   .24589;
-  --core-h:     .75411;   /* the whole core: 221.3 to 900 */
-  --plate-h:    .64300;   /* the part of it every mode actually uses: 221.3 to 800 */
-  --pw:         var(--frame-w);
-  --ph:         calc(var(--plate-h) * var(--frame-h));
-  --fan-scale:  0.94;
 
   /* timeline — mirrored in scripts/laser.js */
   --t-arm:      140ms;
@@ -64,7 +55,7 @@
 }
 
 *, *::before, *::after { box-sizing: border-box; }
-html, body { height: 100%; }
+html, body { min-height: 100%; }
 
 body {
   margin: 0;
@@ -93,9 +84,13 @@ body {
   isolation: isolate;
   min-height: 100svh;
   display: grid;
-  grid-template-rows: auto minmax(0, 1fr) auto;
+  /* 1fr, not minmax(0,1fr): the composition has a real height and the row it
+     sits in must never be allowed to shrink below it. */
+  grid-template-rows: auto 1fr auto;
   gap: clamp(14px, 2.6vh, 32px);
-  padding: clamp(18px, 3vw, 42px);
+  /* the horizontal padding IS the grid margin — that is what makes the page
+     and the 16 columns share an edge */
+  padding: clamp(18px, 3vh, 42px) var(--grid-margin);
 }
 
 /* one soft key light behind the object, one cold fill off the floor */
@@ -108,10 +103,11 @@ body {
     linear-gradient(180deg, var(--ink-1) 0%, var(--ink-0) 58%, var(--ink-void) 100%);
 }
 
-/* grain — stops large flat darks from banding */
-.stage::after {
+/* Grain — stops large flat darks from banding. It belongs to the page rather
+   than to the first screen of it, so it is fixed and covers the scroll. */
+body::after {
   content: "";
-  position: absolute; inset: 0; z-index: -1;
+  position: fixed; inset: 0; z-index: 1;
   pointer-events: none;
   opacity: .035;
   background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='140' height='140'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='.85' numOctaves='3'/%3E%3C/filter%3E%3Crect width='140' height='140' filter='url(%23n)'/%3E%3C/svg%3E");
@@ -121,13 +117,11 @@ body {
    MASTHEAD — a strip, not a navbar
    ========================================================================== */
 
-.masthead {
-  display: flex;
-  align-items: flex-start;
-  justify-content: space-between;
-  gap: 24px;
-  flex-wrap: wrap;
-}
+/* the strip is placed by .grid in the markup: the wordmark takes the first
+   columns, the readout the last, and both sit on lines the composition below
+   them also uses */
+.masthead { align-items: start; row-gap: calc(2 * var(--rhythm)); }
+.readout { justify-self: end; }
 
 /* two voices: an editorial sans for the object's name, mono for everything
    the instrument would say about itself */
@@ -192,8 +186,11 @@ body {
 
 .theatre {
   display: grid;
-  place-items: center;
+  align-content: center;
   min-height: 0;
+  /* Perspective is only ever used by the cut itself, where the eight layers
+     lift out of the object for a moment. The composition it resolves into is
+     flat: nothing in the released state carries a Z or a rotation. */
   perspective: 1500px;
   perspective-origin: 50% 44%;
 }
@@ -204,18 +201,17 @@ body {
 
 .rig {
   position: relative;
+  width: 100%;
+  height: 100%;
   transform-style: preserve-3d;
   transition: transform var(--t-open) var(--ease-open);
 }
 [data-state="sliced"] .rig { transform: scale(var(--rig-scale)); }
-/* the fan needs more of the viewport than the opened object did */
-[data-state="released"] .rig,
-[data-state="closing"]  .rig { transform: translate3d(0, -1%, 0) scale(var(--fan-scale)); }
 
 .frame {
   position: relative;
-  width: var(--frame-w);
-  height: var(--frame-h);
+  width: 100%;
+  height: 100%;
   transform-style: preserve-3d;
 }
 
@@ -229,8 +225,9 @@ body {
   transition: transform var(--t-open) var(--ease-open), opacity var(--t-open) ease;
 }
 [data-state="sliced"] .cast { transform: translate(-50%, 2%) scale(1.24, .7); opacity: .5; }
+/* the shell is left standing and dimmed, so its shadow goes with it */
 [data-state="released"] .cast,
-[data-state="closing"]  .cast { transform: translate(-50%, 16%) scaleY(.5); opacity: .26; }
+[data-state="closing"]  .cast { transform: translate(-50%, -6%) scale(1.1, .7); opacity: .22; }
 
 /* --- the eight layers --------------------------------------------------- */
 
@@ -348,188 +345,10 @@ body {
    lying exactly on top of one another. The cut opens the machine and they come
    out of that single place.
 
-   Everything below is expressed in plate units — --pw across, --ph down — so
-   the whole composition scales with the object instead of with the viewport.
+   Where the six of them land is a layout question, not a motion question, so
+   the whole deck — placement, size, labels and the retargeted deal — lives in
+   styles/station.css on the 16-column grid.
    ========================================================================== */
-
-.deck {
-  list-style: none;
-  margin: 0;
-  padding: 0;
-  position: absolute;
-  left: 0; right: 0;
-  top:    calc(var(--core-top) * var(--frame-h));
-  height: var(--ph);
-  transform-style: preserve-3d;
-  pointer-events: none;
-}
-
-.plate {
-  position: absolute;
-  inset: 0;
-  opacity: 0;
-  transform: translate3d(0, 0, 0);
-  transition: opacity 280ms ease, transform var(--t-open) var(--ease-open);
-}
-
-.plate__face {
-  position: absolute;
-  inset: 0;
-  background-color: var(--ink-1);
-  background-repeat: no-repeat;
-  background-position: 0 0;
-  background-size: 100% 100%;
-}
-
-/* The four core layers already carry the LASER state. This plate holds no
-   image; it exists so the LASER label travels on exactly the same path they do. */
-/* Every mode leaves some empty chassis at the bottom. Ending a plate on that
-   hard rectangle is what would make it read as a card, so the tail is
-   dissolved instead — the layers come out of the dark rather than sitting on
-   top of it. The mask is on the face, not the plate, so the label survives it. */
-.plate__face {
-  -webkit-mask-image: linear-gradient(to bottom, #000 0 86%, transparent 100%);
-          mask-image: linear-gradient(to bottom, #000 0 86%, transparent 100%);
-}
-/* the LASER state is the four core layers, so its tail lives on the last one.
-   72% of the plate is 39% of that layer. */
-[data-state="released"] .slice--core.chop--8,
-[data-state="closing"]  .slice--core.chop--8 {
-  -webkit-mask-image: linear-gradient(to bottom, #000 0 53%, transparent 63%);
-          mask-image: linear-gradient(to bottom, #000 0 53%, transparent 63%);
-}
-
-/* The five hidden states are not part of the first paint. JavaScript adds
-   .deck-ready once the page is idle, which is when they get fetched — well
-   before anyone can read the trigger, and after LCP is settled. */
-.deck-ready .plate--pads .plate__face  { background-image: url("../media/station/final/station-mode-pads.webp"); }
-.deck-ready .plate--synth .plate__face { background-image: url("../media/station/final/station-mode-synth.webp"); }
-.deck-ready .plate--seq .plate__face   { background-image: url("../media/station/final/station-mode-seq.webp"); }
-.deck-ready .plate--song .plate__face  { background-image: url("../media/station/final/station-mode-song.webp"); }
-.deck-ready .plate--mix .plate__face   { background-image: url("../media/station/final/station-mode-mix.webp"); }
-
-/* the mode's own name, in the site's voice rather than Station's tab skin,
-   worded exactly as the selector words it so the two read as the same thing */
-.chip {
-  position: absolute;
-  left: 0; bottom: 100%;
-  margin-bottom: 10px;
-  padding-bottom: 5px;
-  border-bottom: 1px solid rgba(185, 154, 98, .45);
-  font-size: 9.5px;
-  letter-spacing: .28em;
-  text-transform: uppercase;
-  color: var(--sand-mid);
-  white-space: nowrap;
-  opacity: 0;
-  transition: opacity 300ms ease;
-}
-/* PADS takes the next scene, so it is the one that reads first */
-.plate--pads .chip { color: var(--sand); border-bottom-color: var(--gold); }
-
-/* --- where each layer lands ----------------------------------------------
-   --fx / --fy : offset in plate widths and plate heights
-   --fz        : depth. positive is toward the viewer, and under the scene's
-                 perspective that is also what makes a plate larger
-   --fr        : a degree or two, never more
-   --fo        : how present the layer stays
-
-   The chassis re-closes: all four of its layers take the same target, so the
-   shell reassembles, steps back and dims while its contents come forward.
-   The four core layers do the same, which is what turns them back into one
-   plate — the LASER state, whole again and now visibly one of six.
-   -------------------------------------------------------------------------- */
-
-.plate, .slice { --tx: calc(var(--fx) * var(--pw)); --ty: calc(var(--fy) * var(--ph)); }
-
-.slice--chassis            { --fx:  0;    --fy: -.60; --fz: -300px; --fr:  0deg;   --fo: .52; }
-.slice--chassis.chop--4    { --fo: .82; }   /* the selector stays the most legible part of the shell */
-
-/* A zig-zag, not a row: every other layer sits high, so no plate is squarely
-   behind its neighbour and each one keeps a free edge to be read by. */
-/* --fx and --fy are pre-perspective, so a layer pushed back needs a larger
-   offset than one pulled forward to land in the same place on screen. These are
-   back-solved from the screen positions the composition wants. */
-.slice--core, .plate--laser { --fx: -.19; --fy: -.35; --fz:  -60px; --fr:   .8deg; --fo: 1; }
-.plate--pads                { --fx:  .56; --fy:  .17; --fz:  215px; --fr: -1.2deg; --fo: 1; }
-.plate--synth               { --fx: -.90; --fy: -.05; --fz:   60px; --fr: -2.0deg; --fo: 1; }
-.plate--seq                 { --fx: 1.38; --fy: -.39; --fz: -200px; --fr:  2.4deg; --fo: .94; }
-.plate--song                { --fx: 1.83; --fy:  .36; --fz: -110px; --fr:  1.5deg; --fo: .92; }
-.plate--mix                 { --fx:-1.81; --fy:  .32; --fz: -170px; --fr: -3.0deg; --fo: .9; }
-
-/* --- the release ----------------------------------------------------------
-   Static end state for released and closing both. The animation drives the
-   path while released; dropping to closing removes the animation without
-   moving anything, which is what lets the composition transition back to the
-   intact object instead of snapping.
-   -------------------------------------------------------------------------- */
-
-[data-state="released"] .plate,
-[data-state="closing"]  .plate {
-  opacity: var(--fo);
-  transform: translate3d(var(--tx), var(--ty), var(--fz)) rotate(var(--fr));
-}
-[data-state="released"] .chip,
-[data-state="closing"]  .chip { opacity: 1; }
-
-[data-state="released"] .slice,
-[data-state="closing"]  .slice {
-  transform: translate3d(var(--tx), var(--ty), var(--fz)) rotate(var(--fr));
-}
-[data-state="released"] .slice--chassis,
-[data-state="closing"]  .slice--chassis { opacity: var(--fo); }
-
-[data-state="released"] .plate {
-  animation: deal var(--t-deal) both;
-  animation-delay: calc(var(--n) * 55ms);
-}
-[data-state="released"] .chip { transition-delay: calc(var(--n) * 55ms + var(--t-deal) * .55); }
-
-[data-state="released"] .slice--core    { animation: core-deal var(--t-deal) both; }
-[data-state="released"] .slice--chassis { animation: shell var(--t-deal) var(--ease-open) both; }
-
-/* Everything leaves the same place. The first fifth of the deal is a common
-   move toward the viewer that every layer shares; only after that do the
-   trajectories separate. */
-@keyframes deal {
-  0% {
-    opacity: 0;
-    transform: translate3d(0, 0, 0) rotate(0deg);
-    animation-timing-function: cubic-bezier(.4, 0, .6, 1);
-  }
-  14% { opacity: .6; }
-  20% {
-    transform: translate3d(0, calc(var(--ph) * -.03), 48px) rotate(0deg);
-    animation-timing-function: cubic-bezier(.16, 1, .3, 1);
-  }
-  100% {
-    opacity: var(--fo);
-    transform: translate3d(var(--tx), var(--ty), var(--fz)) rotate(var(--fr));
-  }
-}
-
-@keyframes core-deal {
-  0% {
-    transform: translate3d(var(--dx), calc((var(--i) - 4.5) * var(--gap)), var(--dz)) rotate(var(--rz));
-    animation-timing-function: cubic-bezier(.4, 0, .6, 1);
-  }
-  20% {
-    transform: translate3d(0, calc(var(--ph) * -.03), 48px) rotate(0deg);
-    animation-timing-function: cubic-bezier(.16, 1, .3, 1);
-  }
-  100% { transform: translate3d(var(--tx), var(--ty), var(--fz)) rotate(var(--fr)); }
-}
-
-@keyframes shell {
-  0% {
-    opacity: 1;
-    transform: translate3d(var(--dx), calc((var(--i) - 4.5) * var(--gap)), var(--dz)) rotate(var(--rz));
-  }
-  100% {
-    opacity: var(--fo);
-    transform: translate3d(var(--tx), var(--ty), var(--fz)) rotate(var(--fr));
-  }
-}
 
 /* ==========================================================================
    THE LASER
@@ -604,7 +423,11 @@ body {
 
 /* one flash. it means "cut", so it happens once and it is short. */
 .flash {
-  position: absolute; inset: -16%;
+  position: absolute;
+  /* the bloom reaches past the object, but capped: on a tall frame a plain
+     -16% reaches past the fold and invents a scrollbar for an element that is
+     invisible except for 150ms */
+  inset: max(-70px, -16%);
   opacity: 0;
   pointer-events: none;
   transform: translateZ(42px);
@@ -623,10 +446,11 @@ body {
    TRIGGER
    ========================================================================== */
 
+/* the control row is grid-placed too — no centred island floating under the
+   composition, it starts on the same line the wordmark starts on */
 .controls {
-  display: grid;
-  justify-items: center;
-  gap: 13px;
+  align-items: center;
+  row-gap: calc(1.5 * var(--rhythm));
   padding-bottom: clamp(2px, 1.4vh, 12px);
 }
 .no-js .controls { visibility: hidden; }
@@ -693,93 +517,44 @@ body {
   font-size: 10.5px;
   letter-spacing: .1em;
   color: var(--sand-low);
-  text-align: center;
   transition: color 320ms ease;
 }
 
 /* ==========================================================================
-   MOBILE — a different composition, not a squeezed desktop one.
-   The object is sized off width, opens with tighter gaps and a wider drift,
-   and the index moves underneath it while keeping its 4x2 pad shape.
+   NARROWER VIEWPORTS
+
+   Where the six modes go below desktop is a placement question and belongs to
+   the grid — styles/station.css steps the spans down and finally stacks them.
+   What is left here is the room around the composition: the strip, the
+   control, and how hard the object works for its space.
+
+   Desktop is the composition this pass designed. The narrow layouts are
+   sound holding positions, not the authored mobile scene.
    ========================================================================== */
 
-@media (max-width: 900px) {
-  :root {
-    --frame-w:   min(62vw, 310px);
-    --frame-h:   calc(var(--frame-w) * 900 / 451);
-    --gap:       calc(var(--frame-h) * 0.024);
-    --rig-scale: 0.88;
-    --fan-scale: 0.84;
-  }
+@media (max-width: 1099px) {
+  :root { --rig-scale: 0.93; }
+}
 
-  /* A hand held close, not a table. There is no room sideways, so the six
-     states separate mostly in depth and in height, and the order of what
-     matters is carried by which one is nearest rather than by who has space. */
-  .slice--chassis             { --fx:  0;   --fy: -.49; --fz: -240px; --fr:  0deg;   --fo: .5; }
-  .slice--core, .plate--laser { --fx: -.17; --fy: -.27; --fz:  -60px; --fr:  .8deg;  --fo: 1; }
-  .plate--pads                { --fx:  .21; --fy:  .30; --fz:  170px; --fr: -1.2deg; --fo: 1; }
-  .plate--synth               { --fx: -.39; --fy:  .04; --fz:   50px; --fr: -2.0deg; --fo: 1; }
-  .plate--seq                 { --fx:  .48; --fy: -.15; --fz: -150px; --fr:  2.2deg; --fo: .94; }
-  .plate--song                { --fx:  .50; --fy:  .60; --fz: -100px; --fr:  1.5deg; --fo: .92; }
-  .plate--mix                 { --fx: -.44; --fy:  .66; --fz: -170px; --fr: -2.6deg; --fo: .9; }
-  .chip { font-size: 9px; letter-spacing: .22em; margin-bottom: 7px; }
-  /* Narrow screens stack the layers, so a label always belongs on whichever
-     edge of its layer nothing else is covering: right for the two on the right,
-     underneath for the one at the bottom of the left-hand cascade. */
-  .plate--seq .chip, .plate--song .chip { left: auto; right: 0; }
-  .plate--mix .chip {
-    /* 88%, not 100%: the plate has already faded out by then, and a label
-       floating below the fade reads as detached from the layer it names */
-    top: 88%; bottom: auto;
-    margin: 0;
-    padding: 5px 0 0;
-    border-top: 1px solid rgba(185, 154, 98, .45);
-    border-bottom: 0;
-  }
-  .theatre {
-    grid-template-columns: minmax(0, 1fr);
-    justify-items: center;
-    gap: clamp(14px, 3vh, 30px);
-  }
-  .theatre__void { display: none; }
-  /* keep the ground shadow inside the viewport — it is decoration, and it must
-     not be the thing that invents a scrollbar */
-  .cast { width: 132%; height: clamp(28px, 5vh, 54px); }
-  .index { justify-self: center; max-width: 26rem; width: 100%; }
-  .index__item { padding: 9px 8px 10px 0; }
-  .mark { margin-left: 9px; font-size: 9px; }
+/* stacked: the object no longer opens sideways, so nothing needs depth */
+@media (max-width: 720px) {
+  .theatre { perspective: none; }
+  .cast { display: none; }
+  .stage { grid-template-rows: auto auto auto; }
 }
 
 @media (max-width: 560px) {
-  :root {
-    --frame-w:   min(56vw, 250px);
-    --rig-scale: 0.86;
-  }
-  .stage { gap: 12px; padding: 16px; }
+  .stage { gap: 12px; padding: 16px var(--grid-margin); }
   .masthead { flex-direction: column; gap: 11px; }
   .wordmark { font-size: clamp(26px, 8vw, 34px); }
   .tagline { margin-top: 9px; font-size: 9.5px; letter-spacing: .12em; }
   .readout { padding: 7px 12px; font-size: 9.5px; letter-spacing: .1em; }
   .trigger { padding: 14px 22px; gap: 14px; min-width: 0; width: 100%; letter-spacing: .2em; }
-  .index__item { padding: 8px 6px 9px 0; }
-  .index__name { font-size: 9.5px; letter-spacing: .05em; }
   /* less room below, more room beside: the layers drift wider instead */
   .chop--1 { --dxf: -.115; } .chop--2 { --dxf: -.05; }
   .chop--3 { --dxf:  .045; } .chop--4 { --dxf:  .11; }
   .chop--5 { --dxf: -.095; } .chop--6 { --dxf: -.025; }
   .chop--7 { --dxf:  .07; }  .chop--8 { --dxf:  .13; }
-}
-
-/* short phones: the scene stops pretending to be one screen rather than
-   shrinking the instrument until nothing on it is readable */
-@media (max-width: 560px) and (max-height: 720px) {
-  :root { --frame-w: min(50vw, 210px); }
-  .stage { min-height: 0; }
-}
-
-/* short landscape viewports */
-@media (max-height: 620px) and (min-width: 901px) {
-  :root { --frame-h: clamp(230px, 46svh, 360px); }
 }
 
 /* coarse pointers: no hover affordance to lean on */

@@ -1,0 +1,236 @@
+/* ==========================================================================
+   website — the reading chapters
+
+   Past the overview the page changes gear. The hero is a poster: six modules
+   at a glance, no explanation. From here down it is a magazine: one module per
+   chapter, read at reading speed.
+
+   Every chapter resolves through the same 16 columns as the hero, and no two
+   are laid out the same way. That is the point — a repeated row of image-left,
+   text-right is a component library, not an article. The variation is written
+   once, in the LAYOUT block near the bottom of this file, so the whole reading
+   rhythm can be read in one screen and changed in one place.
+
+   The screens are not illustrations. Each one is a stage that a later pass
+   fills with the real thing — a pad that presses, a wavetable that moves, a
+   playhead that travels. See DEMO STAGE below for the contract they honour.
+   ========================================================================== */
+
+.chapters {
+  position: relative;
+  padding-block: clamp(72px, 11vh, 176px) clamp(96px, 14vh, 224px);
+  padding-inline: var(--grid-margin);
+}
+
+/* A chapter is a band of the page, not a card. Nothing here has a border, a
+   background or a radius; the separation is space and a single hairline. */
+.chapter {
+  position: relative;
+  padding-block: clamp(56px, 8vh, 128px);
+}
+
+/* the hairline sits on the grid, not on the viewport: it starts where column
+   one starts and stops where column sixteen stops */
+.chapter + .chapter::before {
+  content: "";
+  position: absolute;
+  left: 0; right: 0; top: 0;
+  height: 1px;
+  background: linear-gradient(90deg,
+    rgba(43, 39, 49, .9) 0%, rgba(43, 39, 49, .9) 62%, transparent 100%);
+}
+
+.chapter__grid { row-gap: calc(7 * var(--rhythm)); align-items: start; }
+
+/* --------------------------------------------------------------------------
+   THE HEADING BLOCK
+   -------------------------------------------------------------------------- */
+
+.chapter__head { display: grid; gap: calc(1.5 * var(--rhythm)); }
+
+/* the number carries the running order, and the rule after it gives the block
+   a left edge that agrees with the column it starts on */
+.chapter__n {
+  margin: 0;
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  font-size: 10px;
+  letter-spacing: .28em;
+  color: var(--gold);
+}
+.chapter__n::after {
+  content: "";
+  flex: 1;
+  height: 1px;
+  background: linear-gradient(90deg, rgba(185, 154, 98, .5), transparent);
+}
+
+.chapter__title {
+  margin: 0;
+  font-family: var(--sans);
+  font-size: clamp(26px, 2.5vw, 40px);
+  font-weight: 300;
+  letter-spacing: .1em;
+  line-height: 1.05;
+  text-transform: uppercase;
+  color: var(--sand);
+}
+
+.chapter__kicker {
+  margin: 0;
+  font-size: 10px;
+  letter-spacing: .24em;
+  text-transform: uppercase;
+  color: var(--sand-low);
+}
+
+.chapter__lede {
+  margin: calc(2 * var(--rhythm)) 0 0;
+  max-width: 34ch;
+  font-size: 12.5px;
+  line-height: 1.75;
+  color: var(--sand-mid);
+}
+
+/* --------------------------------------------------------------------------
+   SPECS
+
+   A short technical column, not a feature grid. Slash-led because that is the
+   site's existing mark for a small technical aside, and no bullets, boxes or
+   icons — those are what turn a paragraph into a pricing table.
+   -------------------------------------------------------------------------- */
+
+.specs {
+  list-style: none;
+  margin: 0;
+  padding: 0;
+  display: grid;
+  gap: calc(1.25 * var(--rhythm));
+  font-size: 11px;
+  letter-spacing: .06em;
+  color: var(--sand-low);
+}
+
+.specs li { display: flex; gap: 10px; }
+.specs li::before { content: "/"; color: var(--gold); opacity: .65; }
+
+/* --------------------------------------------------------------------------
+   DEMO STAGE
+
+   The contract, so the interaction pass has somewhere to land:
+
+     .demo         owns the column placement and carries data-demo="<module>"
+     .demo__screen is the stage. It is position:relative with its own stacking
+                   context and a fixed aspect ratio, so anything dropped inside
+                   it — a canvas, an absolutely positioned overlay, a grid of
+                   real buttons — lands on the picture without moving the page.
+     .demo__still  is the capture standing in until that exists.
+
+   The aspect ratio is declared per chapter from the derived file's real pixel
+   size, so the box is the right shape before the image arrives and the page
+   never shifts. Every still is lazy, because none of them is above the fold.
+   -------------------------------------------------------------------------- */
+
+.demo { position: relative; }
+
+.demo__screen {
+  position: relative;
+  isolation: isolate;
+  aspect-ratio: var(--ar);
+  background: var(--ink-1);
+  overflow: hidden;
+}
+
+/* the interactive layer a later pass adds, positioned against the stage */
+.demo__screen > canvas,
+.demo__screen > .demo__layer { position: absolute; inset: 0; }
+
+.demo__still {
+  display: block;
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+}
+
+/* A capture of a screen has its own hard edge, and on a black page that edge
+   reads as a pasted rectangle. One hairline at the top, fading out, is enough
+   to say "panel" without drawing a frame around it. */
+.demo__screen::after {
+  content: "";
+  position: absolute;
+  inset: 0;
+  pointer-events: none;
+  border-top: 1px solid rgba(185, 154, 98, .18);
+}
+
+/* the module's own name, in the site's voice, hung off the screen's top line */
+.demo__mark {
+  margin: 0 0 calc(1.25 * var(--rhythm));
+  font-size: 9px;
+  letter-spacing: .26em;
+  text-transform: uppercase;
+  color: var(--sand-low);
+}
+
+/* --------------------------------------------------------------------------
+   LAYOUT
+
+   The reading rhythm, in one place. Read each block as: which column each part
+   starts on, how many it spans, and which row it sits in.
+
+     02 LASER    text left, the waveform takes the rest of the page
+     03 PADS     mirrored — the grid leads, the text answers, specs on a rail
+     04 ZOLA-X   heading across the top, one full-width screen under it
+     05 SEQ SONG two screens standing on a shared floor, one composition
+     06 MIX      the quiet one: a single screen, off centre, nothing beside it
+   -------------------------------------------------------------------------- */
+
+.ch--laser .chapter__head { --c:  1; --s: 4; }
+.ch--laser .demo          { --c:  6; --s: 11; }
+.ch--laser .specs         { --c:  1; --s: 4; }
+
+.ch--pads  .demo          { --c:  1; --s: 7; }
+.ch--pads  .chapter__head { --c:  9; --s: 5; }
+.ch--pads  .specs         { --c: 14; --s: 3; }
+
+.ch--synth .chapter__head { --c:  1; --s: 7;  --r: 1; }
+.ch--synth .specs         { --c: 13; --s: 4;  --r: 1; }
+.ch--synth .demo          { --c:  1; --s: 16; --r: 2; }
+
+.ch--seq   .chapter__head { --c:  1; --s: 4;  --r: 1; }
+.ch--seq   .demo--seq     { --c:  6; --s: 5;  --r: 1; }
+.ch--seq   .demo--song    { --c: 11; --s: 6;  --r: 1; }
+/* the two screens are different shapes and different heights; standing them on
+   one floor is what makes them read as one composition instead of two tiles */
+.ch--seq   .demo--song    { align-self: end; }
+
+.ch--mix   .chapter__head { --c:  1; --s: 5; }
+.ch--mix   .demo          { --c:  7; --s: 8; }
+
+/* --------------------------------------------------------------------------
+   NARROWER VIEWPORTS
+
+   The chapters keep their order and lose their arrangement: one column, text
+   before its screen every time. Holding position, same as the overview.
+   -------------------------------------------------------------------------- */
+
+@media (max-width: 1099px) {
+  .ch--pads .demo,
+  .ch--seq .demo--seq,
+  .ch--seq .demo--song { order: 1; }
+
+  .chapters .chapter__head,
+  .chapters .specs,
+  .chapters .demo { --c: 1; --s: 16; --r: auto; }
+
+  .ch--seq .demo--seq  { --s: 9; }
+  .ch--seq .demo--song { --s: 16; align-self: auto; }
+  .chapter__grid { row-gap: calc(5 * var(--rhythm)); }
+  .chapter__lede { max-width: 46ch; }
+}
+
+@media (max-width: 640px) {
+  .ch--seq .demo--seq { --s: 16; }
+  .chapter { padding-block: clamp(40px, 7vh, 72px); }
+}

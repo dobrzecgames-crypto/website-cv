@@ -9,147 +9,418 @@
 <script>document.documentElement.classList.remove('no-js')</script>
 <link rel="preload" as="image" type="image/webp" href="media/station/final/station-laser-loaded.webp" fetchpriority="high">
 <link rel="preload" as="image" type="image/webp" href="media/station/final/station-laser-cut.webp">
+<link rel="stylesheet" href="styles/grid.css">
 <link rel="stylesheet" href="styles/site.css">
+<link rel="stylesheet" href="styles/station.css">
+<link rel="stylesheet" href="styles/chapters.css">
 </head>
 <body>
 
 <!--
-  Scene 00 + Scene 01. TECHNICAL_PRINCIPLES.md section 15: prove the riskiest
-  interaction before building page volume.
+  The page has two gears.
 
-  One LASER IT does the whole reveal. The chassis is identical in every mode
-  capture — verified pixel by pixel — and only the area below the view tabs
-  changes, so that area is treated as a magazine of states: six modes stacked
-  exactly on top of one another until the cut opens the machine.
+  The overview is a poster: the machine, the six modules it holds, and a name
+  for each. It answers "what is this" at a glance and explains nothing. One
+  LASER IT does the whole reveal — the chassis is identical in every mode
+  capture, verified pixel by pixel, and only the area below the view tabs
+  changes, so that area is treated as a magazine of states.
 
-  TODO(content): the masthead still needs the builder's byline. Left out rather
-  than invented — ASSET_PLAN.md "Missing-content rule".
+  Past it the page slows down and reads like a magazine: one module per
+  chapter, at reading speed, each with a screen big enough to become the real
+  thing later.
+
+  Everything on both gears resolves through one 16-column editorial grid —
+  styles/grid.css. Start column, span, row. Press Shift+G to see it.
+
+  TODO(content): the masthead still needs the builder's byline, and every lede
+  and spec list below is provisional — written from what the captures actually
+  show, so nothing is invented, but none of it is the builder's own words yet.
+  ASSET_PLAN.md "Missing-content rule".
 -->
 
-<main class="stage" id="stage" data-state="intact">
+<main>
 
-  <header class="masthead">
-    <div class="masthead__object">
+<section class="stage" id="stage" data-state="intact">
+
+  <header class="masthead grid">
+    <div class="masthead__object" style="--c:1; --s:7">
       <h1 class="wordmark">Station</h1>
       <p class="tagline">A music workstation that runs in a browser tab</p>
     </div>
-    <p class="readout" role="status" aria-live="polite" aria-atomic="true">
+    <p class="readout" style="--c:13; --s:4" role="status" aria-live="polite" aria-atomic="true">
       <span class="readout__lamp" aria-hidden="true"></span>
       <span id="readoutText">Source loaded · 1 slice</span>
     </p>
   </header>
 
-  <div class="theatre">
-    <figure class="object">
-      <div class="rig">
-        <div class="frame" role="img"
-             aria-label="Station shown as one tall instrument: transport row, readout, project and bank row, the seven view tabs, a waveform display, the CUT slider and a sixteen-pad slice map.">
+  <div class="theatre plot-host">
 
-          <!--
-            Eight layers. Each holds a full copy of the same image and shows only
-            its own band of it, so untouched they tile the frame exactly and read
-            as one screen. Every cut falls in a real gap between Station's chassis
-            modules, so no control is bisected.
+    <!--
+      The overview. .plot resolves every child's box from the column step, so a
+      module can start on column 11, stand in its own air, or run off the
+      viewport edge and still be exactly on the grid. Nothing here is rotated
+      or in perspective, and no two modules overlap: three empty corridors do
+      the separating, shared lines do the holding together.
+    -->
+    <div class="plot station" id="plot">
 
-            01-04 are the chassis, which is the same in every mode.
-            05-08 are the core: the area the active tab controls.
-          -->
-          <div class="slices">
-            <div class="slice slice--chassis chop chop--1 slice--first" style="--i:1"><i class="face face--before"></i><i class="face face--after"></i></div>
-            <div class="slice slice--chassis chop chop--2" style="--i:2"><i class="face face--before"></i><i class="face face--after"></i></div>
-            <div class="slice slice--chassis chop chop--3" style="--i:3"><i class="face face--before"></i><i class="face face--after"></i></div>
-            <div class="slice slice--chassis chop chop--4" style="--i:4"><i class="face face--before"></i><i class="face face--after"></i></div>
-            <div class="slice slice--core chop chop--5" style="--i:5"><i class="face face--before"></i><i class="face face--after"></i></div>
-            <div class="slice slice--core chop chop--6" style="--i:6"><i class="face face--before"></i><i class="face face--after"></i></div>
-            <div class="slice slice--core chop chop--7" style="--i:7"><i class="face face--before"></i><i class="face face--after"></i></div>
-            <div class="slice slice--core chop chop--8 slice--last" style="--i:8"><i class="face face--before"></i><i class="face face--after"></i></div>
+      <figure class="object placed">
+        <div class="rig">
+          <div class="frame" role="img"
+               aria-label="Station shown as one tall instrument: transport row, readout, project and bank row, the seven view tabs, a waveform display, the CUT slider and a sixteen-pad slice map.">
+
+            <!--
+              Eight layers. Each holds a full copy of the same image and shows only
+              its own band of it, so untouched they tile the frame exactly and read
+              as one screen. Every cut falls in a real gap between Station's chassis
+              modules, so no control is bisected.
+
+              01-04 are the chassis, which is the same in every mode.
+              05-08 are the core: the area the active tab controls, and the
+              rectangle the LASER label hangs off in the overview.
+            -->
+            <div class="slices">
+              <div class="slice slice--chassis chop chop--1 slice--first" style="--i:1"><i class="face face--before"></i><i class="face face--after"></i></div>
+              <div class="slice slice--chassis chop chop--2" style="--i:2"><i class="face face--before"></i><i class="face face--after"></i></div>
+              <div class="slice slice--chassis chop chop--3" style="--i:3"><i class="face face--before"></i><i class="face face--after"></i></div>
+              <div class="slice slice--chassis chop chop--4" style="--i:4"><i class="face face--before"></i><i class="face face--after"></i></div>
+              <div class="slice slice--core chop chop--5" style="--i:5"><i class="face face--before"></i><i class="face face--after"></i></div>
+              <div class="slice slice--core chop chop--6" style="--i:6"><i class="face face--before"></i><i class="face face--after"></i></div>
+              <div class="slice slice--core chop chop--7" style="--i:7"><i class="face face--before"></i><i class="face face--after"></i></div>
+              <div class="slice slice--core chop chop--8 slice--last" style="--i:8"><i class="face face--before"></i><i class="face face--after"></i></div>
+            </div>
+
+            <!-- the laser: target brackets, one travelling beam, seven cuts -->
+            <svg class="beams" viewBox="0 0 451 900" aria-hidden="true" focusable="false">
+              <g class="target">
+                <path d="M5 31V5h26M420 5h26v26M446 869v26h-26M31 895H5v-26"/>
+              </g>
+              <g class="cutline" style="--p:.06644">
+                <line class="cutline__halo" x1="2" y1="59.8" x2="449" y2="59.8"/>
+                <line class="cutline__core" x1="2" y1="59.8" x2="449" y2="59.8"/>
+                <circle class="cutline__pin" cx="8" cy="59.8" r="3.6"/><circle class="cutline__pin" cx="443" cy="59.8" r="3.6"/>
+              </g>
+              <g class="cutline" style="--p:.11500">
+                <line class="cutline__halo" x1="2" y1="103.5" x2="449" y2="103.5"/>
+                <line class="cutline__core" x1="2" y1="103.5" x2="449" y2="103.5"/>
+                <circle class="cutline__pin" cx="8" cy="103.5" r="3.6"/><circle class="cutline__pin" cx="443" cy="103.5" r="3.6"/>
+              </g>
+              <g class="cutline" style="--p:.17426">
+                <line class="cutline__halo" x1="2" y1="156.83" x2="449" y2="156.83"/>
+                <line class="cutline__core" x1="2" y1="156.83" x2="449" y2="156.83"/>
+                <circle class="cutline__pin" cx="8" cy="156.83" r="3.6"/><circle class="cutline__pin" cx="443" cy="156.83" r="3.6"/>
+              </g>
+              <g class="cutline cutline--core" style="--p:.24589">
+                <line class="cutline__halo" x1="2" y1="221.3" x2="449" y2="221.3"/>
+                <line class="cutline__core" x1="2" y1="221.3" x2="449" y2="221.3"/>
+                <circle class="cutline__pin" cx="8" cy="221.3" r="3.6"/><circle class="cutline__pin" cx="443" cy="221.3" r="3.6"/>
+              </g>
+              <g class="cutline" style="--p:.44422">
+                <line class="cutline__halo" x1="2" y1="399.8" x2="449" y2="399.8"/>
+                <line class="cutline__core" x1="2" y1="399.8" x2="449" y2="399.8"/>
+                <circle class="cutline__pin" cx="8" cy="399.8" r="3.6"/><circle class="cutline__pin" cx="443" cy="399.8" r="3.6"/>
+              </g>
+              <g class="cutline" style="--p:.51500">
+                <line class="cutline__halo" x1="2" y1="463.5" x2="449" y2="463.5"/>
+                <line class="cutline__core" x1="2" y1="463.5" x2="449" y2="463.5"/>
+                <circle class="cutline__pin" cx="8" cy="463.5" r="3.6"/><circle class="cutline__pin" cx="443" cy="463.5" r="3.6"/>
+              </g>
+              <g class="cutline" style="--p:.70367">
+                <line class="cutline__halo" x1="2" y1="633.3" x2="449" y2="633.3"/>
+                <line class="cutline__core" x1="2" y1="633.3" x2="449" y2="633.3"/>
+                <circle class="cutline__pin" cx="8" cy="633.3" r="3.6"/><circle class="cutline__pin" cx="443" cy="633.3" r="3.6"/>
+              </g>
+            </svg>
+
+            <div class="beam" aria-hidden="true"></div>
+            <div class="flash" aria-hidden="true"></div>
           </div>
-
-          <!--
-            The deck. Every plate is the same rectangle as the core, so before the
-            reveal all six lie exactly on top of one another and on top of the
-            core itself. --n is the deal order; PADS goes last so it lands in
-            front. The LASER plate carries no image: the four core layers already
-            hold that state, and this element only carries its label so the label
-            travels with them.
-          -->
-          <ul class="deck" id="deck">
-            <li class="plate plate--mix"   style="--n:1"><i class="plate__face"></i><span class="chip">Mix</span></li>
-            <li class="plate plate--song"  style="--n:2"><i class="plate__face"></i><span class="chip">Song</span></li>
-            <li class="plate plate--seq"   style="--n:3"><i class="plate__face"></i><span class="chip">Seq</span></li>
-            <li class="plate plate--synth" style="--n:4"><i class="plate__face"></i><span class="chip">Synth</span></li>
-            <li class="plate plate--pads"  style="--n:5"><i class="plate__face"></i><span class="chip">Pads</span></li>
-            <li class="plate plate--laser" style="--n:0"><span class="chip">Laser</span></li>
-          </ul>
-
-          <!-- the laser: target brackets, one travelling beam, seven cuts -->
-          <svg class="beams" viewBox="0 0 451 900" aria-hidden="true" focusable="false">
-            <g class="target">
-              <path d="M5 31V5h26M420 5h26v26M446 869v26h-26M31 895H5v-26"/>
-            </g>
-            <g class="cutline" style="--p:.06644">
-              <line class="cutline__halo" x1="2" y1="59.8" x2="449" y2="59.8"/>
-              <line class="cutline__core" x1="2" y1="59.8" x2="449" y2="59.8"/>
-              <circle class="cutline__pin" cx="8" cy="59.8" r="3.6"/><circle class="cutline__pin" cx="443" cy="59.8" r="3.6"/>
-            </g>
-            <g class="cutline" style="--p:.11500">
-              <line class="cutline__halo" x1="2" y1="103.5" x2="449" y2="103.5"/>
-              <line class="cutline__core" x1="2" y1="103.5" x2="449" y2="103.5"/>
-              <circle class="cutline__pin" cx="8" cy="103.5" r="3.6"/><circle class="cutline__pin" cx="443" cy="103.5" r="3.6"/>
-            </g>
-            <g class="cutline" style="--p:.17426">
-              <line class="cutline__halo" x1="2" y1="156.83" x2="449" y2="156.83"/>
-              <line class="cutline__core" x1="2" y1="156.83" x2="449" y2="156.83"/>
-              <circle class="cutline__pin" cx="8" cy="156.83" r="3.6"/><circle class="cutline__pin" cx="443" cy="156.83" r="3.6"/>
-            </g>
-            <g class="cutline cutline--core" style="--p:.24589">
-              <line class="cutline__halo" x1="2" y1="221.3" x2="449" y2="221.3"/>
-              <line class="cutline__core" x1="2" y1="221.3" x2="449" y2="221.3"/>
-              <circle class="cutline__pin" cx="8" cy="221.3" r="3.6"/><circle class="cutline__pin" cx="443" cy="221.3" r="3.6"/>
-            </g>
-            <g class="cutline" style="--p:.44422">
-              <line class="cutline__halo" x1="2" y1="399.8" x2="449" y2="399.8"/>
-              <line class="cutline__core" x1="2" y1="399.8" x2="449" y2="399.8"/>
-              <circle class="cutline__pin" cx="8" cy="399.8" r="3.6"/><circle class="cutline__pin" cx="443" cy="399.8" r="3.6"/>
-            </g>
-            <g class="cutline" style="--p:.51500">
-              <line class="cutline__halo" x1="2" y1="463.5" x2="449" y2="463.5"/>
-              <line class="cutline__core" x1="2" y1="463.5" x2="449" y2="463.5"/>
-              <circle class="cutline__pin" cx="8" cy="463.5" r="3.6"/><circle class="cutline__pin" cx="443" cy="463.5" r="3.6"/>
-            </g>
-            <g class="cutline" style="--p:.70367">
-              <line class="cutline__halo" x1="2" y1="633.3" x2="449" y2="633.3"/>
-              <line class="cutline__core" x1="2" y1="633.3" x2="449" y2="633.3"/>
-              <circle class="cutline__pin" cx="8" cy="633.3" r="3.6"/><circle class="cutline__pin" cx="443" cy="633.3" r="3.6"/>
-            </g>
-          </svg>
-
-          <div class="beam" aria-hidden="true"></div>
-          <div class="flash" aria-hidden="true"></div>
+          <div class="cast" aria-hidden="true"></div>
         </div>
-        <div class="cast" aria-hidden="true"></div>
-      </div>
 
-      <figcaption class="visually-hidden">
-        Station cut along its own construction seams into eight layers, four of
-        them chassis and four of them the area the active tab controls. That area
-        turns out to hold six states of the same machine: laser, pads, synth,
-        seq, song and mix.
-      </figcaption>
-    </figure>
+        <figcaption class="visually-hidden">
+          Station cut along its own construction seams into eight layers, four of
+          them chassis and four of them the area the active tab controls. That area
+          turns out to hold six states of the same machine: laser, pads, synth,
+          seq, song and mix.
+        </figcaption>
+      </figure>
+
+      <!--
+        The six modules. --n is the deal order the frozen motion layer uses;
+        where each one lands is set in styles/station.css. The LASER entry
+        carries no image: the four core layers above already hold that state,
+        so the element only marks its box and carries the label.
+
+        Names and numbers only. The numbers follow the site's narrative
+        backbone — LASER, PADS, SYNTH, SEQ / SONG, MIX — which is also the
+        order of the chapters below, so the overview doubles as the contents.
+      -->
+      <ul class="deck" id="deck">
+
+        <li class="plate plate--mix placed" style="--n:1">
+          <i class="plate__face"></i>
+          <p class="tag">
+            <span class="tag__n">06</span>
+            <span class="tag__name">Mix</span>
+          </p>
+        </li>
+
+        <li class="plate plate--song placed" style="--n:2">
+          <i class="plate__face"></i>
+          <p class="tag">
+            <span class="tag__n">05</span>
+            <span class="tag__name">Song</span>
+          </p>
+        </li>
+
+        <li class="plate plate--seq placed" style="--n:3">
+          <i class="plate__face"></i>
+          <p class="tag tag--before">
+            <span class="tag__n">04</span>
+            <span class="tag__name">Seq</span>
+          </p>
+        </li>
+
+        <li class="plate plate--synth placed" style="--n:4">
+          <i class="plate__face"></i>
+          <p class="tag tag--below">
+            <span class="tag__n">03</span>
+            <span class="tag__name">Synth</span>
+          </p>
+        </li>
+
+        <li class="plate plate--pads placed" style="--n:5">
+          <i class="plate__face"></i>
+          <p class="tag tag--after">
+            <span class="tag__n">02</span>
+            <span class="tag__name">Pads</span>
+          </p>
+        </li>
+
+        <li class="plate plate--laser placed" style="--n:0">
+          <i class="plate__face"></i>
+          <p class="tag tag--below">
+            <span class="tag__n">01</span>
+            <span class="tag__name">Laser</span>
+          </p>
+        </li>
+
+      </ul>
+    </div>
   </div>
 
-  <div class="controls">
-    <button class="trigger" id="laserIt" type="button">
+  <div class="controls grid">
+    <button class="trigger" id="laserIt" type="button" style="--c:1; --s:4">
       <span class="trigger__label" id="triggerLabel">Laser it</span>
       <span class="trigger__meta" id="triggerMeta">cut 8</span>
       <span class="trigger__charge" aria-hidden="true"></span>
     </button>
-    <p class="hint" id="hint">One pass. Eight layers, and everything the tabs were keeping out of sight.</p>
+    <p class="hint" id="hint" style="--c:6; --s:8">One pass. Eight layers, and everything the tabs were keeping out of sight.</p>
   </div>
+
+</section>
+
+
+<!--
+  THE CHAPTERS
+
+  Order follows the approved narrative backbone in DECISIONS.md — LASER, PADS,
+  SYNTH, SEQ / SONG, MIX — not the running order of the reference sheet, which
+  opens on the synth. Reordering is DOM order and nothing else.
+
+  Every .demo__screen is a stage, not a picture. The still standing in it now
+  is the module's real capture; the interaction pass replaces or overlays it
+  with the working thing. Each capture has a partner state already sitting in
+  assets/station/current/details/ for exactly that — pads at rest, meters idle,
+  waveform uncut, wavetable sounding.
+-->
+<div class="chapters">
+
+  <!-- ─── 01 already happened above: the overview and the cut ─────────── -->
+
+  <section class="chapter ch--laser" aria-labelledby="ch-laser-title">
+    <div class="chapter__grid grid">
+
+      <div class="chapter__head">
+        <p class="chapter__n">01</p>
+        <h2 class="chapter__title" id="ch-laser-title">Laser</h2>
+        <p class="chapter__kicker">Sample manipulation</p>
+        <p class="chapter__lede">
+          A break goes in whole. Set the cut and the pieces come out as eight
+          slices, each one landing on a pad, ready to play out of order.
+        </p>
+      </div>
+
+      <!-- interaction pass: draggable slice points, a travelling playhead.
+           Partner captures: waveform-laser.png (uncut), waveform-playhead.png -->
+      <figure class="demo" data-demo="laser">
+        <p class="demo__mark">Waveform · eight cut markers</p>
+        <div class="demo__screen" style="--ar: 1200 / 445">
+          <img class="demo__still" src="media/station/details/laser-slices.webp"
+               width="1200" height="445" loading="lazy" decoding="async" fetchpriority="low"
+               alt="Station's waveform display, one break shown with eight gold cut markers across it.">
+        </div>
+      </figure>
+
+      <ul class="specs">
+        <li>Transient slicing</li>
+        <li>Manual slice points</li>
+        <li>Slices map to pads 01–08</li>
+      </ul>
+
+    </div>
+  </section>
+
+
+  <section class="chapter ch--pads" aria-labelledby="ch-pads-title">
+    <div class="chapter__grid grid">
+
+      <!-- interaction pass: press a pad, get the physical return.
+           Partner capture: pads-grid.png (the same grid at rest) -->
+      <figure class="demo" data-demo="pads">
+        <p class="demo__mark">Sixteen pads · three struck</p>
+        <div class="demo__screen" style="--ar: 1000 / 1002">
+          <img class="demo__still" src="media/station/details/pads-grid.webp"
+               width="1000" height="1002" loading="lazy" decoding="async" fetchpriority="low"
+               alt="Station's sixteen-pad grid, three pads lit and holding slices, the rest empty.">
+        </div>
+      </figure>
+
+      <div class="chapter__head">
+        <p class="chapter__n">02</p>
+        <h2 class="chapter__title" id="ch-pads-title">Pads</h2>
+        <p class="chapter__kicker">Performance sampler</p>
+        <p class="chapter__lede">
+          Sixteen pads, each holding a slice, a sample, or nothing yet. This is
+          where cut material stops being a file and becomes something to play.
+        </p>
+      </div>
+
+      <ul class="specs">
+        <li>Sixteen pads</li>
+        <li>Ready or empty, per pad</li>
+        <li>Fed by the live slice map</li>
+      </ul>
+
+    </div>
+  </section>
+
+
+  <section class="chapter ch--synth" aria-labelledby="ch-synth-title">
+    <div class="chapter__grid grid">
+
+      <div class="chapter__head">
+        <p class="chapter__n">03</p>
+        <h2 class="chapter__title" id="ch-synth-title">Zola-X</h2>
+        <p class="chapter__kicker">Poly synthesizer</p>
+        <p class="chapter__lede">
+          Station's own polyphonic synth. The wavetable is the interface — the
+          rest of the instrument waits behind five tabs instead of crowding it.
+        </p>
+      </div>
+
+      <ul class="specs">
+        <li>Osc · Filter · Env · Mod · FX</li>
+        <li>Two oscillators</li>
+        <li>Wavetable position</li>
+        <li>Unison</li>
+      </ul>
+
+      <!-- interaction pass: the wavetable moves under the position control.
+           Partner capture: wavetable-zola-x-active.png (sounding) -->
+      <figure class="demo" data-demo="zola-x">
+        <p class="demo__mark">ZOLA-X · the wavetable screen</p>
+        <div class="demo__screen" style="--ar: 1200 / 464">
+          <img class="demo__still" src="media/station/details/zola-x-wavetable.webp"
+               width="1200" height="464" loading="lazy" decoding="async" fetchpriority="low"
+               alt="The ZOLA-X wavetable screen: a drawn waveform surface with the position readout above it.">
+        </div>
+      </figure>
+
+    </div>
+  </section>
+
+
+  <section class="chapter ch--seq" aria-labelledby="ch-seq-title">
+    <div class="chapter__grid grid">
+
+      <div class="chapter__head">
+        <p class="chapter__n">04 / 05</p>
+        <h2 class="chapter__title" id="ch-seq-title">Seq / Song</h2>
+        <p class="chapter__kicker">Pattern and arrangement</p>
+        <p class="chapter__lede">
+          Steps become a pattern; patterns become an arrangement. The same grid
+          read at two scales of time, which is where separate parts turn into
+          one piece.
+        </p>
+        <ul class="specs" style="margin-top: calc(3 * var(--rhythm))">
+          <li>Eight lanes, 1/16 resolution</li>
+          <li>Per-step velocity</li>
+          <li>Pattern sections A–D</li>
+        </ul>
+      </div>
+
+      <!-- interaction pass: a step playhead running the matrix -->
+      <figure class="demo demo--seq" data-demo="seq">
+        <p class="demo__mark">Step matrix</p>
+        <div class="demo__screen" style="--ar: 1000 / 1155">
+          <img class="demo__still" src="media/station/details/seq-grid.webp"
+               width="1000" height="1155" loading="lazy" decoding="async" fetchpriority="low"
+               alt="Station's step sequencer matrix: eight lanes of sixteen steps, some steps filled.">
+        </div>
+      </figure>
+
+      <figure class="demo demo--song" data-demo="song">
+        <p class="demo__mark">Arrangement · six lanes</p>
+        <div class="demo__screen" style="--ar: 1000 / 742">
+          <img class="demo__still" src="media/station/details/song-arrangement.webp"
+               width="1000" height="742" loading="lazy" decoding="async" fetchpriority="low"
+               alt="Station's arrangement grid: six lanes of clips laid out across bars.">
+        </div>
+      </figure>
+
+    </div>
+  </section>
+
+
+  <section class="chapter ch--mix" aria-labelledby="ch-mix-title">
+    <div class="chapter__grid grid">
+
+      <div class="chapter__head">
+        <p class="chapter__n">06</p>
+        <h2 class="chapter__title" id="ch-mix-title">Mix</h2>
+        <p class="chapter__kicker">Level and judgment</p>
+        <p class="chapter__lede">
+          Eight channels and a master. Deciding what stays loud turns out to be
+          a product decision as often as an audio one.
+        </p>
+        <ul class="specs" style="margin-top: calc(3 * var(--rhythm))">
+          <li>Eight channels</li>
+          <li>Live meters</li>
+          <li>Solo and mute per channel</li>
+        </ul>
+      </div>
+
+      <!-- interaction pass: the meters move.
+           Partner capture: mix-faders.png (the same bank, meters idle) -->
+      <figure class="demo" data-demo="mix">
+        <p class="demo__mark">Eight channels · meters live</p>
+        <div class="demo__screen" style="--ar: 1000 / 689">
+          <img class="demo__still" src="media/station/details/mix-channels.webp"
+               width="1000" height="689" loading="lazy" decoding="async" fetchpriority="low"
+               alt="Station's mixer: eight channel strips with faders and moving meters, and a master strip.">
+        </div>
+      </figure>
+
+    </div>
+  </section>
+
+</div>
 
 </main>
 
 <script src="scripts/laser.js" defer></script>
+<script src="scripts/grid-debug.js" defer></script>
 </body>
 </html>

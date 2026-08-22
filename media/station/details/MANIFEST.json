@@ -1,0 +1,166 @@
+{
+  "generatedFrom": "assets/station/current",
+  "sourceSetId": "2026-08-21-0c64ac8",
+  "coreTop": 0.2458888888888889,
+  "coreBottom": 0.8888888888888888,
+  "webpQuality": 0.86,
+  "tool": "tools/derive-media.mjs",
+  "files": [
+    {
+      "source": "details/wavetable-zola-x.png",
+      "sourceBytes": 96175,
+      "sourceSha256": "597ae82fbe45d71fe13d9b5e4091990196473c49e388365c8923249a137af688",
+      "sourcePx": {
+        "width": 1311,
+        "height": 507
+      },
+      "croppedY": [
+        0,
+        507
+      ],
+      "outputPx": {
+        "width": 1200,
+        "height": 464
+      },
+      "role": "ZOLA-X chapter still: the wavetable screen at rest. Partner: wavetable-zola-x-active.png.",
+      "cssFallback": "assets/station/current/details/wavetable-zola-x.png",
+      "outputs": [
+        {
+          "file": "zola-x-wavetable.webp",
+          "bytes": 21504,
+          "sha256": "3363a60819202faab376eb0749eaece489dd226fda8f34d024e96fcabde0e386"
+        }
+      ]
+    },
+    {
+      "source": "details/slice-markers.png",
+      "sourceBytes": 91327,
+      "sourceSha256": "7036f40910975d61a71bdbac38713f23e555fe7bd489aeb378c82ddfe8b11591",
+      "sourcePx": {
+        "width": 1245,
+        "height": 462
+      },
+      "croppedY": [
+        0,
+        462
+      ],
+      "outputPx": {
+        "width": 1200,
+        "height": 445
+      },
+      "role": "LASER chapter still: the waveform with gold cut markers. Partners: waveform-laser.png (uncut), waveform-playhead.png (playing).",
+      "cssFallback": "assets/station/current/details/slice-markers.png",
+      "outputs": [
+        {
+          "file": "laser-slices.webp",
+          "bytes": 18210,
+          "sha256": "6b6d69c89bea8e2cca0b9c63d94de9cacd123f280446b5b14fc89fa5aac83047"
+        }
+      ]
+    },
+    {
+      "source": "details/pads-grid-active.png",
+      "sourceBytes": 646155,
+      "sourceSha256": "90b0f1c1c52754da8cd03960ea3899a79b0160f446a5bc2086d28aef3835f9ad",
+      "sourcePx": {
+        "width": 1335,
+        "height": 1338
+      },
+      "croppedY": [
+        0,
+        1338
+      ],
+      "outputPx": {
+        "width": 1000,
+        "height": 1002
+      },
+      "role": "PADS chapter still: the 16-pad grid, three struck. Partner: pads-grid.png (at rest).",
+      "cssFallback": "assets/station/current/details/pads-grid-active.png",
+      "outputs": [
+        {
+          "file": "pads-grid.webp",
+          "bytes": 47654,
+          "sha256": "5255e4dd34225ea17fb185438a279f372707c570251f2fa546afc5d677d3c670"
+        }
+      ]
+    },
+    {
+      "source": "details/seq-grid.png",
+      "sourceBytes": 110704,
+      "sourceSha256": "d6a1c07242bebacb551cea9073cd2e6bf90ae78b9a332bf837cc11c0624795bd",
+      "sourcePx": {
+        "width": 1335,
+        "height": 1542
+      },
+      "croppedY": [
+        0,
+        1542
+      ],
+      "outputPx": {
+        "width": 1000,
+        "height": 1155
+      },
+      "role": "SEQ chapter still: the step matrix without app chrome.",
+      "cssFallback": "assets/station/current/details/seq-grid.png",
+      "outputs": [
+        {
+          "file": "seq-grid.webp",
+          "bytes": 19366,
+          "sha256": "c7f8dd51ad46cb027833d977a40dcdae5c95507fa2cce27fc07181c9a7f6d71b"
+        }
+      ]
+    },
+    {
+      "source": "details/mix-meters.png",
+      "sourceBytes": 184808,
+      "sourceSha256": "2081d1c69886f3bc34d937d0282cd9445427fcbed33ce5248c1f68d503147be4",
+      "sourcePx": {
+        "width": 1311,
+        "height": 903
+      },
+      "croppedY": [
+        0,
+        903
+      ],
+      "outputPx": {
+        "width": 1000,
+        "height": 689
+      },
+      "role": "MIX chapter still: the eight-channel bank, meters moving. Partner: mix-faders.png (idle).",
+      "cssFallback": "assets/station/current/details/mix-meters.png",
+      "outputs": [
+        {
+          "file": "mix-channels.webp",
+          "bytes": 24936,
+          "sha256": "893865e094b211a11e2ac1a08d6960e0dd45aa1ea8e6036567ccea16c51eb90e"
+        }
+      ]
+    },
+    {
+      "source": "details/song-arrangement.png",
+      "sourceBytes": 96248,
+      "sourceSha256": "d85b5bdd8cd7f2ba3d4d941c04d5a5a996b0f0fda049a57cb324ca1718509dcb",
+      "sourcePx": {
+        "width": 1245,
+        "height": 924
+      },
+      "croppedY": [
+        0,
+        924
+      ],
+      "outputPx": {
+        "width": 1000,
+        "height": 742
+      },
+      "role": "SONG chapter still: the arrangement grid, six lanes of clips.",
+      "cssFallback": "assets/station/current/details/song-arrangement.png",
+      "outputs": [
+        {
+          "file": "song-arrangement.webp",
+          "bytes": 13356,
+          "sha256": "a88cae7ccf7b8b6ce1b8a860100e1b120620ae0938bd1b3c37caedc8d63d8df5"
+        }
+      ]
+    }
+  ]
+}

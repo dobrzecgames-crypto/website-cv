@@ -32,6 +32,20 @@
 
   var calmQuery = window.matchMedia('(prefers-reduced-motion: reduce)');
 
+  /* --- development flags -------------------------------------------------
+     ?motion=off   freezes the motion layer, exactly the way the reduced-motion
+                   preference does. Layout work needs the scene to hold still.
+     ?state=<name> opens straight into a named state. ?state=released is the
+                   finished composition, which is how the static layout is
+                   judged on its own rather than at the end of a cut.
+     Neither does anything on a normal load, and neither is a design surface.
+     ------------------------------------------------------------------------ */
+
+  var flags = new URLSearchParams(window.location.search);
+  var frozen = flags.get('motion') === 'off';
+  if (frozen) root.classList.add('no-motion');
+  function calm() { return frozen || calmQuery.matches; }
+
   /* --- timeline --------------------------------------------------------- */
 
   var MOVED = {
@@ -123,7 +137,7 @@
     readyDeck();
     setBusy(true);
 
-    if (calmQuery.matches) {
+    if (calm()) {
       /* no travelling beam, no flash, no fan-out: the same arrangement,
          arrived at directly */
       say('released');
@@ -151,7 +165,7 @@
   }
 
   function restore() {
-    var t = calmQuery.matches ? CALM : MOVED;
+    var t = calm() ? CALM : MOVED;
     setBusy(true);
     cancelPending();
     stage.classList.remove('is-flash');
@@ -188,4 +202,12 @@
   };
   if (calmQuery.addEventListener) calmQuery.addEventListener('change', onCalmChange);
   else if (calmQuery.addListener) calmQuery.addListener(onCalmChange);
+
+  /* the dev entry point, applied last so it wins over the initial markup */
+  var wanted = flags.get('state');
+  if (wanted && ['intact', 'sliced', 'released'].indexOf(wanted) >= 0) {
+    readyDeck();
+    state(wanted);
+    say(wanted === 'released' ? 'released' : 'intact');
+  }
 }());
