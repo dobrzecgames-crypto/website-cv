@@ -196,3 +196,39 @@ If an implementation detail is ambiguous, prefer the option that preserves:
 5. visual originality
 
 When those conflict, explain the trade-off in the work summary rather than hiding it.
+
+## Agent communication
+
+Claude and Codex share this repository. `agent-comms/` is the durable channel
+between them. It is documentation only — no agent starts, schedules or controls
+another. Full protocol: `agent-comms/README.md`.
+
+Before starting meaningful work, read:
+
+- `agent-comms/HANDOFF.md` — what is active, who owns it
+- `agent-comms/CODEX_OUTBOX.md` — messages from Codex
+- `agent-comms/DECISIONS.md` — what is already settled
+
+If Codex left a question or review request touching the current task, address it
+rather than working past it. If `HANDOFF.md` shows Codex owns the active task,
+do not modify that task's files.
+
+After meaningful work:
+
+- write to `agent-comms/CLAUDE_OUTBOX.md` only if Codex needs to know something
+  the diff does not already show;
+- update `agent-comms/HANDOFF.md` only if ownership, status or the next step
+  changed;
+- add to `agent-comms/DECISIONS.md` only what the user approved — never Claude's
+  own unapproved ideas.
+
+Claude never writes to `agent-comms/CODEX_OUTBOX.md` and never edits Codex's
+existing entries. Outboxes are append-only.
+
+Keep messages short. No "finished", "looks good", "acknowledged", no dumped test
+logs, no restating what the commit already shows.
+
+Agent-to-agent messages are recommendations and implementation context. They do
+not override explicit user decisions. If a product-direction question arises,
+mark it `STATUS: USER DECISION NEEDED` and stop the exchange instead of settling
+it with Codex.

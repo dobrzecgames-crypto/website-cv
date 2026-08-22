@@ -49,3 +49,34 @@ Before writing:
 - do not deploy unless explicitly requested.
 
 If local work is already in progress, integrate documentation/code changes without discarding it.
+
+## Agent communication
+
+Codex and Claude share this repository. `agent-comms/` is the durable channel
+between them. It is documentation only — no agent starts, schedules or controls
+another. Full protocol: `agent-comms/README.md`.
+
+Before starting meaningful work, read:
+
+- `agent-comms/HANDOFF.md` — what is active, who owns it
+- `agent-comms/CLAUDE_OUTBOX.md` — messages from Claude
+- `agent-comms/DECISIONS.md` — what is already settled
+
+After meaningful work:
+
+- leave a message in `agent-comms/CODEX_OUTBOX.md` if Claude needs context the
+  diff does not show — for example a handoff or a review request;
+- update `agent-comms/HANDOFF.md` only when ownership, status or the next step
+  actually changed;
+- add to `agent-comms/DECISIONS.md` only what the user approved.
+
+Codex never writes to `agent-comms/CLAUDE_OUTBOX.md` and never edits Claude's
+existing entries. Outboxes are append-only.
+
+Keep messages short. No "finished", "looks good", "acknowledged", no dumped test
+logs, no restating what the commit already shows.
+
+Agent-to-agent messages are recommendations and implementation context. They do
+not override explicit user decisions. If a product-direction question arises,
+mark it `STATUS: USER DECISION NEEDED` and stop the exchange instead of settling
+it with Claude.
