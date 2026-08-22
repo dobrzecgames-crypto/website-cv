@@ -543,10 +543,17 @@ body::after {
 }
 
 @media (max-width: 560px) {
+  .stage { gap: 12px; padding: 16px var(--grid-margin); }
+  .masthead { flex-direction: column; gap: 11px; }
   .wordmark { font-size: clamp(26px, 8vw, 34px); }
   .tagline { margin-top: 9px; font-size: 9.5px; letter-spacing: .12em; }
   .readout { padding: 7px 12px; font-size: 9.5px; letter-spacing: .1em; }
   .trigger { padding: 14px 22px; gap: 14px; min-width: 0; width: 100%; letter-spacing: .2em; }
+  /* less room below, more room beside: the layers drift wider instead */
+  .chop--1 { --dxf: -.115; } .chop--2 { --dxf: -.05; }
+  .chop--3 { --dxf:  .045; } .chop--4 { --dxf:  .11; }
+  .chop--5 { --dxf: -.095; } .chop--6 { --dxf: -.025; }
+  .chop--7 { --dxf:  .07; }  .chop--8 { --dxf:  .13; }
 }
 
 /* coarse pointers: no hover affordance to lean on */
@@ -574,17 +581,7 @@ body::after {
 }
 
 /* ===========================================================================
-   THE HERO SHELL
-
-   Three bands: the strip, the composition, the control row. All three take
-   their horizontal edges from the same rail, so the wordmark, the machine and
-   the trigger stand on shared lines.
-
-   --chrome is everything in the stage that is not the composition: padding,
-   the strip, the two gaps and the control row. styles/station.css subtracts
-   it from the viewport height to decide how large the plate can be before it
-   has to scale as one object. It is measured against the real page, not
-   guessed; tools/measure-hero.mjs re-checks it.
+   DEALER HERO CANVAS
 
    GRID-EXCEPTION: this task is explicitly HERO-only. The checkpointed reading
    chapters below retain their existing 16-track placements until their own
@@ -596,25 +593,43 @@ body::after {
   --gutter: 16px;
   --hero-width: min(1328px, calc(100vw - 80px));
   --hero-rail: max(40px, calc((100vw - 1328px) / 2));
-  --chrome: 204px;
-  display: grid;
-  grid-template-rows: auto minmax(0, 1fr) auto;
-  gap: clamp(10px, 1.8vh, 20px);
-  min-height: 100svh;
-  padding: 24px var(--hero-rail) 20px;
+  /* Canonical geometry lives at 1000px tall. Below that, the same authored
+     spans and rows fit continuously into the real browser height. The cards
+     remain centred inside their grid spans, so scene fitting never invents a
+     second set of off-grid landing coordinates. */
+  --scene-fit: clamp(.72, calc((100svh - 160px) / 840px), 1);
+  display: block;
+  min-height: 720px;
+  height: max(100svh, 720px);
+  padding: 30px var(--hero-rail) 24px;
   overflow: hidden;
 }
 
-.stage .masthead { position: relative; z-index: 120; }
+.stage .masthead {
+  position: relative;
+  z-index: 120;
+  width: var(--hero-width);
+}
 
 .stage .theatre {
-  display: grid;
-  grid-template-columns: minmax(0, 1fr);
-  align-content: center;
+  position: absolute;
+  inset: 96px auto auto var(--hero-rail);
+  display: block;
+  width: var(--hero-width);
+  height: 780px;
   min-height: 0;
 }
 
-.stage .controls { position: relative; z-index: 130; padding: 0; }
+.stage .station { width: 100%; }
+
+.stage .controls {
+  position: absolute;
+  z-index: 130;
+  left: var(--hero-rail);
+  bottom: 24px;
+  width: var(--hero-width);
+  padding: 0;
+}
 
 [data-state="dealing"] .readout,
 [data-state="released"] .readout { color: var(--sand); border-color: rgba(185, 154, 98, .3); }
@@ -633,7 +648,7 @@ body::after {
   position: absolute;
   z-index: 140;
   left: 50%;
-  bottom: 26px;
+  bottom: 20px;
   display: grid;
   place-items: center;
   width: 32px;
@@ -668,11 +683,16 @@ body::after {
     --grid-cols: 8;
     --hero-width: calc(100vw - 64px);
     --hero-rail: 32px;
+    min-height: 768px;
+    height: max(100svh, 768px);
   }
+  .stage .theatre { top: 136px; height: 840px; }
   .stage .masthead__object { grid-column: 1 / span 4; }
   .stage .readout { grid-column: 6 / span 3; }
   .stage .trigger { grid-column: 1 / span 3; }
   .stage .hint { grid-column: 4 / span 5; }
+  [data-state="dealing"] .controls,
+  [data-state="released"] .controls { opacity: 0; visibility: hidden; }
 }
 
 @media (max-width: 767px) {
@@ -681,14 +701,21 @@ body::after {
     --gutter: 12px;
     --hero-width: calc(100vw - 40px);
     --hero-rail: 20px;
+    --scene-fit: 1;
+    min-height: 1490px;
+    height: 1490px;
     padding-top: 20px;
   }
+  .stage .theatre { top: 144px; height: 1320px; }
   .stage .masthead { row-gap: 12px; }
   .stage .masthead__object,
   .stage .readout { grid-column: 1 / span 4; }
   .stage .readout { grid-row: 2; justify-self: start; }
+  .stage .controls { bottom: auto; top: 552px; }
   .stage .trigger { grid-column: 1 / span 4; }
   .stage .hint { display: none; }
+  [data-state="dealing"] .controls,
+  [data-state="released"] .controls { opacity: 0; visibility: hidden; }
 }
 
 @media (prefers-reduced-motion: reduce) {
@@ -697,8 +724,8 @@ body::after {
   /* Development/review escape hatch: ?motion=on lets the authored dealer be
      inspected on a machine whose OS preference is reduced motion. Normal page
      loads continue to respect that preference. */
-  .force-motion .card.is-out { animation-duration: var(--flight) !important; }
-  .force-motion .card.is-back { animation-duration: 260ms !important; }
+  .force-motion .plate.is-launching { animation-duration: var(--flight) !important; }
+  .force-motion .plate.is-returning { animation-duration: 280ms !important; }
   .force-motion [data-state="slicing"] .beam { display: block; animation-duration: var(--t-sweep) !important; }
   .force-motion .flash { display: block; animation-duration: var(--t-flash) !important; }
   .force-motion .scroll-cue { transition-duration: 180ms !important; }

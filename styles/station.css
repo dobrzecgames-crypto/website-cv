@@ -1,112 +1,108 @@
 /* ===========================================================================
-   website — Station HERO: the machine opened, and dealt
+   website — Station dealer HERO
 
-   One closed instrument. Press LASER IT and the same cut Station performs on a
-   sample is performed on Station itself: one flash, the machine delaminates
-   along its own seams, and everything it was holding goes across the table at
-   once, fast, the way a dealer throws.
+   The chassis and the deck are separate physical layers. The chassis keeps
+   only the controls above the mode slot and the foot below it. The six mode
+   cards are the content that completes Station at rest; those same DOM nodes
+   leave the slot, so an outgoing mode cannot remain duplicated in the center.
 
-   Fourteen cards. Each one is ONE thing — an instrument, a grid, a display, a
-   control group — cut out of a real capture on that panel's own boundary. Not
-   the same chassis fourteen times with a different tab open: the chassis is
-   cut away, and several of these never appear on screen together in the real
-   app. That is the whole argument the scene is making.
-
-   The machine does not survive the cut. Its eight bands separate and go while
-   the first cards are still in the air, so nothing is left standing in the
-   middle of its own contents.
-
-   MECHANISM
-
-     .slice   eight bands, each a full copy of the capture windowed to its own
-              slice of it. Untouched they tile the frame exactly and read as
-              one screen.
-     .card    positioned at its landing rectangle and animated FROM the
-              machine, never towards a computed target: the flight is a
-              transform back to identity, so the frame that was solved is the
-              frame the browser paints and it cannot drift.
-
-   GEOMETRY
-
-   Each breakpoint family owns a canonical canvas and its own deal —
-   GRID_BIBLE.md section 14 — and every authored number is in that canvas's
-   units. --u turns one canonical unit into real pixels, so the whole table
-   scales as one plate rather than reflowing into a second composition.
-
-   Desktop canvas is 1328 x 800: the binding 12-column content width at 1440,
-   and 50 rows of the 16px lattice. Station stands dead centre of it, which is
-   also the point every card comes out of.
-
-   The frozen frame, with measured validation, is GRID_BIBLE.md section 19.
+   Canonical 1440 geometry follows GRID_BIBLE.md:
+     canvas 1440 · rails 56 · 12 × 96 columns · 16 gutters
+     source deck c5 / span 3 · final widths S2 / M3 / L4
    ========================================================================== */
 
 .station {
-  --canvas-w: 1328;
-  --canvas-h: 800;
-  --u: calc(100cqw / var(--canvas-w));
-
-  /* --- the machine ------------------------------------------------------ */
-  --ar-frame: 1.9955654;      /* 900 / 451 */
-  --frame-x: 504;             /* centred, so the deal comes from the true centre */
-  --frame-y: 80;
-  --frame-w-c: 320;           /* span 3 */
-  --frame-h-c: 638.58;
-  --deal-x: 664;              /* the point everything comes out of */
-  --deal-y: 399;
-
-  /* the chassis bands window a full copy of the capture, so they need these
-     two as resolved lengths rather than canonical numbers */
-  --frame-w: calc(var(--frame-w-c) * var(--u));
-  --frame-h: calc(var(--frame-h-c) * var(--u));
-
-  /* --- the deal --------------------------------------------------------- */
-  --hold: .30;                /* how big a card is while still inside */
-  --ease-deal: cubic-bezier(.16, .72, .19, 1);
-
-  position: relative;
-  container-type: inline-size;
-  width: max(320px, min(100%, calc((100svh - var(--chrome, 200px)) * var(--canvas-w) / var(--canvas-h))));
-  aspect-ratio: var(--canvas-w) / var(--canvas-h);
-  margin-inline: auto;
+  --ar-frame: 1.995565;       /* 900 / 451 */
+  --ar-plate: 1.283333;       /* derived 720 × 924 core crop */
+  --core-c: 5;
+  --core-s: 3;
+  --source-nudge: calc(var(--cs) / 2);
+  --object-y: 32px;
+  --frame-w: calc(var(--core-s) * var(--cs) - var(--gutter));
+  --frame-h: calc(var(--frame-w) * var(--ar-frame));
+  --core-y: calc(var(--frame-h) * .24589);
+  --core-h: calc(var(--frame-h) * .64300);
+  --source-x: calc((var(--core-c) - 1) * var(--cs) + var(--source-nudge));
+  --source-y: calc(var(--object-y) + var(--core-y));
+  --source-w: var(--frame-w);
+  --source-h: calc(var(--source-w) * var(--ar-plate));
+  --source-fit-x: calc((var(--source-w) - var(--source-w) * var(--scene-fit)) / 2);
+  --source-fit-y: calc(var(--core-y) * (var(--scene-fit) - 1));
+  --empty-fit: calc(var(--scene-fit) * .56);
+  --empty-shift-x: calc((var(--source-w) - var(--source-w) * var(--empty-fit)) / 2);
+  --gap: calc(var(--frame-h) * .024);
+  height: 780px;
 }
 
-/* ==========================================================================
-   THE MACHINE
-   ========================================================================== */
-
+/* The full instrument is centered before the cut. Its top and foot stay as
+   chassis after the cards leave; the dark bay between them is the empty slot. */
 .station .object {
-  position: absolute;
-  left: calc(var(--frame-x) * var(--u));
-  top: calc(var(--frame-y) * var(--u));
-  width: var(--frame-w);
-  height: var(--frame-h);
-  z-index: 10;
-  margin: 0;
+  --c: var(--core-c);
+  --s: var(--core-s);
+  --py: var(--object-y);
+  --ar: var(--ar-frame);
+  --nudge: var(--source-nudge);
+  z-index: 20;
+  opacity: 1;
+  transform: translate3d(var(--source-fit-x), 0, 0) scale(var(--scene-fit));
+  transform-origin: 0 0;
+  transition: transform 140ms cubic-bezier(.2, .9, .25, 1), opacity 140ms ease;
 }
 
-/* The bands come apart along the seams the beam just cut, and go. They are on
-   their way out before the third card lands, so the machine is never left
-   standing empty in the middle of its own contents. */
-[data-state="dealing"] .slice,
-[data-state="released"] .slice {
+.station .frame::before {
+  content: "";
+  position: absolute;
+  z-index: -1;
+  left: 0;
+  top: var(--core-y);
+  width: 100%;
+  height: var(--core-h);
+  border-inline: 1px solid rgba(90, 82, 96, .24);
+  background:
+    linear-gradient(90deg, rgba(255,255,255,.025), transparent 8% 92%, rgba(255,255,255,.02)),
+    linear-gradient(180deg, #06060a, #0a0910 58%, #06060a);
+  box-shadow: inset 0 12px 24px rgba(0,0,0,.52), inset 0 -10px 22px rgba(0,0,0,.4);
+  transform-origin: 50% 50%;
+  transition: transform 140ms cubic-bezier(.2, .9, .25, 1), opacity 140ms ease;
+}
+
+.slice--foot { --t: .8888889; --h: .1111111; }
+
+/* The old cut spread is intentionally suppressed here. LASER IT is now the
+   fast dealer prelude; exploding the chassis first would reintroduce a second
+   visual event and obscure the single-slot mechanism. */
+[data-state="sliced"] .rig,
+[data-state="dealing"] .rig,
+[data-state="released"] .rig,
+[data-state="closing"] .rig { transform: none; }
+
+[data-state="dealing"] .slice--chassis,
+[data-state="released"] .slice--chassis { opacity: .54; }
+
+/* Once MIX clears the source, the chassis resolves into evidence rather than
+   a second hero object. It keeps the same physical bands and central seam,
+   but settles to a quiet, ruler-centred remnant before the cue appears. */
+[data-state="released"] .station .object {
+  opacity: .34;
   transform:
-    translate3d(var(--dx), calc((var(--i) - 4.5) * 10px), var(--dz))
-    rotate(var(--rz));
-  opacity: 0;
-  transition:
-    transform 460ms var(--ease-open) calc((var(--i) - 1) * 14ms),
-    opacity 260ms ease calc(60ms + (var(--i) - 1) * 20ms);
+    translate3d(var(--empty-shift-x), calc(96px * var(--scene-fit)), 0)
+    scale(var(--empty-fit));
+}
+
+[data-state="released"] .station .frame::before {
+  opacity: .42;
+  transform: scaleY(.32);
 }
 
 [data-state="dealing"] .cast,
-[data-state="released"] .cast { opacity: 0 }
+[data-state="released"] .cast {
+  opacity: .18;
+  transform: translate(-50%, -5%) scale(1.04, .62);
+}
 
-[data-state="dealing"] .station .object,
-[data-state="released"] .station .object { pointer-events: none }
-
-/* ==========================================================================
-   THE CARDS
-   ========================================================================== */
+/* --------------------------------------------------------------------------
+   ONE CENTRAL DECK
+   -------------------------------------------------------------------------- */
 
 .deck {
   list-style: none;
@@ -116,197 +112,237 @@
   margin: 0;
   padding: 0;
   pointer-events: none;
+  isolation: isolate;
 }
 
-.card {
+.plate {
+  --span-w: calc(var(--s) * var(--cs) - var(--gutter));
+  --final-w: calc(var(--span-w) * var(--scene-fit));
+  --deal-scale: calc(var(--final-w) / var(--source-w));
+  --target-x: calc(
+    (var(--c) - 1) * var(--cs) + (var(--span-w) - var(--final-w)) / 2
+  );
+  --target-y: calc(var(--py) * var(--scene-fit));
+  --tx: calc(var(--target-x) - var(--source-x));
+  --ty: calc(var(--target-y) - var(--source-y));
+  --mid-x: calc(var(--source-fit-x) + (var(--tx) - var(--source-fit-x)) * .76 + var(--bend-x));
+  --mid-y: calc(var(--source-fit-y) + (var(--ty) - var(--source-fit-y)) * .72 + var(--bend-y));
+  --mid-scale: calc(var(--scene-fit) + (var(--deal-scale) - var(--scene-fit)) * .72);
+
   position: absolute;
-  left: calc(var(--x) * var(--u));
-  top: calc(var(--y) * var(--u));
-  width: calc(var(--w) * var(--u));
-  aspect-ratio: var(--ar);
-  z-index: calc(20 + var(--n));
-  opacity: 0;
-  transform-origin: 50% 50%;
-  will-change: transform, opacity;
-
-  /* the vector from this card's own centre back to the machine */
-  --card-cx: calc(var(--x) + var(--w) / 2);
-  --card-cy: calc(var(--y) + var(--w) / var(--ar) / 2);
-  --dx: calc((var(--deal-x) - var(--card-cx)) * var(--u));
-  --dy: calc((var(--deal-y) - var(--card-cy)) * var(--u));
-
-  transform: translate3d(var(--dx), var(--dy), 0) scale(var(--hold));
+  left: var(--source-x);
+  top: var(--source-y);
+  width: var(--source-w);
+  height: var(--source-h);
+  z-index: calc(70 - var(--n));
+  opacity: 1;
+  visibility: visible;
+  transform: translate3d(var(--source-fit-x), var(--source-fit-y), 0) scale(var(--scene-fit)) rotate(0deg);
+  transform-origin: 0 0;
+  will-change: transform;
 }
 
-.card__face {
+/* GRID-EXCEPTION: the 1px inset is a raster containment guard, not authored
+   layout geometry. It prevents a lower transparent WebP edge from peeking
+   outside the active card while preserving the same six physical DOM nodes. */
+.plate:not(:first-child):not(.is-launching):not(.is-landed):not(.is-returning) {
+  clip-path: inset(1px);
+}
+
+.plate__face {
   position: absolute;
   inset: 0;
+  overflow: hidden;
   background-color: var(--ink-1);
   background-repeat: no-repeat;
   background-position: 0 0;
   background-size: 100% 100%;
-  /* a card lying on a table, not an image pasted onto one */
-  box-shadow:
-    inset 0 1px 0 rgba(255, 255, 255, .05),
-    0 2px 3px rgba(0, 0, 0, .5),
-    0 16px 34px rgba(0, 0, 0, .46);
+  box-shadow: 0 1px 0 rgba(255,255,255,.04), 0 16px 32px rgba(0,0,0,.22);
 }
 
-.card.is-out { animation: deal var(--flight) var(--ease-deal) both }
-.card.is-landed { opacity: 1; transform: none; will-change: auto }
+/* LASER is required for first paint; the five lower cards are fetched at idle
+   or at the first sign of intent by scripts/laser.js. */
+.plate--laser .plate__face {
+  background-image: url("../media/station/final/station-mode-laser-loaded.webp");
+}
 
-/* Out of the machine, a short arc, then square on the table. The rotation
-   lives only in the flight: a dealer's hand is loose, the table is not. */
-@keyframes deal {
+.plate--laser .plate__face::after {
+  content: "";
+  position: absolute;
+  inset: 0;
+  opacity: 0;
+  background: url("../media/station/final/station-mode-laser.webp") 0 0 / 100% 100% no-repeat;
+  transition: opacity 70ms linear;
+}
+
+[data-state="slicing"] .plate--laser .plate__face::after,
+[data-state="dealing"] .plate--laser .plate__face::after,
+[data-state="released"] .plate--laser .plate__face::after { opacity: 1; }
+
+.deck-ready .plate--pads  .plate__face { background-image: url("../media/station/final/station-mode-pads.webp"); }
+.deck-ready .plate--synth .plate__face { background-image: url("../media/station/final/station-mode-synth.webp"); }
+.deck-ready .plate--seq   .plate__face { background-image: url("../media/station/final/station-mode-seq.webp"); }
+.deck-ready .plate--song  .plate__face { background-image: url("../media/station/final/station-mode-song.webp"); }
+.deck-ready .plate--mix   .plate__face { background-image: url("../media/station/final/station-mode-mix.webp"); }
+
+/* Once a card leaves the chassis, dissolve its unused lower panel exactly as
+   the checkpointed component treatment did. Inside the slot it stays solid so
+   six equal physical layers cover one another without seams. */
+.plate.is-launching .plate__face,
+.plate.is-landed .plate__face {
+  -webkit-mask-image: linear-gradient(to bottom, #000 0 86%, transparent 100%);
+          mask-image: linear-gradient(to bottom, #000 0 86%, transparent 100%);
+}
+
+.plate.is-launching {
+  z-index: calc(80 + var(--n));
+  animation: dealer-flight var(--flight) cubic-bezier(.18, .76, .2, 1) both;
+}
+
+.plate.is-landed {
+  z-index: var(--z);
+  transform: translate3d(var(--tx), var(--ty), 0) scale(var(--deal-scale)) rotate(var(--r));
+  will-change: auto;
+}
+
+.plate.is-returning {
+  z-index: calc(90 + var(--n));
+  animation: dealer-return 280ms cubic-bezier(.42, 0, .55, 1) both;
+}
+
+@keyframes dealer-flight {
   0% {
-    opacity: 0;
-    transform: translate3d(var(--dx), var(--dy), 0) scale(var(--hold)) rotate(var(--spin));
-  }
-  16% { opacity: 1 }
-  58% {
     transform:
-      translate3d(calc(var(--dx) * .30 + var(--bend-x) * var(--u)),
-                  calc(var(--dy) * .30 + var(--bend-y) * var(--u)), 0)
-      scale(.86)
-      rotate(calc(var(--spin) * .38));
+      translate3d(var(--source-fit-x), var(--source-fit-y), 0)
+      scale(var(--scene-fit))
+      rotate(0deg);
   }
-  100% { opacity: 1; transform: none }
+  68% {
+    transform:
+      translate3d(var(--mid-x), var(--mid-y), 0)
+      scale(var(--mid-scale))
+      rotate(var(--mid-r));
+  }
+  100% { transform: translate3d(var(--tx), var(--ty), 0) scale(var(--deal-scale)) rotate(var(--r)); }
 }
 
-.card.is-back { animation: undeal 260ms cubic-bezier(.5, 0, .6, 1) both }
-@keyframes undeal {
-  from { opacity: 1; transform: none }
-  to   { opacity: 0; transform: translate3d(var(--dx), var(--dy), 0) scale(var(--hold)) }
+@keyframes dealer-return {
+  from { transform: translate3d(var(--tx), var(--ty), 0) scale(var(--deal-scale)) rotate(var(--r)); }
+  to   {
+    transform:
+      translate3d(var(--source-fit-x), var(--source-fit-y), 0)
+      scale(var(--scene-fit))
+      rotate(0deg);
+  }
 }
 
-/* ==========================================================================
-   THE DESKTOP DEAL — canonical 1328 x 800
+/* --------------------------------------------------------------------------
+   LABELS — inherited visual voice, attached to the moving physical card
+   -------------------------------------------------------------------------- */
 
-   --x/--y  landing rectangle, canonical units, origin at the canvas top-left
-   --w      landing width, always W(n) = 112n - 16
-   --ar     the derived file's own aspect; the height follows from it
-   --n      launch order, carried on the element, and the stacking order
-   --spin   how loose the throw is; it is zero by the time the card lands
-   ========================================================================== */
+.tag {
+  position: absolute;
+  left: 0;
+  bottom: 100%;
+  margin: 0 0 10px;
+  padding-bottom: 6px;
+  border-bottom: 1px solid rgba(185, 154, 98, .35);
+  white-space: nowrap;
+  opacity: 0;
+}
 
-.card--laser-waveform   { --x:    0; --y:  16; --w: 544; --ar: 2.9013; --flight: 380ms; --spin: -5deg; --bend-x: -26; --bend-y: -34 }
-.card--synth-zola-x     { --x:  672; --y: 400; --w: 320; --ar:  .8388; --flight: 400ms; --spin:  4deg; --bend-x:  30; --bend-y:  26 }
-.card--pads-grid        { --x:  224; --y: 288; --w: 208; --ar: 1.0256; --flight: 340ms; --spin: -6deg; --bend-x: -34; --bend-y:  14 }
-.card--mix-channels     { --x: 1120; --y: 304; --w: 320; --ar: 1.2379; --flight: 400ms; --spin:  5deg; --bend-x:  36; --bend-y:  -8 }
-.card--seq-matrix       { --x:  784; --y: 128; --w: 208; --ar:  .9306; --flight: 340ms; --spin:  6deg; --bend-x:  22; --bend-y: -30 }
-.card--synth-bassic     { --x: 1008; --y:  48; --w: 208; --ar:  .8046; --flight: 400ms; --spin:  5deg; --bend-x:  32; --bend-y: -28 }
-.card--laser-slices     { --x:  336; --y: 624; --w: 320; --ar: 1.9753; --flight: 360ms; --spin: -4deg; --bend-x: -18; --bend-y:  32 }
-.card--synth-monogorg   { --x:    0; --y: 432; --w: 208; --ar:  .8157; --flight: 380ms; --spin: -6deg; --bend-x: -36; --bend-y:  18 }
-.card--song-arrangement { --x: 1008; --y: 592; --w: 208; --ar: 1.2877; --flight: 380ms; --spin:  5deg; --bend-x:  30; --bend-y:  28 }
-.card--synth-drum       { --x:  448; --y: 352; --w: 208; --ar: 1.0777; --flight: 320ms; --spin: -3deg; --bend-x: -14; --bend-y:  24 }
-.card--synth-picker     { --x:  560; --y:  64; --w: 208; --ar:  .9043; --flight: 340ms; --spin:  4deg; --bend-x:   8; --bend-y: -32 }
-.card--laser-source     { --x:  112; --y: 688; --w: 208; --ar: 2.4060; --flight: 360ms; --spin: -5deg; --bend-x: -28; --bend-y:  30 }
-.card--laser-cut        { --x: -112; --y: 224; --w: 320; --ar: 4.7473; --flight: 340ms; --spin: -4deg; --bend-x: -38; --bend-y: -12 }
-.card--mix-bus          { --x: 1120; --y:   0; --w: 320; --ar: 7.6190; --flight: 320ms; --spin:  4deg; --bend-x:  34; --bend-y: -26 }
+.tag__n { display: block; font-size: 9px; letter-spacing: .22em; color: var(--sand-low); }
+.tag__name {
+  display: block;
+  margin-top: 3px;
+  font-family: var(--sans);
+  font-size: 14px;
+  font-weight: 300;
+  letter-spacing: .18em;
+  text-transform: uppercase;
+  color: var(--sand-mid);
+}
 
-/* The art. Everything is fetched at idle or at the first sign of intent —
-   scripts/laser.js — so none of it is in the way of first paint. */
-.deck-ready .card--laser-waveform   .card__face { background-image: url("../media/station/cards/laser-waveform.webp") }
-.deck-ready .card--laser-cut        .card__face { background-image: url("../media/station/cards/laser-cut.webp") }
-.deck-ready .card--laser-slices     .card__face { background-image: url("../media/station/cards/laser-slices.webp") }
-.deck-ready .card--laser-source     .card__face { background-image: url("../media/station/cards/laser-source.webp") }
-.deck-ready .card--pads-grid        .card__face { background-image: url("../media/station/cards/pads-grid.webp") }
-.deck-ready .card--synth-picker     .card__face { background-image: url("../media/station/cards/synth-picker.webp") }
-.deck-ready .card--synth-zola-x     .card__face { background-image: url("../media/station/cards/synth-zola-x.webp") }
-.deck-ready .card--synth-bassic     .card__face { background-image: url("../media/station/cards/synth-bassic.webp") }
-.deck-ready .card--synth-monogorg   .card__face { background-image: url("../media/station/cards/synth-monogorg.webp") }
-.deck-ready .card--synth-drum       .card__face { background-image: url("../media/station/cards/synth-drum.webp") }
-.deck-ready .card--seq-matrix       .card__face { background-image: url("../media/station/cards/seq-matrix.webp") }
-.deck-ready .card--song-arrangement .card__face { background-image: url("../media/station/cards/song-arrangement.webp") }
-.deck-ready .card--mix-channels     .card__face { background-image: url("../media/station/cards/mix-channels.webp") }
-.deck-ready .card--mix-bus          .card__face { background-image: url("../media/station/cards/mix-bus.webp") }
+.plate--laser .tag { border-bottom-color: var(--gold); }
+.plate--laser .tag__name { font-size: 17px; color: var(--sand); }
 
-/* ==========================================================================
-   TABLET — 768 to 1199
+.tag--below {
+  top: 100%; bottom: auto; margin: 10px 0 0; padding: 6px 0 0;
+  border-top: 1px solid rgba(185, 154, 98, .35); border-bottom: 0;
+}
+.tag--before { left: auto; right: 100%; top: 0; bottom: auto; margin: 0 14px 0 0; text-align: right; }
+.tag--after  { left: 100%; top: 0; bottom: auto; margin: 0 0 0 14px; }
+.tag--inside {
+  top: 16px;
+  bottom: auto;
+  left: 16px;
+  margin: 0;
+  padding: 6px 8px;
+  border: 1px solid rgba(185, 154, 98, .24);
+  background: rgba(7, 7, 11, .72);
+}
 
-   Its own canvas and its own deal. The table is narrower and taller, so the
-   throw runs down it rather than across.
-   ========================================================================== */
+.plate.is-launching .tag {
+  animation: dealer-tag-in calc(var(--flight) * .42) ease calc(var(--flight) * .48) both;
+}
+.plate.is-landed .tag { opacity: 1; }
+@keyframes dealer-tag-in { from { opacity: 0 } to { opacity: 1 } }
+
+/* --------------------------------------------------------------------------
+   BREAKPOINT-SPECIFIC LANDING MAPS
+
+   Desktop is the measured canonical contract. Tablet and mobile are authored
+   recompositions; they do not proportionally shrink the 1440 coordinates.
+   -------------------------------------------------------------------------- */
+
+@media (min-width: 1200px) and (max-width: 1439px) {
+  .station { height: 760px; --object-y: 40px; }
+}
 
 @media (min-width: 768px) and (max-width: 1199px) {
-  .station {
-    --canvas-w: 960;
-    --canvas-h: 1320;
-    /* 8 columns, step 122, W(n) = 122n - 16, rails 0/122/.../854 */
-    --frame-x: 330;
-    --frame-y: 210;
-    --frame-w-c: 300;
-    --frame-h-c: 598.67;
-    --deal-x: 480;
-    --deal-y: 509;
-    width: 100%;
-  }
-
-  .card--laser-waveform   { --x:   0; --y:    0; --w: 594 }
-  .card--mix-bus          { --x: 610; --y:   32; --w: 350 }
-  .card--synth-bassic     { --x: 732; --y:  128; --w: 228 }
-  .card--seq-matrix       { --x:   0; --y:  253; --w: 228 }
-  .card--laser-slices     { --x: 244; --y:  253; --w: 228 }
-  .card--laser-cut        { --x: 244; --y:  416; --w: 350 }
-  .card--pads-grid        { --x: 732; --y:  459; --w: 228 }
-  .card--mix-channels     { --x: 244; --y:  538; --w: 350 }
-  .card--synth-monogorg   { --x:   0; --y:  546; --w: 228 }
-  .card--synth-zola-x     { --x: 610; --y:  729; --w: 350 }
-  .card--synth-drum       { --x: 244; --y:  869; --w: 228 }
-  .card--synth-picker     { --x:   0; --y:  874; --w: 228 }
-  .card--song-arrangement { --x: 244; --y: 1105; --w: 228 }
-  .card--laser-source     { --x:   0; --y: 1150; --w: 228 }
+  .station { --core-c: 4; --core-s: 2; --source-nudge: 0px; --object-y: 72px; height: 840px; }
+  .plate--pads  { --c: 4 !important; --s: 2 !important; --py: 0px !important; }
+  .plate--synth { --c: 1 !important; --s: 3 !important; --py: 80px !important; }
+  .plate--mix   { --c: 7 !important; --s: 2 !important; --py: 48px !important; }
+  .plate--laser { --c: 6 !important; --s: 3 !important; --py: 384px !important; }
+  .plate--seq   { --c: 4 !important; --s: 2 !important; --py: 328px !important; }
+  .plate--song  { --c: 2 !important; --s: 2 !important; --py: 544px !important; }
 }
-
-/* ==========================================================================
-   MOBILE — under 768
-
-   The table is a column. Station opens near the top and the cards fall down
-   the page, alternating which rail they hold, two abreast where two fit.
-   ========================================================================== */
 
 @media (max-width: 767px) {
-  .station {
-    --canvas-w: 350;
-    --canvas-h: 1560;
-    /* 4 columns, step 90.5, W(n) = 90.5n - 12, rails 0/90.5/181/271.5 */
-    --frame-x: 60;
-    --frame-y: 40;
-    --frame-w-c: 230;
-    --frame-h-c: 458.98;
-    --deal-x: 175;
-    --deal-y: 269;
-    --hold: .34;
-    width: 100%;
+  .station { --core-c: 2; --core-s: 2; --source-nudge: 0px; --object-y: 48px; height: 1320px; }
+  .plate--pads  { --c: 1 !important; --s: 2 !important; --py: 32px !important; }
+  .plate--synth { --c: 1 !important; --s: 3 !important; --py: 384px !important; }
+  .plate--mix   { --c: 3 !important; --s: 2 !important; --py: 144px !important; }
+  .plate--laser { --c: 3 !important; --s: 2 !important; --py: 944px !important; }
+  .plate--seq   { --c: 3 !important; --s: 2 !important; --py: 672px !important; }
+  .plate--song  { --c: 1 !important; --s: 2 !important; --py: 800px !important; }
+  .tag,
+  .tag--before,
+  .tag--after,
+  .tag--below,
+  .tag--inside {
+    top: 12px;
+    right: auto;
+    bottom: auto;
+    left: 12px;
+    margin: 0;
+    padding: 6px 8px;
+    border: 1px solid rgba(185, 154, 98, .24);
+    background: rgba(7, 7, 11, .72);
+    text-align: left;
   }
-
-  .card--laser-waveform   { --x:   0; --y:    0; --w: 350 }
-  .card--laser-cut        { --x:   0; --y:  145; --w: 350 }
-  .card--laser-slices     { --x:   0; --y:  243; --w: 259 }
-  .card--pads-grid        { --x:   0; --y:  398; --w: 169 }
-  .card--laser-source     { --x: 181; --y:  398; --w: 169 }
-  .card--synth-picker     { --x: 181; --y:  492; --w: 169 }
-  .card--synth-zola-x     { --x:   0; --y:  587; --w: 169 }
-  .card--synth-bassic     { --x: 181; --y:  703; --w: 169 }
-  .card--synth-monogorg   { --x:   0; --y:  812; --w: 169 }
-  .card--synth-drum       { --x: 181; --y:  937; --w: 169 }
-  .card--seq-matrix       { --x:   0; --y: 1043; --w: 169 }
-  .card--song-arrangement { --x: 181; --y: 1118; --w: 169 }
-  .card--mix-channels     { --x:   0; --y: 1273; --w: 259 }
-  .card--mix-bus          { --x:   0; --y: 1506; --w: 350 }
 }
-
-/* ==========================================================================
-   REDUCED MOTION — the same table, arrived at without the throw
-   ========================================================================== */
 
 @media (prefers-reduced-motion: reduce) {
-  html:not(.force-motion) .card { animation: none !important }
-  html:not(.force-motion) .card.is-landed,
-  html:not(.force-motion) [data-state="dealing"] .card,
-  html:not(.force-motion) [data-state="released"] .card { opacity: 1; transform: none }
-  html:not(.force-motion) [data-state="dealing"] .slice,
-  html:not(.force-motion) [data-state="released"] .slice { transition-duration: 200ms }
+  html:not(.force-motion) .plate { animation: none !important; }
+  html:not(.force-motion) [data-state="released"] .plate,
+  html:not(.force-motion) [data-state="dealing"] .plate {
+    z-index: var(--z);
+    transform: translate3d(var(--tx), var(--ty), 0) scale(var(--deal-scale)) rotate(var(--r));
+  }
+  html:not(.force-motion) [data-state="released"] .tag,
+  html:not(.force-motion) [data-state="dealing"] .tag { opacity: 1; }
 }
 
-.no-motion .card { animation: none !important }
+.no-motion .plate { animation: none !important; }

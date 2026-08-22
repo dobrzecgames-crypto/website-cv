@@ -1,16 +1,14 @@
 /* ===========================================================================
-   LASER IT — one machine, one cut, fourteen cards on the table.
+   LASER IT — one chassis, one six-card deck, one fast deal.
 
      intact -> arming -> slicing -> dealing -> released
-                                                 |
-                                            closing -> intact
+                                                |
+                                           closing -> intact
 
-   CSS owns all geometry: where every card lands, how big it is, and the arc it
-   takes. JS owns narrative state and the clock, nothing else.
-
-   The deal is deliberately faster than a card can be read. Nobody is meant to
-   study the table on the way past — the impression to leave is how much came
-   out of one object, and that only lands if it happens at once.
+   CSS owns geometry and each trajectory. JS owns only narrative state and
+   the launch clock. Every departing card is the exact node that occupied the
+   central slot; revealing the next card is therefore a consequence of motion,
+   not a screenshot swap or a duplicate appearing elsewhere.
    ========================================================================== */
 
 (function () {
@@ -22,7 +20,7 @@
   var deck = document.getElementById('deck');
   if (!stage || !trigger || !deck) return;
 
-  var cards = Array.prototype.slice.call(deck.querySelectorAll('.card'));
+  var cards = Array.prototype.slice.call(deck.querySelectorAll('.plate'));
   var label = document.getElementById('triggerLabel');
   var meta = document.getElementById('triggerMeta');
   var readout = document.getElementById('readoutText');
@@ -39,37 +37,47 @@
   if (audit) stage.dataset.audit = '[]';
   function calm() { return frozen || (!forcedMotion && calmQuery.matches); }
 
-  function mark(event, card) {
+  function mark(event, mode) {
     if (!audit) return;
-    audit.push({ event: event, card: card || null, at: Math.round(performance.now() - runStart) });
+    audit.push({ event: event, mode: mode || null, at: Math.round(performance.now() - runStart) });
     stage.dataset.audit = JSON.stringify(audit);
   }
 
-  /* Fourteen launches inside 500ms after a 160ms prelude, flights of 320-400ms.
-     The table is complete a touch under a second after the flash; the cue
-     follows 160ms behind the last card. GRID_BIBLE.md section 11. */
+  /* Six starts in 500ms; the final MIX settle is 950ms after the first
+     launch. Including the 160ms LASER prelude, the visible sequence resolves
+     at 1110ms. The cue follows 160ms later. */
   var CLOCK = {
     arm: 50,
     sweep: 110,
-    interval: 38,
+    interval: 100,
     cueDelay: 160,
-    restore: 300
+    restore: 280
   };
 
   var COPY = {
     intact: {
       readout: 'Source loaded · 1 slice',
       label: 'Laser it',
-      meta: 'open it up',
-      hint: 'One instrument. Cut it open and see what it is holding.'
+      meta: 'deal 6',
+      hint: 'One pass. Six modes, all held in the same central slot.'
     },
-    cutting: { readout: 'Cutting', label: 'Cutting', meta: '···', hint: '' },
-    dealing: { readout: 'Dealing', label: 'Dealing', meta: 'bach · bach · bach', hint: '' },
+    cutting: {
+      readout: 'Cutting',
+      label: 'Cutting',
+      meta: '···',
+      hint: ''
+    },
+    dealing: {
+      readout: 'Dealing · 6 modes',
+      label: 'Dealing',
+      meta: 'bach · bach',
+      hint: ''
+    },
     released: {
-      readout: '14 cards · one machine',
-      label: 'Put it back',
-      meta: 'close it up',
-      hint: 'Every one of these came out of the same tab.'
+      readout: '6 modes · slot empty',
+      label: 'Replay',
+      meta: 'deal again',
+      hint: 'Six modes left one chassis. The central slot is empty.'
     }
   };
 
@@ -96,18 +104,17 @@
   }
   function state(name) { stage.dataset.state = name; }
 
-  /* The cards are worth 156 KB between them and none of them is on screen
-     before the click, so they are fetched at idle — or the moment the pointer
-     reaches the trigger, which is the safety net for an immediate press. */
+  /* Load the five cards under LASER before they are needed. They are small
+     derived WebP assets; intent is the safety net for an immediate click. */
   var deckReady = false;
+  var deckUrls = ['pads', 'synth', 'seq', 'song', 'mix'].map(function (mode) {
+    return 'media/station/final/station-mode-' + mode + '.webp';
+  });
   function readyDeck() {
     if (deckReady) return;
     deckReady = true;
     root.classList.add('deck-ready');
-    cards.forEach(function (card) {
-      var image = new Image();
-      image.src = 'media/station/cards/' + card.dataset.card + '.webp';
-    });
+    deckUrls.forEach(function (src) { var image = new Image(); image.src = src; });
   }
   function scheduleDeck() {
     if (window.requestIdleCallback) window.requestIdleCallback(readyDeck, { timeout: 1600 });
@@ -123,14 +130,16 @@
     return value.slice(-2) === 'ms' ? parseFloat(value) : parseFloat(value) * 1000;
   }
 
-  function clearCard(card) { card.classList.remove('is-out', 'is-landed', 'is-back'); }
-  function land(card) {
-    card.classList.remove('is-out', 'is-back');
-    card.classList.add('is-landed');
+  function clearCard(card) {
+    card.classList.remove('is-launching', 'is-landed', 'is-returning');
   }
   function resetCards() {
     cards.forEach(clearCard);
     deck.setAttribute('aria-hidden', 'true');
+  }
+  function land(card) {
+    card.classList.remove('is-launching', 'is-returning');
+    card.classList.add('is-landed');
   }
   function landAll() {
     cards.forEach(land);
@@ -155,19 +164,22 @@
     deck.removeAttribute('aria-hidden');
     mark('deal-start');
 
-    var last = 0;
-    cards.forEach(function (card) {
-      var order = parseInt(card.style.getPropertyValue('--n'), 10) || 0;
-      var launch = order * CLOCK.interval;
-      var settle = launch + milliseconds(card);
-      last = Math.max(last, settle);
+    var lastSettle = 0;
+    cards.forEach(function (card, index) {
+      var launch = index * CLOCK.interval;
+      var flight = milliseconds(card);
+      var settle = launch + flight;
+      lastSettle = Math.max(lastSettle, settle);
       at(launch, function () {
-        card.classList.add('is-out');
-        mark('deal', card.dataset.card);
+        card.classList.add('is-launching');
+        mark('launch', card.dataset.mode);
       });
-      at(settle, function () { land(card); });
+      at(settle, function () {
+        land(card);
+        mark('land', card.dataset.mode);
+      });
     });
-    at(last, finishDeal);
+    at(lastSettle, finishDeal);
   }
 
   function cut() {
@@ -217,8 +229,8 @@
     }
 
     cards.forEach(function (card) {
-      card.classList.remove('is-out', 'is-landed');
-      card.classList.add('is-back');
+      card.classList.remove('is-launching', 'is-landed');
+      card.classList.add('is-returning');
     });
     at(CLOCK.restore, function () {
       resetCards();
@@ -248,7 +260,8 @@
   else if (calmQuery.addListener) calmQuery.addListener(onCalmChange);
 
   deck.setAttribute('aria-hidden', 'true');
-  if (flags.get('state') === 'released') {
+  var wanted = flags.get('state');
+  if (wanted === 'released') {
     readyDeck();
     landAll();
     state('released');

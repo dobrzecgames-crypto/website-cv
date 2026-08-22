@@ -19,22 +19,19 @@
 <!--
   The page has two gears.
 
-  The hero is a poster, and it makes one argument: look how much is in here.
-  One closed instrument, one LASER IT, and fourteen things go across the table
-  in under a second. Nobody is meant to read them on the way past.
+  The overview is a poster: the machine, the six modules it holds, and a name
+  for each. It answers "what is this" at a glance and explains nothing. One
+  LASER IT does the whole reveal — the chassis is identical in every mode
+  capture, verified pixel by pixel, and only the area below the view tabs
+  changes, so that area is treated as a magazine of states.
 
-  Each card is one thing, cut out of a real capture on that panel's own
-  boundary — the chassis is cut away, so what is left is the instrument, the
-  grid, the display itself. Several of these never appear on screen together
-  in the real app, which is the point.
-
-  Past the hero the page slows down and reads like a magazine: one module per
+  Past it the page slows down and reads like a magazine: one module per
   chapter, at reading speed, each with a screen big enough to become the real
-  working thing later.
+  thing later.
 
-  The hero resolves through the binding 12-column grid in GRID_BIBLE.md; the
-  reading chapters retain their checkpointed placement in this hero-only pass.
-  Press Shift+G to inspect the canvas.
+  The dealer hero resolves through the binding 12-column grid in
+  GRID_BIBLE.md; the reading chapters retain their checkpointed placement in
+  this hero-only pass. Press Shift+G to inspect the dealer canvas.
 
   TODO(content): the masthead still needs the builder's byline, and every lede
   and spec list below is provisional — written from what the captures actually
@@ -60,35 +57,31 @@
   <div class="theatre plot-host">
 
     <!--
-      The composition. Every box in it — the machine, and each module cut out
-      of it — resolves from one canonical canvas, so a piece can hold the left
-      rail, stand in its own air, or run off the right edge and still be
-      exactly on the grid. Nothing is rotated and nothing overlaps: irregular
-      corridors do the separating, three shared axes do the holding together.
+      The overview. .plot resolves every child's box from the column step, so a
+      module can start on column 11, stand in its own air, or run off the
+      viewport edge and still be exactly on the grid. Nothing here is rotated
+      or in perspective, and no two modules overlap: three empty corridors do
+      the separating, shared lines do the holding together.
     -->
     <div class="plot station" id="plot">
 
-      <figure class="object">
+      <figure class="object placed">
         <div class="rig">
           <div class="frame" role="img"
                aria-label="Station shown as one tall instrument: transport row, readout, project and bank row, the seven view tabs, a waveform display, the CUT slider and a sixteen-pad slice map.">
 
             <!--
-              Eight bands, every one of them a full copy of the capture windowed
-              to its own slice of it, so untouched they tile the frame exactly
-              and read as one screen. Each cut falls in a real gap between
-              Station's chassis modules, measured off the source, so no control
-              is bisected. At the flash they separate and go.
+              Five stationary bands keep only the chassis above the mode slot and
+              its physical foot below. The core is no longer baked into these image
+              slices: the six real deck nodes complete that gap while intact, then
+              leave it one by one.
             -->
             <div class="slices">
-              <div class="slice chop chop--1 slice--first" style="--i:1"><i class="face face--before"></i><i class="face face--after"></i></div>
-              <div class="slice chop chop--2" style="--i:2"><i class="face face--before"></i><i class="face face--after"></i></div>
-              <div class="slice chop chop--3" style="--i:3"><i class="face face--before"></i><i class="face face--after"></i></div>
-              <div class="slice chop chop--4" style="--i:4"><i class="face face--before"></i><i class="face face--after"></i></div>
-              <div class="slice chop chop--5" style="--i:5"><i class="face face--before"></i><i class="face face--after"></i></div>
-              <div class="slice chop chop--6" style="--i:6"><i class="face face--before"></i><i class="face face--after"></i></div>
-              <div class="slice chop chop--7" style="--i:7"><i class="face face--before"></i><i class="face face--after"></i></div>
-              <div class="slice chop chop--8 slice--last" style="--i:8"><i class="face face--before"></i><i class="face face--after"></i></div>
+              <div class="slice slice--chassis chop chop--1 slice--first" style="--i:1"><i class="face face--before"></i><i class="face face--after"></i></div>
+              <div class="slice slice--chassis chop chop--2" style="--i:2"><i class="face face--before"></i><i class="face face--after"></i></div>
+              <div class="slice slice--chassis chop chop--3" style="--i:3"><i class="face face--before"></i><i class="face face--after"></i></div>
+              <div class="slice slice--chassis chop chop--4" style="--i:4"><i class="face face--before"></i><i class="face face--after"></i></div>
+              <div class="slice slice--chassis slice--foot slice--last" style="--i:5"><i class="face face--before"></i><i class="face face--after"></i></div>
             </div>
 
             <!-- the laser: target brackets, one travelling beam, seven cuts -->
@@ -140,85 +133,76 @@
         </div>
 
         <figcaption class="visually-hidden">
-          Station with one central slot holding six states of the same machine:
+          Station with one central deck holding six states of the same machine:
           laser, pads, synth, seq, song and mix. The same six layers leave that
-          slot, each cut down to the part of itself that matters, and the
-          emptied chassis closes over the gap they came out of.
+          slot and expose the empty chassis behind them.
         </figcaption>
       </figure>
 
       <!--
-        THE DEAL
+        One physical deck, not Station plus six copies. All six cards occupy
+        the same core-sized box in the intact state. JS launches these exact
+        nodes in narrative order; removing the top card exposes the next node
+        underneath and the empty slot bed is revealed after MIX.
 
-        Fourteen cards, and every one of them is one thing: an instrument, a
-        grid, a display, a control group. Not Station with a different tab open
-        fourteen times — the chassis is cut away, so what is left is the thing
-        itself. Several of these never appear on screen together in the real
-        app, which is the point: one machine holds all of it.
-
-        Each card is a real crop of a real capture, taken on that panel's own
-        boundary. tools/derive-cards.mjs carries the rectangles and how they
-        were measured; media/station/cards/MANIFEST.json records what was cut.
-
-        Position, size, launch order and trajectory are in styles/station.css
-        and frozen in GRID_BIBLE.md section 19. Nothing here is random.
+        --c / --s / --py are the authored final landing contract. At canonical
+        1440 they resolve through the 12-column geometry in GRID_BIBLE.md.
+        --n is launch order; timing and trajectory remain motion variables.
       -->
-      <ul class="deck" id="deck" aria-hidden="true">
+      <ul class="deck" id="deck">
 
-        <li class="card card--laser-waveform" data-card="laser-waveform" style="--n:0">
-          <i class="card__face" role="img" aria-label="The loaded break, cut into eight slices, with a marker on every cut."></i>
+        <li class="plate plate--laser" data-mode="laser"
+            style="--n:0; --c:9; --s:3; --py:256px; --r:-1.8deg; --z:7; --flight:440ms; --bend-x:18px; --bend-y:-34px; --mid-r:-3.2deg">
+          <i class="plate__face"></i>
+          <p class="tag tag--before">
+            <span class="tag__n">01</span>
+            <span class="tag__name">Laser</span>
+          </p>
         </li>
 
-        <li class="card card--synth-zola-x" data-card="synth-zola-x" style="--n:1">
-          <i class="card__face" role="img" aria-label="ZOLA-X, a polyphonic wavetable synthesizer, showing its wavetable."></i>
+        <li class="plate plate--pads" data-mode="pads"
+            style="--n:1; --c:5; --s:2; --py:0px; --r:-1.2deg; --z:4; --flight:400ms; --bend-x:30px; --bend-y:-26px; --mid-r:2.8deg">
+          <i class="plate__face"></i>
+          <p class="tag tag--inside">
+            <span class="tag__n">02</span>
+            <span class="tag__name">Pads</span>
+          </p>
         </li>
 
-        <li class="card card--pads-grid" data-card="pads-grid" style="--n:2">
-          <i class="card__face" role="img" aria-label="The sixteen-pad performance grid, eight pads loaded."></i>
+        <li class="plate plate--synth" data-mode="synth"
+            style="--n:2; --c:1; --s:3; --py:80px; --r:1.1deg; --z:3; --flight:480ms; --bend-x:-34px; --bend-y:-44px; --mid-r:-2.6deg">
+          <i class="plate__face"></i>
+          <p class="tag tag--inside">
+            <span class="tag__n">03</span>
+            <span class="tag__name">Synth</span>
+          </p>
         </li>
 
-        <li class="card card--mix-channels" data-card="mix-channels" style="--n:3">
-          <i class="card__face" role="img" aria-label="The mixer: eight channel strips with live meters, solo and mute."></i>
+        <li class="plate plate--seq" data-mode="seq"
+            style="--n:3; --c:7; --s:2; --py:368px; --r:-0.6deg; --z:8; --flight:380ms; --bend-x:-18px; --bend-y:30px; --mid-r:2.2deg">
+          <i class="plate__face"></i>
+          <p class="tag tag--inside">
+            <span class="tag__n">04</span>
+            <span class="tag__name">Seq</span>
+          </p>
         </li>
 
-        <li class="card card--seq-matrix" data-card="seq-matrix" style="--n:4">
-          <i class="card__face" role="img" aria-label="The step sequencer: eight pads against sixteen steps."></i>
+        <li class="plate plate--song" data-mode="song"
+            style="--n:4; --c:4; --s:3; --py:320px; --r:0.7deg; --z:5; --flight:420ms; --bend-x:32px; --bend-y:22px; --mid-r:-2.4deg">
+          <i class="plate__face"></i>
+          <p class="tag tag--after">
+            <span class="tag__n">05</span>
+            <span class="tag__name">Song</span>
+          </p>
         </li>
 
-        <li class="card card--synth-bassic" data-card="synth-bassic" style="--n:5">
-          <i class="card__face" role="img" aria-label="BASSIC: two oscillators, a sub, and a filter, for bass and leads."></i>
-        </li>
-
-        <li class="card card--laser-slices" data-card="laser-slices" style="--n:6">
-          <i class="card__face" role="img" aria-label="The live slice map: eight slices sitting on eight pads, named and ready."></i>
-        </li>
-
-        <li class="card card--synth-monogorg" data-card="synth-monogorg" style="--n:7">
-          <i class="card__face" role="img" aria-label="MONOGORG: a mono bass synth built around drive, contour and glide."></i>
-        </li>
-
-        <li class="card card--song-arrangement" data-card="song-arrangement" style="--n:8">
-          <i class="card__face" role="img" aria-label="The arrangement: six lanes of patterns laid out across the bars."></i>
-        </li>
-
-        <li class="card card--synth-drum" data-card="synth-drum" style="--n:9">
-          <i class="card__face" role="img" aria-label="The drum synth: eight shaping faders per voice, kick and snare."></i>
-        </li>
-
-        <li class="card card--synth-picker" data-card="synth-picker" style="--n:10">
-          <i class="card__face" role="img" aria-label="The instrument menu: BASSIC, MONOGORG, ZOLA-X and the drum synth."></i>
-        </li>
-
-        <li class="card card--laser-source" data-card="laser-source" style="--n:11">
-          <i class="card__face" role="img" aria-label="Where a break comes in: choose a WAV file, or start from one of four samples."></i>
-        </li>
-
-        <li class="card card--laser-cut" data-card="laser-cut" style="--n:12">
-          <i class="card__face" role="img" aria-label="The cut control: how many slices, and the transport to audition them."></i>
-        </li>
-
-        <li class="card card--mix-bus" data-card="mix-bus" style="--n:13">
-          <i class="card__face" role="img" aria-label="Bus, FX and master routing."></i>
+        <li class="plate plate--mix" data-mode="mix"
+            style="--n:5; --c:8; --s:2; --py:16px; --r:1.5deg; --z:6; --flight:450ms; --bend-x:-10px; --bend-y:-38px; --mid-r:3.4deg">
+          <i class="plate__face"></i>
+          <p class="tag">
+            <span class="tag__n">06</span>
+            <span class="tag__name">Mix</span>
+          </p>
         </li>
 
       </ul>
@@ -228,10 +212,10 @@
   <div class="controls grid">
     <button class="trigger" id="laserIt" type="button" style="--c:1; --s:3">
       <span class="trigger__label" id="triggerLabel">Laser it</span>
-      <span class="trigger__meta" id="triggerMeta">open it up</span>
+      <span class="trigger__meta" id="triggerMeta">cut 8</span>
       <span class="trigger__charge" aria-hidden="true"></span>
     </button>
-    <p class="hint" id="hint" style="--c:5; --s:6">One instrument. Cut it open and see what it is holding.</p>
+    <p class="hint" id="hint" style="--c:5; --s:6">One pass. Six modes, all held in the same central slot.</p>
   </div>
 
   <a class="scroll-cue" id="scrollCue" href="#ch-laser-title" aria-label="Continue to the Laser chapter">
@@ -255,25 +239,6 @@
   with the working thing. Each capture has a partner state already sitting in
   assets/station/current/details/ for exactly that — pads at rest, meters idle,
   waveform uncut, wavetable sounding.
-
-  THIS IS WHERE THE INTERACTIVE WORK LANDS.
-
-  prototypes/station-interactions/ holds five working, dependency-free
-  micro-interactions built for exactly these chapters. They are deliberately
-  NOT used in the hero: up there the pieces are a composition and must stay
-  still. Down here they are the subject, and the reader has stopped to look.
-
-     data-demo="laser"   <-  lab #laser   pointer playhead, slice confirmation
-     data-demo="pads"    <-  lab #pads    rubber travel, edge-constrained light
-     data-demo="zola-x"  <-  lab #zola    one display-linked control per view
-     data-demo="seq"     <-  lab #seq     step toggles, optional playhead
-     data-demo="mix"     <-  lab #mixer   signal-shaped meter envelopes
-     data-demo="song"        no lab counterpart yet
-
-  The lab runs standalone — see its README. Mounting it here is its own task:
-  lift lab.css/lab.js into the site's token set, keep each experiment behind
-  the .demo__screen it belongs to, and let the still stay as the no-JS and
-  reduced-motion fallback. Do not delete or flatten the lab to do it.
 -->
 <div class="chapters">
 

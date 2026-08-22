@@ -31,27 +31,13 @@ At canonical 1440 desktop, the grid is based on a 4px atom, 16px dot pitch, 12 c
 
 ## Hero interaction
 
-The page opens on Station and nothing else: one closed instrument, nothing
-showing from under the chassis, no card on the table.
+The opening Station interaction uses the central mode area as a deck:
 
-`LASER IT` performs on Station the cut Station performs on a sample. One flash,
-the machine delaminates along its own seams, and the fourteen things it was
-holding go across the table at once, fast, the way a dealer throws. The machine
-does not survive the cut — nothing of it is left standing among its contents.
+`LASER → PADS → SYNTH → SEQ → SONG → MIX`
 
-A card is ONE thing: one instrument, one grid, one display, one control group,
-cut out of a real capture on that panel's own boundary. Never the same chassis
-again with a different tab open, and never a strip of chassis — that is part of
-the machine's natural look and says nothing on its own. Do not invent a card
-the capture set has no evidence for.
+Cards are dealt quickly into an asymmetric but deterministic composition. An outgoing mode must not remain duplicated in the central Station. Final positions land on the grid; motion paths may leave it.
 
-Landing positions are measured and **frozen** in `GRID_BIBLE.md` section 19,
-"Dealt-table hero contract". Do not re-derive them in CSS; revise that contract
-first if the table has to change. `tools/derive-cards.mjs` carries the crop
-rectangles and how they were measured.
-
-The interactive per-mode components in `prototypes/station-interactions/` are
-for the reading chapters below the hero, not for the hero itself.
+Do not freeze exact landing coordinates until all six real component bounds are available and measured.
 
 ## Git safety
 
