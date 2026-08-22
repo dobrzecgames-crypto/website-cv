@@ -1,108 +1,191 @@
 /* ===========================================================================
-   website — Station dealer HERO
+   website — Station HERO: one instrument, opened
 
-   The chassis and the deck are separate physical layers. The chassis keeps
-   only the controls above the mode slot and the foot below it. The six mode
-   cards are the content that completes Station at rest; those same DOM nodes
-   leave the slot, so an outgoing mode cannot remain duplicated in the center.
+   The scene is not a hand of cards. It is one machine taken apart along its
+   own seams, and every cut in it is horizontal:
 
-   Canonical 1440 geometry follows GRID_BIBLE.md:
-     canvas 1440 · rails 56 · 12 × 96 columns · 16 gutters
-     source deck c5 / span 3 · final widths S2 / M3 / L4
+     · seven cuts across the chassis, measured off the real capture
+     · one cut per module, on that module's own internal panel boundary
+
+   That single rule is what makes the frame read as decomposition rather than
+   as six screenshots arranged on a page. A module is a real crop of a real
+   capture — the waveform, the eight loaded pads, the wavetable, the step
+   matrix, the arrangement, the channel bank — so no two pieces share an
+   aspect ratio and no two carry the same weight.
+
+   MECHANISM
+
+   One physical deck. All six modules occupy the same core slot while Station
+   is intact, at full size, completely covering one another; nothing peeks out
+   from under the chassis before the trigger. A module leaves the slot as the
+   exact DOM node that filled it, so an outgoing mode is never duplicated in
+   the centre, and the next mode is revealed by the departure itself.
+
+     --cut   where the laser cuts this module, as a fraction of the plate.
+             Applied at launch: the piece is released at its own seam.
+     --k     landing scale. The set is fixed by the span table, W(n)/320:
+             0.65 = W(2), 1.00 = W(3), 1.35 = W(4), 1.70 = W(5), 2.05 = W(6).
+     --x/--y canonical landing coordinates of the VISIBLE rect's top-left.
+
+   Because the crop only ever removes the bottom of the plate, the visible
+   rect's top-left is the box's top-left, so the landing transform is a plain
+   translate + scale with no compensation term.
+
+   GEOMETRY
+
+   Each breakpoint family owns a canonical canvas and its own landing map —
+   GRID_BIBLE.md section 14 — and every authored number below is in that
+   canvas's units. --u converts one canonical unit into real pixels, so the
+   whole composition scales as one plate and never needs a second set of
+   off-grid coordinates.
+
+   The desktop canvas is 1328 x 656: the binding 12-column content width at
+   1440, and 41 rows of the 16px lattice. At 1440 x 900 --u resolves to
+   exactly 1px and the composition stands on the page's real column rails.
+
+   The frame contract, measured validation included, is in GRID_BIBLE.md
+   section 19, "Opened-instrument hero contract".
    ========================================================================== */
 
 .station {
-  --ar-frame: 1.995565;       /* 900 / 451 */
-  --ar-plate: 1.283333;       /* derived 720 × 924 core crop */
-  --core-c: 5;
-  --core-s: 3;
-  --source-nudge: calc(var(--cs) / 2);
-  --object-y: 32px;
-  --frame-w: calc(var(--core-s) * var(--cs) - var(--gutter));
-  --frame-h: calc(var(--frame-w) * var(--ar-frame));
-  --core-y: calc(var(--frame-h) * .24589);
-  --core-h: calc(var(--frame-h) * .64300);
-  --source-x: calc((var(--core-c) - 1) * var(--cs) + var(--source-nudge));
-  --source-y: calc(var(--object-y) + var(--core-y));
-  --source-w: var(--frame-w);
-  --source-h: calc(var(--source-w) * var(--ar-plate));
-  --source-fit-x: calc((var(--source-w) - var(--source-w) * var(--scene-fit)) / 2);
-  --source-fit-y: calc(var(--core-y) * (var(--scene-fit) - 1));
-  --empty-fit: calc(var(--scene-fit) * .56);
-  --empty-shift-x: calc((var(--source-w) - var(--source-w) * var(--empty-fit)) / 2);
-  --gap: calc(var(--frame-h) * .024);
-  height: 780px;
+  /* --- the canonical canvas ------------------------------------------- */
+  --canvas-w: 1328;
+  --canvas-h: 656;
+  --u: calc(100cqw / var(--canvas-w));
+
+  /* --- the source: Station intact ------------------------------------- */
+  --ar-frame: 1.9955654;      /* 900 / 451, the whole instrument */
+  --ar-plate: 1.2833333;      /* 924 / 720, the core crop a module is cut from */
+  --core-top: .24589;         /* the seam under the view tabs */
+  --core-bottom: .88889;      /* the seam above the foot */
+
+  --frame-x: 448;             /* column 5 */
+  --frame-y: 8;
+  --frame-w-c: 320;           /* span 3 */
+  --frame-h-c: 638.58;        /* --frame-w-c * --ar-frame */
+  --head-h: 157;              /* --frame-h-c * --core-top, the surviving chassis */
+
+  /* the chassis bands in styles/site.css window a full copy of the capture,
+     so they need these two as resolved lengths rather than canonical numbers */
+  --frame-w: calc(var(--frame-w-c) * var(--u));
+  --frame-h: calc(var(--frame-h-c) * var(--u));
+
+  --slot-x: 448;
+  --slot-y: 165;              /* --frame-y + --head-h */
+  --slot-w: 320;
+  --slot-h: 410.67;           /* --slot-w * --ar-plate */
+
+  /* where the emptied chassis docks: the top-left corner, under the wordmark */
+  --dock-x: 0;
+  --dock-y: 0;
+
+  /* --- motion ---------------------------------------------------------- */
+  --t-close: 380ms;
+  --ease-throw: cubic-bezier(.18, .74, .2, 1);
+  --ease-close: cubic-bezier(.32, .04, .2, 1);
+
+  position: relative;
+  container-type: inline-size;
+  /* The plate keeps its shape at every size. Where the viewport is too short
+     for the canonical canvas it shrinks as one object rather than reflowing
+     into a second, unauthored composition. */
+  width: max(320px, min(100%, calc((100svh - var(--chrome, 240px)) * var(--canvas-w) / var(--canvas-h))));
+  aspect-ratio: var(--canvas-w) / var(--canvas-h);
+  margin-inline: auto;
 }
 
-/* The full instrument is centered before the cut. Its top and foot stay as
-   chassis after the cards leave; the dark bay between them is the empty slot. */
+/* ==========================================================================
+   THE CHASSIS
+
+   Intact it is the whole instrument. Emptied it is a control surface: the
+   transport, the readout, the project row and the seven view tabs — which is
+   to say, the row that names the six pieces now lying around it.
+
+   It does not fade to a ghost and it does not stay as a tall dark frame with
+   a hole in it. It closes over its own empty bay and withdraws to the corner.
+   ========================================================================== */
+
 .station .object {
-  --c: var(--core-c);
-  --s: var(--core-s);
-  --py: var(--object-y);
-  --ar: var(--ar-frame);
-  --nudge: var(--source-nudge);
+  position: absolute;
+  left: calc(var(--frame-x) * var(--u));
+  top: calc(var(--frame-y) * var(--u));
+  width: var(--frame-w);
+  height: var(--frame-h);
   z-index: 20;
-  opacity: 1;
-  transform: translate3d(var(--source-fit-x), 0, 0) scale(var(--scene-fit));
-  transform-origin: 0 0;
-  transition: transform 140ms cubic-bezier(.2, .9, .25, 1), opacity 140ms ease;
+  margin: 0;
 }
 
+.station .rig {
+  clip-path: inset(0);
+  transition:
+    clip-path var(--t-close) var(--ease-close),
+    transform var(--t-close) var(--ease-close),
+    filter var(--t-close) linear;
+}
+
+/* the bay behind the deck: what the six modules are sitting in */
 .station .frame::before {
   content: "";
   position: absolute;
   z-index: -1;
   left: 0;
-  top: var(--core-y);
+  top: calc(var(--core-top) * 100%);
   width: 100%;
-  height: var(--core-h);
+  height: calc((var(--core-bottom) - var(--core-top)) * 100%);
   border-inline: 1px solid rgba(90, 82, 96, .24);
-  background:
-    linear-gradient(90deg, rgba(255,255,255,.025), transparent 8% 92%, rgba(255,255,255,.02)),
-    linear-gradient(180deg, #06060a, #0a0910 58%, #06060a);
-  box-shadow: inset 0 12px 24px rgba(0,0,0,.52), inset 0 -10px 22px rgba(0,0,0,.4);
-  transform-origin: 50% 50%;
-  transition: transform 140ms cubic-bezier(.2, .9, .25, 1), opacity 140ms ease;
+  background: linear-gradient(180deg, #06060a, #0a0910 58%, #06060a);
+  box-shadow: inset 0 12px 24px rgba(0, 0, 0, .52), inset 0 -10px 22px rgba(0, 0, 0, .4);
 }
 
 .slice--foot { --t: .8888889; --h: .1111111; }
 
-/* The old cut spread is intentionally suppressed here. LASER IT is now the
-   fast dealer prelude; exploding the chassis first would reintroduce a second
-   visual event and obscure the single-slot mechanism. */
+/* The chassis no longer explodes on its own. LASER IT is one event: the cut,
+   then the modules leaving. A second spread here would compete with it. */
 [data-state="sliced"] .rig,
 [data-state="dealing"] .rig,
 [data-state="released"] .rig,
 [data-state="closing"] .rig { transform: none; }
 
-[data-state="dealing"] .slice--chassis,
-[data-state="released"] .slice--chassis { opacity: .54; }
-
-/* Once MIX clears the source, the chassis resolves into evidence rather than
-   a second hero object. It keeps the same physical bands and central seam,
-   but settles to a quiet, ruler-centred remnant before the cue appears. */
-[data-state="released"] .station .object {
-  opacity: .34;
-  transform:
-    translate3d(var(--empty-shift-x), calc(96px * var(--scene-fit)), 0)
-    scale(var(--empty-fit));
+/* Closing: the machine swallows its empty bay and its foot, and steps out of
+   the middle of its own contents. Same width, same tabs, no scale — it is the
+   same object, just no longer carrying anything. */
+[data-state="released"] .station .rig {
+  clip-path: inset(0 0 calc((1 - var(--core-top)) * 100%) 0);
+  transform: translate3d(
+    calc((var(--dock-x) - var(--frame-x)) * var(--u)),
+    calc((var(--dock-y) - var(--frame-y)) * var(--u)), 0);
+  filter: saturate(.62) brightness(.9);
 }
 
-[data-state="released"] .station .frame::before {
-  opacity: .42;
-  transform: scaleY(.32);
+/* the seam it closed on stays warm for a moment, then reads as a rule */
+.station .rig::after {
+  content: "";
+  position: absolute;
+  left: 0;
+  right: 0;
+  top: calc(var(--core-top) * 100%);
+  height: 2px;
+  transform: translateY(-2px);
+  opacity: 0;
+  pointer-events: none;
+  background: linear-gradient(90deg,
+    rgba(185, 154, 98, .1), var(--gold-lit) 22%, var(--gold-hot) 50%, var(--gold-lit) 78%, rgba(185, 154, 98, .1));
+}
+[data-state="released"] .station .rig::after { animation: seam-cool 1400ms ease-out both; }
+
+@keyframes seam-cool {
+  0%   { opacity: 0 }
+  14%  { opacity: 1 }
+  100% { opacity: .52 }
 }
 
-[data-state="dealing"] .cast,
-[data-state="released"] .cast {
-  opacity: .18;
-  transform: translate(-50%, -5%) scale(1.04, .62);
-}
+/* the ground shadow belongs to the tall object; the closed strip lies flat */
+[data-state="released"] .cast,
+[data-state="closing"]  .cast { opacity: 0; }
 
-/* --------------------------------------------------------------------------
-   ONE CENTRAL DECK
-   -------------------------------------------------------------------------- */
+/* ==========================================================================
+   THE DECK
+   ========================================================================== */
 
 .deck {
   list-style: none;
@@ -116,56 +199,54 @@
 }
 
 .plate {
-  --span-w: calc(var(--s) * var(--cs) - var(--gutter));
-  --final-w: calc(var(--span-w) * var(--scene-fit));
-  --deal-scale: calc(var(--final-w) / var(--source-w));
-  --target-x: calc(
-    (var(--c) - 1) * var(--cs) + (var(--span-w) - var(--final-w)) / 2
-  );
-  --target-y: calc(var(--py) * var(--scene-fit));
-  --tx: calc(var(--target-x) - var(--source-x));
-  --ty: calc(var(--target-y) - var(--source-y));
-  --mid-x: calc(var(--source-fit-x) + (var(--tx) - var(--source-fit-x)) * .76 + var(--bend-x));
-  --mid-y: calc(var(--source-fit-y) + (var(--ty) - var(--source-fit-y)) * .72 + var(--bend-y));
-  --mid-scale: calc(var(--scene-fit) + (var(--deal-scale) - var(--scene-fit)) * .72);
-
+  /* the box is the slot, always — the crop and the scale do the rest */
   position: absolute;
-  left: var(--source-x);
-  top: var(--source-y);
-  width: var(--source-w);
-  height: var(--source-h);
+  left: calc(var(--slot-x) * var(--u));
+  top: calc(var(--slot-y) * var(--u));
+  width: calc(var(--slot-w) * var(--u));
+  height: calc(var(--slot-h) * var(--u));
   z-index: calc(70 - var(--n));
-  opacity: 1;
-  visibility: visible;
-  transform: translate3d(var(--source-fit-x), var(--source-fit-y), 0) scale(var(--scene-fit)) rotate(0deg);
   transform-origin: 0 0;
   will-change: transform;
+
+  --tx: calc((var(--x) - var(--slot-x)) * var(--u));
+  --ty: calc((var(--y) - var(--slot-y)) * var(--u));
+  --mid-x: calc(var(--tx) * .74 + var(--bend-x) * var(--u));
+  --mid-y: calc(var(--ty) * .70 + var(--bend-y) * var(--u));
+  --mid-k: calc(1 + (var(--k) - 1) * .74);
 }
 
 /* GRID-EXCEPTION: the 1px inset is a raster containment guard, not authored
-   layout geometry. It prevents a lower transparent WebP edge from peeking
-   outside the active card while preserving the same six physical DOM nodes. */
+   layout geometry. It keeps a transparent WebP edge on a lower plate from
+   showing past the plate covering it while the instrument is still intact. */
 .plate:not(:first-child):not(.is-launching):not(.is-landed):not(.is-returning) {
   clip-path: inset(1px);
+}
+
+/* the cell is the material: clipped at the cut, and lit as a physical layer */
+.plate__cell {
+  position: absolute;
+  inset: 0;
+  clip-path: inset(0);
 }
 
 .plate__face {
   position: absolute;
   inset: 0;
-  overflow: hidden;
   background-color: var(--ink-1);
   background-repeat: no-repeat;
   background-position: 0 0;
   background-size: 100% 100%;
-  box-shadow: 0 1px 0 rgba(255,255,255,.04), 0 16px 32px rgba(0,0,0,.22);
 }
 
-/* LASER is required for first paint; the five lower cards are fetched at idle
-   or at the first sign of intent by scripts/laser.js. */
+/* LASER is on screen at first paint; the five under it are fetched at idle or
+   at the first sign of intent — scripts/laser.js */
 .plate--laser .plate__face {
   background-image: url("../media/station/final/station-mode-laser-loaded.webp");
 }
 
+/* the laser cut the material as well as the machine: markers appear, CUT
+   reads 8, the pads fill. Revealed under the flash. */
 .plate--laser .plate__face::after {
   content: "";
   position: absolute;
@@ -174,175 +255,308 @@
   background: url("../media/station/final/station-mode-laser.webp") 0 0 / 100% 100% no-repeat;
   transition: opacity 70ms linear;
 }
-
 [data-state="slicing"] .plate--laser .plate__face::after,
 [data-state="dealing"] .plate--laser .plate__face::after,
-[data-state="released"] .plate--laser .plate__face::after { opacity: 1; }
+[data-state="released"] .plate--laser .plate__face::after { opacity: 1 }
 
-.deck-ready .plate--pads  .plate__face { background-image: url("../media/station/final/station-mode-pads.webp"); }
-.deck-ready .plate--synth .plate__face { background-image: url("../media/station/final/station-mode-synth.webp"); }
-.deck-ready .plate--seq   .plate__face { background-image: url("../media/station/final/station-mode-seq.webp"); }
-.deck-ready .plate--song  .plate__face { background-image: url("../media/station/final/station-mode-song.webp"); }
-.deck-ready .plate--mix   .plate__face { background-image: url("../media/station/final/station-mode-mix.webp"); }
+.deck-ready .plate--pads  .plate__face { background-image: url("../media/station/final/station-mode-pads.webp") }
+.deck-ready .plate--synth .plate__face { background-image: url("../media/station/final/station-mode-synth.webp") }
+.deck-ready .plate--seq   .plate__face { background-image: url("../media/station/final/station-mode-seq.webp") }
+.deck-ready .plate--song  .plate__face { background-image: url("../media/station/final/station-mode-song.webp") }
+.deck-ready .plate--mix   .plate__face { background-image: url("../media/station/final/station-mode-mix.webp") }
 
-/* Once a card leaves the chassis, dissolve its unused lower panel exactly as
-   the checkpointed component treatment did. Inside the slot it stays solid so
-   six equal physical layers cover one another without seams. */
-.plate.is-launching .plate__face,
-.plate.is-landed .plate__face {
-  -webkit-mask-image: linear-gradient(to bottom, #000 0 86%, transparent 100%);
-          mask-image: linear-gradient(to bottom, #000 0 86%, transparent 100%);
+/* --- the cut ------------------------------------------------------------
+   A module is released at its own seam. The clip is applied at launch, so
+   inside the slot the six plates are still one indistinguishable stack.
+   Thickness is authored in device pixels and divided back out of the landing
+   scale, so the line is the same weight on a 656px piece and a 208px one.
+   ------------------------------------------------------------------------ */
+
+.plate.is-launching .plate__cell,
+.plate.is-landed .plate__cell {
+  clip-path: inset(0 0 calc((1 - var(--cut)) * 100%) 0);
 }
+
+.plate__cell::after {
+  content: "";
+  position: absolute;
+  left: 0;
+  right: 0;
+  top: calc(var(--cut) * 100%);
+  height: calc(2px / var(--k));
+  transform: translateY(calc(-2px / var(--k)));
+  opacity: 0;
+  background: linear-gradient(90deg,
+    rgba(185, 154, 98, .12), var(--gold-lit) 20%, var(--gold-hot) 50%, var(--gold-lit) 80%, rgba(185, 154, 98, .12));
+}
+.plate.is-launching .plate__cell::after { animation: cut-cool 1200ms ease-out both }
+.plate.is-landed .plate__cell::after { opacity: .52 }
+
+@keyframes cut-cool {
+  0%   { opacity: 1 }
+  100% { opacity: .52 }
+}
+
+/* --- material ----------------------------------------------------------
+   The pieces are lying on the ground, not pasted onto it. drop-shadow rather
+   than box-shadow because it follows the clip; it is applied only once the
+   piece has landed, so nothing filters during flight.
+   ---------------------------------------------------------------------- */
+
+.plate.is-landed .plate__cell {
+  filter:
+    drop-shadow(0 calc(3px / var(--k)) calc(2px / var(--k)) rgba(0, 0, 0, .5))
+    drop-shadow(0 calc(14px / var(--k)) calc(26px / var(--k)) rgba(0, 0, 0, .42));
+}
+
+/* --- flight ------------------------------------------------------------- */
 
 .plate.is-launching {
   z-index: calc(80 + var(--n));
-  animation: dealer-flight var(--flight) cubic-bezier(.18, .76, .2, 1) both;
+  animation: throw var(--flight) var(--ease-throw) both;
 }
 
 .plate.is-landed {
   z-index: var(--z);
-  transform: translate3d(var(--tx), var(--ty), 0) scale(var(--deal-scale)) rotate(var(--r));
+  transform: translate3d(var(--tx), var(--ty), 0) scale(var(--k));
   will-change: auto;
 }
 
 .plate.is-returning {
   z-index: calc(90 + var(--n));
-  animation: dealer-return 280ms cubic-bezier(.42, 0, .55, 1) both;
+  animation: throw-back 300ms cubic-bezier(.42, 0, .55, 1) both;
 }
 
-@keyframes dealer-flight {
-  0% {
-    transform:
-      translate3d(var(--source-fit-x), var(--source-fit-y), 0)
-      scale(var(--scene-fit))
-      rotate(0deg);
-  }
-  68% {
-    transform:
-      translate3d(var(--mid-x), var(--mid-y), 0)
-      scale(var(--mid-scale))
-      rotate(var(--mid-r));
-  }
-  100% { transform: translate3d(var(--tx), var(--ty), 0) scale(var(--deal-scale)) rotate(var(--r)); }
+@keyframes throw {
+  0%   { transform: translate3d(0, 0, 0) scale(1) }
+  66%  { transform: translate3d(var(--mid-x), var(--mid-y), 0) scale(var(--mid-k)) }
+  100% { transform: translate3d(var(--tx), var(--ty), 0) scale(var(--k)) }
 }
 
-@keyframes dealer-return {
-  from { transform: translate3d(var(--tx), var(--ty), 0) scale(var(--deal-scale)) rotate(var(--r)); }
-  to   {
-    transform:
-      translate3d(var(--source-fit-x), var(--source-fit-y), 0)
-      scale(var(--scene-fit))
-      rotate(0deg);
-  }
+@keyframes throw-back {
+  from { transform: translate3d(var(--tx), var(--ty), 0) scale(var(--k)) }
+  to   { transform: translate3d(0, 0, 0) scale(1) }
 }
 
-/* --------------------------------------------------------------------------
-   LABELS — inherited visual voice, attached to the moving physical card
-   -------------------------------------------------------------------------- */
+/* ==========================================================================
+   LABELS
+
+   Welded to the piece so they travel with it, but counter-scaled out of the
+   landing scale so the type is one size across a 2.05x piece and a 0.65x one.
+   ========================================================================== */
 
 .tag {
   position: absolute;
   left: 0;
-  bottom: 100%;
-  margin: 0 0 10px;
-  padding-bottom: 6px;
-  border-bottom: 1px solid rgba(185, 154, 98, .35);
+  top: calc(var(--cut) * 100%);
+  margin: 0;
+  padding: 0;
   white-space: nowrap;
   opacity: 0;
+  transform: scale(calc(1 / var(--k)));
+  transform-origin: 0 0;
 }
 
-.tag__n { display: block; font-size: 9px; letter-spacing: .22em; color: var(--sand-low); }
+.tag::before {
+  content: "";
+  position: absolute;
+  left: 0;
+  top: 0;
+  width: 24px;
+  height: 1px;
+  background: rgba(185, 154, 98, .45);
+}
+
+.tag__n,
+.tag__name { display: block }
+
+.tag__n {
+  margin-top: 11px;
+  font-size: 9px;
+  letter-spacing: .24em;
+  color: var(--sand-low);
+}
+
 .tag__name {
-  display: block;
-  margin-top: 3px;
+  margin-top: 2px;
   font-family: var(--sans);
-  font-size: 14px;
+  font-size: 13px;
   font-weight: 300;
-  letter-spacing: .18em;
+  letter-spacing: .2em;
   text-transform: uppercase;
   color: var(--sand-mid);
 }
 
-.plate--laser .tag { border-bottom-color: var(--gold); }
-.plate--laser .tag__name { font-size: 17px; color: var(--sand); }
+/* the piece carrying the chapter gets the larger voice */
+.plate--laser .tag::before { background: var(--gold) }
+.plate--laser .tag__name { font-size: 19px; letter-spacing: .16em; color: var(--sand) }
 
-.tag--below {
-  top: 100%; bottom: auto; margin: 10px 0 0; padding: 6px 0 0;
-  border-top: 1px solid rgba(185, 154, 98, .35); border-bottom: 0;
+/* A piece with no room under its cut takes the air above its top edge, or the
+   corridor beside it. Which one is a composition decision per piece, not a
+   rule — the label goes wherever that piece actually has clearance. */
+.tag--over {
+  top: auto;
+  bottom: 100%;
+  transform-origin: 0 100%;
 }
-.tag--before { left: auto; right: 100%; top: 0; bottom: auto; margin: 0 14px 0 0; text-align: right; }
-.tag--after  { left: 100%; top: 0; bottom: auto; margin: 0 0 0 14px; }
-.tag--inside {
-  top: 16px;
-  bottom: auto;
-  left: 16px;
-  margin: 0;
-  padding: 6px 8px;
-  border: 1px solid rgba(185, 154, 98, .24);
-  background: rgba(7, 7, 11, .72);
+.tag--over::before { top: auto; bottom: 0 }
+.tag--over .tag__n { margin-top: 0; margin-bottom: 2px }
+.tag--over .tag__name { margin: 0 0 9px }
+
+.tag--beside {
+  top: 0;
+  left: 100%;
+  padding-left: calc(14px / var(--k));
 }
+.tag--beside::before { left: calc(14px / var(--k)) }
+.tag--beside .tag__n { margin-top: 9px }
 
-.plate.is-launching .tag {
-  animation: dealer-tag-in calc(var(--flight) * .42) ease calc(var(--flight) * .48) both;
-}
-.plate.is-landed .tag { opacity: 1; }
-@keyframes dealer-tag-in { from { opacity: 0 } to { opacity: 1 } }
+.plate.is-launching .tag { animation: tag-in calc(var(--flight) * .4) ease calc(var(--flight) * .5) both }
+.plate.is-landed .tag { opacity: 1 }
+@keyframes tag-in { from { opacity: 0 } to { opacity: 1 } }
 
-/* --------------------------------------------------------------------------
-   BREAKPOINT-SPECIFIC LANDING MAPS
+/* ==========================================================================
+   THE DESKTOP LANDING MAP — canonical 1328 x 656
 
-   Desktop is the measured canonical contract. Tablet and mobile are authored
-   recompositions; they do not proportionally shrink the 1440 coordinates.
-   -------------------------------------------------------------------------- */
+   Solved against GRID_BIBLE.md and measured: minimum clear distance 21px,
+   three shared alignment axes (x 0, x 320, x 448 — the last of which is the
+   slot's own left edge), area-weighted centroid 28px right and 4px below the
+   canvas centre, six distinct landing rows, five distinct landing columns,
+   one deliberate bleed past the right rail, one throw near a cardinal.
+   ========================================================================== */
 
-@media (min-width: 1200px) and (max-width: 1439px) {
-  .station { height: 760px; --object-y: 40px; }
-}
+.plate--laser { --k: 2.05; --cut: .2911; --x:  768; --y:  48; --z: 6; --n: 0; --flight: 460ms; --bend-x:  26; --bend-y: -44 }
+.plate--pads  { --k: 1.35; --cut: .3750; --x:    0; --y: 240; --z: 4; --n: 1; --flight: 420ms; --bend-x: -34; --bend-y: -30 }
+.plate--synth { --k: 1.35; --cut: .3271; --x:  448; --y: 464; --z: 3; --n: 2; --flight: 480ms; --bend-x: -18; --bend-y:  36 }
+.plate--seq   { --k:  .65; --cut: .8452; --x:  448; --y:   0; --z: 5; --n: 3; --flight: 380ms; --bend-x:  28; --bend-y: -20 }
+.plate--song  { --k:  .65; --cut: .6169; --x:  112; --y: 480; --z: 2; --n: 4; --flight: 440ms; --bend-x: -38; --bend-y:  16 }
+.plate--mix   { --k:  .65; --cut: .6450; --x: 1120; --y: 448; --z: 7; --n: 5; --flight: 400ms; --bend-x:  34; --bend-y:  28 }
+
+/* ==========================================================================
+   TABLET — 768 to 1199
+
+   Its own canvas and its own map. The instrument stands taller in the frame,
+   the primary piece still runs off the right edge, and the pieces recompose
+   into two loose columns rather than shrinking the desktop throw.
+   ========================================================================== */
 
 @media (min-width: 768px) and (max-width: 1199px) {
-  .station { --core-c: 4; --core-s: 2; --source-nudge: 0px; --object-y: 72px; height: 840px; }
-  .plate--pads  { --c: 4 !important; --s: 2 !important; --py: 0px !important; }
-  .plate--synth { --c: 1 !important; --s: 3 !important; --py: 80px !important; }
-  .plate--mix   { --c: 7 !important; --s: 2 !important; --py: 48px !important; }
-  .plate--laser { --c: 6 !important; --s: 3 !important; --py: 384px !important; }
-  .plate--seq   { --c: 4 !important; --s: 2 !important; --py: 328px !important; }
-  .plate--song  { --c: 2 !important; --s: 2 !important; --py: 544px !important; }
+  .station {
+    --canvas-w: 960;
+    --canvas-h: 900;
+
+    /* 8 columns, 16px gutters, 32px rails: at 1024 the step is 122 and a
+       column is 106, so W(n) = 122n - 16 and the rails fall on
+       0 / 122 / 244 / 366 / 488 / 610 / 732 / 854. */
+    --frame-x: 244;           /* column 3, centre offset by half a step */
+    --frame-y: 8;
+    --frame-w-c: 350;         /* span 3 */
+    --frame-h-c: 698.45;
+    --head-h: 171.75;
+    --slot-x: 244;
+    --slot-y: 179.75;
+    --slot-w: 350;
+    --slot-h: 449.17;
+    --dock-x: 0;
+    --dock-y: 0;
+
+    /* portrait canvas: it holds the full grid width and continues past the
+       fold. That is the composition, not a fitting failure. */
+    width: 100%;
+  }
+  .plate--laser { --k: 1.3486; --x: 488; --y:  32; --bend-x:  28; --bend-y: -30 }
+  .plate--seq   { --k:  .6514; --x:   0; --y: 236; --bend-x: -30; --bend-y: -12 }
+  .plate--synth { --k: 1.0000; --x: 366; --y: 268; --bend-x:  20; --bend-y:  16 }
+  .plate--mix   { --k:  .6514; --x: 732; --y: 464; --bend-x:  30; --bend-y:  20 }
+  .plate--pads  { --k: 1.0000; --x: 122; --y: 552; --bend-x: -24; --bend-y:  28 }
+  .plate--song  { --k:  .6514; --x: 610; --y: 700; --bend-x:  16; --bend-y:  30 }
+
+  /* SYNTH has clearance under its cut at this size, and hanging its label
+     above would put it on the same line as LASER's. */
+  .plate--synth .tag {
+    top: calc(var(--cut) * 100%);
+    bottom: auto;
+    transform-origin: 0 0;
+  }
+  .plate--synth .tag::before { top: 0; bottom: auto }
+  .plate--synth .tag__n { margin: 11px 0 0 }
+  .plate--synth .tag__name { margin: 2px 0 0 }
 }
+
+/* ==========================================================================
+   MOBILE — under 768
+
+   A hand-held composition. The machine opens and its parts run down the
+   page in a staggered fall, each one on the 4-column grid, alternating which
+   rail it holds. The scene is deliberately taller than one screen: the deal
+   is the first thing the viewer sees, the tail of it is the reason to scroll.
+   ========================================================================== */
 
 @media (max-width: 767px) {
-  .station { --core-c: 2; --core-s: 2; --source-nudge: 0px; --object-y: 48px; height: 1320px; }
-  .plate--pads  { --c: 1 !important; --s: 2 !important; --py: 32px !important; }
-  .plate--synth { --c: 1 !important; --s: 3 !important; --py: 384px !important; }
-  .plate--mix   { --c: 3 !important; --s: 2 !important; --py: 144px !important; }
-  .plate--laser { --c: 3 !important; --s: 2 !important; --py: 944px !important; }
-  .plate--seq   { --c: 3 !important; --s: 2 !important; --py: 672px !important; }
-  .plate--song  { --c: 1 !important; --s: 2 !important; --py: 800px !important; }
-  .tag,
-  .tag--before,
-  .tag--after,
-  .tag--below,
-  .tag--inside {
-    top: 12px;
-    right: auto;
-    bottom: auto;
-    left: 12px;
-    margin: 0;
-    padding: 6px 8px;
-    border: 1px solid rgba(185, 154, 98, .24);
-    background: rgba(7, 7, 11, .72);
-    text-align: left;
+  .station {
+    --canvas-w: 350;
+    --canvas-h: 1170;
+
+    /* 4 columns, 12px gutters, 20px rails: at 390 the step is 90.5 and a
+       column is 78.5, so the rails fall on 0 / 90.5 / 181 / 271.5 and
+       W(n) = 90.5n - 12. The machine takes the full four columns. */
+    --frame-x: 0;
+    --frame-y: 0;
+    --frame-w-c: 350;         /* span 4 */
+    --frame-h-c: 698.45;
+    --head-h: 171.75;
+    --slot-x: 0;
+    --slot-y: 171.75;
+    --slot-w: 350;
+    --slot-h: 449.17;
+    --dock-x: 0;
+    --dock-y: 0;
+    width: 100%;
   }
+  .plate--laser { --k: 1.0000; --x:   0; --y:  220; --bend-x:   0; --bend-y: -18 }
+  .plate--pads  { --k:  .7414; --x:  90; --y:  399; --bend-x:  16; --bend-y:  14 }
+  .plate--seq   { --k:  .4829; --x:   0; --y:  572; --bend-x: -18; --bend-y:  16 }
+  .plate--song  { --k:  .4829; --x: 181; --y:  636; --bend-x:  18; --bend-y:  18 }
+  .plate--synth { --k: 1.0000; --x:   0; --y:  818; --bend-x: -12; --bend-y:  20 }
+  .plate--mix   { --k:  .4829; --x: 181; --y: 1013; --bend-x:  18; --bend-y:  22 }
+
+  /* at this size a label under a small piece would collide with the piece
+     below it; every label hangs off the top edge instead */
+  .tag {
+    top: auto;
+    left: 0;
+    bottom: 100%;
+    padding-left: 0;
+    transform-origin: 0 100%;
+  }
+  .tag::before { left: 0; top: auto; bottom: 0 }
+  .tag__n { margin-top: 0; margin-bottom: 2px }
+  .tag__name { margin: 0 0 8px }
+  .plate--laser .tag__name { font-size: 16px }
 }
+
+/* ==========================================================================
+   REDUCED MOTION — the same frame, arrived at without the journey
+   ========================================================================== */
 
 @media (prefers-reduced-motion: reduce) {
-  html:not(.force-motion) .plate { animation: none !important; }
-  html:not(.force-motion) [data-state="released"] .plate,
-  html:not(.force-motion) [data-state="dealing"] .plate {
+  html:not(.force-motion) .plate { animation: none !important }
+  html:not(.force-motion) [data-state="dealing"] .plate,
+  html:not(.force-motion) [data-state="released"] .plate {
     z-index: var(--z);
-    transform: translate3d(var(--tx), var(--ty), 0) scale(var(--deal-scale)) rotate(var(--r));
+    transform: translate3d(var(--tx), var(--ty), 0) scale(var(--k));
   }
-  html:not(.force-motion) [data-state="released"] .tag,
-  html:not(.force-motion) [data-state="dealing"] .tag { opacity: 1; }
+  html:not(.force-motion) [data-state="dealing"] .plate .plate__cell,
+  html:not(.force-motion) [data-state="released"] .plate .plate__cell {
+    clip-path: inset(0 0 calc((1 - var(--cut)) * 100%) 0);
+  }
+  html:not(.force-motion) [data-state="dealing"] .tag,
+  html:not(.force-motion) [data-state="released"] .tag { opacity: 1 }
+  html:not(.force-motion) .station .rig::after { animation: none; opacity: 0 }
+  html:not(.force-motion) [data-state="released"] .station .rig::after { opacity: .52 }
+  html:not(.force-motion) .plate .plate__cell::after { animation: none }
+  html:not(.force-motion) .plate.is-landed .plate__cell::after,
+  html:not(.force-motion) [data-state="released"] .plate__cell::after { opacity: .32 }
 }
 
-.no-motion .plate { animation: none !important; }
+.no-motion .plate { animation: none !important }

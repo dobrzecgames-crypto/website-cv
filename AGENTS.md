@@ -31,13 +31,24 @@ At canonical 1440 desktop, the grid is based on a 4px atom, 16px dot pitch, 12 c
 
 ## Hero interaction
 
-The opening Station interaction uses the central mode area as a deck:
+The opening Station interaction treats the central mode area as a magazine of
+states:
 
 `LASER → PADS → SYNTH → SEQ → SONG → MIX`
 
-Cards are dealt quickly into an asymmetric but deterministic composition. An outgoing mode must not remain duplicated in the central Station. Final positions land on the grid; motion paths may leave it.
+Station starts intact, with nothing showing from under the chassis. One
+`LASER IT` cuts it open; the six modules leave the slot quickly into an
+asymmetric but deterministic composition, each released at its own real panel
+seam; the emptied chassis then closes over its bay and docks. An outgoing
+module must not remain duplicated in the central Station. Final positions land
+on the grid; motion paths may leave it.
 
-Do not freeze exact landing coordinates until all six real component bounds are available and measured.
+The landing coordinates are now measured and **frozen** in `GRID_BIBLE.md`
+section 19, "Opened-instrument hero contract". Do not re-derive them; change
+the contract first if the composition has to move.
+
+The interactive per-mode components in `prototypes/station-interactions/` are
+for the reading chapters below the hero, not for the hero itself.
 
 ## Git safety
 

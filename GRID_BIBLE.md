@@ -189,17 +189,23 @@ For normal chapter composition, useful starting ranges are:
 
 These are ranges, not mandatory templates.
 
-### Hero dealt-card scale
+### Hero module scale
 
-For the dealer hero, dealt mode cards should normally use only three canonical width families at 1440:
+The hero releases six modules from one machine. They must not read as six
+equally important screenshots, so scale is a hierarchy, not a distribution.
 
-- `S = W(2) = 208px`
-- `M = W(3) = 320px`
-- `L = W(4) = 432px`
+Widths come from the span table `W(n)`. Because each module is a real crop of a
+real capture, each carries its own aspect ratio, so **width alone does not
+control weight** — the weight class is the rendered area:
 
-Do not make all six the same size. Use at least two families, preferably all three, and do not let more than three cards share one family.
+- `primary` — one module only, roughly 3-4x the area of a detail module
+- `supporting` — two modules
+- `detail` — three modules
 
-Exact mode-to-family assignments are **not frozen yet**. They must be chosen after the final LASER, PADS, SYNTH, SEQ, SONG and MIX component bounds are measured.
+Do not make all six the same size, do not let more than three share one width
+family, and do not let a supporting module out-weigh the primary.
+
+The frozen assignment is in section 19.
 
 ---
 
@@ -298,23 +304,49 @@ As a practical ceiling, a card overlap should normally cover **less than ~8% of 
 
 ---
 
-## 10. The dealer hero: geometry contract
+## 10. The opened-instrument hero: geometry contract
 
 This is the canonical idea for the opening interaction.
 
 ### Semantic model
 
-Station starts intact.
+Station starts intact: one closed object, with nothing showing from under the
+chassis before the trigger.
 
-The central mode area behaves like a **deck of cards**:
+The central mode area behaves like a **magazine of states**:
 
 `LASER → PADS → SYNTH → SEQ → SONG → MIX`
 
-When the current mode is dealt out of the center, the next mode is revealed underneath.
+When the current module leaves the centre, the next is revealed underneath.
 
-**The outgoing card must not remain duplicated inside Station.** The viewer must read one physical object leaving one stack.
+**The outgoing module must not remain duplicated inside Station.** The viewer
+must read one physical object leaving one stack.
 
-The chassis/outer structure may remain as a source frame, but the central mode content is progressively depleted/revealed.
+### Every cut is horizontal, and lands on a real seam
+
+This is the rule that separates decomposition from decoration:
+
+- the seven cuts across the chassis fall in real gaps between Station's chassis
+  modules, measured off the capture;
+- each module is released at **its own** internal panel boundary, found by row
+  variance in that module's capture — the waveform display, the eight loaded
+  pads, the wavetable screen, the step matrix, the arrangement lanes, the
+  channel bank.
+
+A module is therefore a meaningful part rather than a strip, and it is far more
+legible at hero size than a whole mode screen shrunk to fit. Do not invent a cut
+position because it improves the composition; move the module instead.
+
+### The chassis closes
+
+After the last module clears the slot, the chassis closes over its own empty bay
+and its foot, and withdraws. It keeps its full width and its view-tab row — the
+row that names the six pieces now lying around it — so the machine remains the
+evidence that all of this came out of one object.
+
+It must not remain as a tall frame with a hole in it, and it must not become a
+dimmed ghost of the whole instrument. Both readings restore the dominant dark
+mass this contract exists to remove.
 
 ### Final landing rules
 
@@ -325,7 +357,10 @@ At the canonical 1440 layout:
 3. anchors snap to the `16px` dot lattice and preferably to macro rails where practical;
 4. card widths come from the `S/M/L` families above;
 5. preserve each component's aspect ratio;
-6. use fixed authored rotation values, normally within `-5deg … +5deg`;
+6. rotation is authored and fixed, normally within `-5deg … +5deg`; `0deg` on
+   every module is a legitimate and currently preferred choice, because
+   axis-aligned pieces read as parts of a machine while tilted ones read as
+   cards, and because a tilted piece breaks the horizontal-cut language above;
 7. do not use symmetrical `+x / -x` angle pairs as a pattern;
 8. no more than one card should land close to an exact cardinal direction from the source deck without a specific reason;
 9. use at least five distinct landing rows/columns across the six cards so the result does not become a neat two-row gallery;
@@ -376,7 +411,7 @@ Use unrotated bounding boxes first for layout solving, then verify rotated visua
 
 ---
 
-## 11. The dealer hero: timing contract
+## 11. The opened-instrument hero: timing contract
 
 This is included here because motion geometry and landing composition are one scene.
 
@@ -391,9 +426,17 @@ Starting timing targets:
 - complete visible deal + settling should normally finish in `<= 1.2s`
 - the next mode should become visible in the central deck almost immediately as the outgoing card clears it
 - no multi-second pause to present each mode
-- the down-arrow/scroll cue appears only after the final deal has visibly resolved, typically `120–200ms` after the last meaningful settle
+- the chassis begins closing roughly `90ms` after the last module clears the
+  slot and takes about `380ms`; it must not wait for every module to settle,
+  because a chassis still standing open around an empty bay reads as a hole
+- the down-arrow/scroll cue appears only after the scene has visibly resolved, typically `120–200ms` after the last meaningful settle
 
 These are tuning targets, not a demand for one exact easing curve.
+
+Measured on the implemented scene, from the click: cut at `171ms`, six launches
+between `179ms` and `656ms`, chassis closing at `756ms`, everything settled at
+`1126ms`, cue at `1291ms`. Load `?audit` to re-read this trace from the
+`data-audit` attribute on the stage.
 
 Motion paths may leave the grid while in flight. **Landing state returns to the grid.**
 
@@ -584,54 +627,93 @@ Before accepting a scene at 1440 desktop:
 
 ---
 
-## 19. What is intentionally NOT frozen yet
+## 19. The frozen hero contract
 
-Do not invent these values before all six real components are ready:
+The six components have been measured, so the canonical frame is no longer
+open. This section is the executable hero-layout contract; `styles/station.css`
+implements it and nothing else may re-derive it.
 
-- exact LASER/PADS/SYNTH/SEQ/SONG/MIX hero landing coordinates;
-- exact hero rotations;
-- exact z-order;
-- exact per-card scale-family assignment;
-- exact hero height;
-- final motion easing curves.
+### Superseded — dealer visual-correction contract, 2026-08-22
 
-Once MIX is complete and all six components can be measured, solve the canonical 1440 dealer frame against this bible and append a table containing, for each mode:
+The dealer frame recorded here on 2026-08-22 (`f3da8f9`, `6f1ef0a`) was not
+accepted: it read as six equally weighted screenshots distributed around a
+dimmed chassis. It is superseded by the opened-instrument contract below and
+must not be re-derived. Its landing table remains in git history.
 
-```text
-mode | width family/span | x | y | rotation | z-index | launch order | landing note
-```
+---
 
-That table will become the executable hero-layout contract.
+### Opened-instrument hero contract — canonical desktop
 
-### Dealer visual-correction contract — 2026-08-22
+**Canvas.** `1328 × 656` — the binding 12-column content width at 1440, and 41
+rows of the 16px lattice. All coordinates below are canonical canvas units with
+the origin at the canvas top-left, which at `1440 × 900` is page `x 56` and
+resolves at exactly `1px` per unit. Below that size the canvas scales as one
+plate; it never reflows into a second, unauthored composition.
 
-The correction pass keeps the same six-node deck and measured canonical source
-slot at `x 560 / y 285 / 320 × 410.66`, but reduces the dealt density and
-removes the compass-like frame. Coordinates below are viewport coordinates on
-the `1440 × 1000` canvas. Scale is relative to the `320px` source slot.
+**Source.** Station intact on column 5, `320 × 638.58`, top at `y 8`. The core
+slot — the box all six modules occupy while the machine is closed — is
+`x 448 / y 165 / 320 × 410.67`.
 
-| mode | width family/span | x | y | scale | rotation | z-index | launch order / delay | landing note |
-|---|---:|---:|---:|---:|---:|---:|---:|---|
-| LASER | M / 3 | 952 | 352 | 1.000 | -1.8deg | 7 | 1 / 0ms | Lower-right throw with a controlled contact against MIX. |
-| PADS | S / 2 | 504 | 96 | 0.650 | -1.2deg | 4 | 2 / 100ms | Compact high card; shares the central-right edge axis with SONG. |
-| SYNTH | M / 3 | 56 | 176 | 1.000 | 1.1deg | 3 | 3 / 200ms | Left primary, reduced from the previous L family. |
-| SEQ | S / 2 | 728 | 464 | 0.650 | -0.6deg | 8 | 4 / 300ms | Small central-lower bridge rather than a south compass point. |
-| SONG | M / 3 | 392 | 416 | 1.000 | 0.7deg | 5 | 5 / 400ms | Lower-left body; closes the former empty ring around the source. |
-| MIX | S / 2 | 840 | 112 | 0.650 | 1.5deg | 6 | 6 / 500ms | Small upper-right counterweight, reduced from M. |
+**Cut fractions.** Where the laser releases each module, as a fraction of the
+`720 × 924` plate, found by row variance in that module's own capture:
 
-Measured validation of this frame:
+| module | cut | what the cut keeps | visible aspect |
+|---|---:|---|---:|
+| LASER | `.2911` | waveform display, eight slice markers | 2.68 |
+| PADS  | `.3750` | the eight loaded pads, rows 1-2 | 2.08 |
+| SYNTH | `.3271` | the ZOLA-X wavetable screen | 2.38 |
+| SEQ   | `.8452` | the full step matrix | 0.92 |
+| SONG  | `.6169` | six arrangement lanes | 1.26 |
+| MIX   | `.6450` | the eight channel strips | 1.21 |
 
-- area-weighted centroid: `Cx 676.56 / Cy 471.73`, or `-43.44 / -28.27`
-  from the hero center;
-- three cards use M and three use S; no L card remains in the first deal;
-- the only intentional rotated AABB contact is the small `MIX / LASER` touch,
-  below the 8% overlap budget;
+**Landing frame.** Scale is `W(n) / 320`; rotation is `0deg` throughout.
+
+| module | span / scale | x | y | w × h | weight | z | launch | landing note |
+|---|---|---:|---:|---:|---|---:|---:|---|
+| LASER | W(6) / 2.05 | 768 | 48 | 656 × 245 | primary | 6 | 1 / 0ms | Starts on the slot's own right edge and runs off the page. The one sanctioned bleed. |
+| PADS | W(4) / 1.35 | 0 | 240 | 432 × 208 | supporting | 4 | 2 / 95ms | Holds the left rail under the chassis. Eight pads answer the eight markers above them. |
+| SYNTH | W(4) / 1.35 | 448 | 464 | 432 × 181 | supporting | 3 | 3 / 190ms | Starts on the slot's own left edge, one band below it. |
+| SEQ | W(2) / 0.65 | 448 | 0 | 208 × 226 | detail | 5 | 4 / 285ms | The one near-square piece, on the slot's left edge at the top of the canvas. |
+| SONG | W(2) / 0.65 | 112 | 480 | 208 × 165 | detail | 2 | 5 / 380ms | Lower-left counterweight; its right edge shares the chassis' right edge. |
+| MIX | W(2) / 0.65 | 1120 | 448 | 208 × 172 | detail | 7 | 6 / 475ms | The far throw, and the only mass in the lower right. |
+
+**The chassis** closes to its head — `320 × 157`, the top `.24589` of the frame —
+and docks at `0 / 0`, under the wordmark.
+
+**Measured validation** of the rendered frame at `1440 × 900`. Every number
+below was read back off the live DOM, not intended:
+
+- `--u` resolves to `1.000`; every piece lands within a pixel of its authored
+  coordinate;
+- area-weighted centroid `713.1 / 329.7`, i.e. `+49.1 / +1.7` from the canvas
+  centre — inside the `±56 / ±32` balance envelope;
+- minimum clear distance `21.5px` (PADS/SEQ, corner to corner); every pair that
+  actually faces another across a corridor clears `32px` or more;
+- three shared alignment axes: `x 0` (chassis, PADS), `x 320` (chassis right
+  edge, SONG right edge), `x 448` (SEQ, SYNTH — the slot's own left edge);
+- six distinct landing rows and five distinct landing columns;
+- throw distances `195 / 263 / 393 / 437 / 509 / 637` — no two within `40px`,
+  so no two pieces read as the same throw;
+- throw angles clump right-and-down instead of spreading evenly; one throw
+  (PADS) lands within 10° of a cardinal, which is the permitted maximum;
 - mirror-pair rejection passes for every pair;
-- short desktop and tablet viewports use the shared height-fit factor
-  `clamp(.72, (100svh - 160px) / 840px, 1)`: each card stays centred inside
-  its authored grid span while its size and vertical throw fit the available
-  height;
-- all six launch anchors are deterministic and runtime RNG is absent.
+- object coverage `50.1%`; nothing overlaps, so the overlap budget is unused;
+- one bleed past the right rail (LASER, `616` of `656` visible at 1440);
+- no rotation, no runtime RNG, no per-viewport coordinate fudging.
+
+### Opened-instrument hero contract — tablet and mobile
+
+Each family owns its own canvas and its own map, per section 14. Neither is a
+scaled copy of the desktop frame.
+
+- **Tablet, 768–1199.** Canvas `960 × 900`; 8 columns, step `122`,
+  `W(n) = 122n - 16`. Station on column 3, `350` wide. LASER at `W(4)` flush to
+  the right rail; SEQ and PADS hold the left; SYNTH crosses the middle; MIX and
+  SONG fall to the right. The canvas is taller than a 768px viewport by design.
+- **Mobile, < 768.** Canvas `350 × 1170`; 4 columns, step `90.5`,
+  `W(n) = 90.5n - 12`. Station takes all four columns. The modules fall down the
+  page in a staggered cascade, alternating which rail they hold, with SEQ and
+  SONG paired across the gutter. Labels hang above their piece at this size.
 
 ---
 

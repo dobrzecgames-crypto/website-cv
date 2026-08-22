@@ -1,14 +1,18 @@
 /* ===========================================================================
-   LASER IT — one chassis, one six-card deck, one fast deal.
+   LASER IT — one machine, one six-module slot, one cut.
 
      intact -> arming -> slicing -> dealing -> released
                                                 |
                                            closing -> intact
 
-   CSS owns geometry and each trajectory. JS owns only narrative state and
-   the launch clock. Every departing card is the exact node that occupied the
-   central slot; revealing the next card is therefore a consequence of motion,
-   not a screenshot swap or a duplicate appearing elsewhere.
+   CSS owns all geometry, every trajectory and the crop each module is
+   released at. JS owns only narrative state and the clock.
+
+   Every departing module is the exact node that filled the central slot, so
+   revealing the next one is a consequence of the motion rather than a
+   screenshot swap or a duplicate appearing elsewhere. The chassis closes over
+   its own emptied bay on its own beat, once the last module is clear of it —
+   which is why 'released' is entered before the last flight has finished.
    ========================================================================== */
 
 (function () {
@@ -43,23 +47,26 @@
     stage.dataset.audit = JSON.stringify(audit);
   }
 
-  /* Six starts in 500ms; the final MIX settle is 950ms after the first
-     launch. Including the 160ms LASER prelude, the visible sequence resolves
-     at 1110ms. The cue follows 160ms later. */
+  /* Six launches inside 475ms, after a 160ms prelude. The chassis starts
+     closing 90ms after the last module clears it and takes 380ms, so the
+     scene resolves at 1105ms and the cue follows 160ms after that.
+     GRID_BIBLE.md section 11 is the contract these numbers answer to. */
   var CLOCK = {
     arm: 50,
     sweep: 110,
-    interval: 100,
+    interval: 95,
+    close: 90,
+    closing: 380,
     cueDelay: 160,
-    restore: 280
+    restore: 300
   };
 
   var COPY = {
     intact: {
       readout: 'Source loaded · 1 slice',
       label: 'Laser it',
-      meta: 'deal 6',
-      hint: 'One pass. Six modes, all held in the same central slot.'
+      meta: 'cut 6',
+      hint: 'One pass. Six modules, all held in the same central slot.'
     },
     cutting: {
       readout: 'Cutting',
@@ -68,16 +75,16 @@
       hint: ''
     },
     dealing: {
-      readout: 'Dealing · 6 modes',
-      label: 'Dealing',
+      readout: 'Opening · 6 modules',
+      label: 'Opening',
       meta: 'bach · bach',
       hint: ''
     },
     released: {
-      readout: '6 modes · slot empty',
-      label: 'Replay',
-      meta: 'deal again',
-      hint: 'Six modes left one chassis. The central slot is empty.'
+      readout: '6 modules · chassis closed',
+      label: 'Close it',
+      meta: 'put it back',
+      hint: 'Six modules left one machine. What is left of it is the surface that names them.'
     }
   };
 
@@ -148,7 +155,6 @@
 
   function finishDeal() {
     landAll();
-    state('released');
     say('released');
     setBusy(false);
     mark('settled');
@@ -164,11 +170,13 @@
     deck.removeAttribute('aria-hidden');
     mark('deal-start');
 
+    var lastLaunch = 0;
     var lastSettle = 0;
     cards.forEach(function (card, index) {
       var launch = index * CLOCK.interval;
       var flight = milliseconds(card);
       var settle = launch + flight;
+      lastLaunch = Math.max(lastLaunch, launch);
       lastSettle = Math.max(lastSettle, settle);
       at(launch, function () {
         card.classList.add('is-launching');
@@ -179,7 +187,16 @@
         mark('land', card.dataset.mode);
       });
     });
-    at(lastSettle, finishDeal);
+
+    /* The machine closes on its own beat, not as an afterthought once every
+       module has settled: by the time MIX is clear of the slot there is
+       nothing left in it, and a chassis that waited would read as a hole. */
+    var closed = lastLaunch + CLOCK.close;
+    at(closed, function () {
+      state('released');
+      mark('chassis-close');
+    });
+    at(Math.max(lastSettle, closed + CLOCK.closing), finishDeal);
   }
 
   function cut() {
