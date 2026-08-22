@@ -32,3 +32,6 @@ _Source: user instruction, 2026-08-22._
 - Outbox entries are append-only; read messages are not deleted.
 - Agent-to-agent agreement never overrides an explicit user decision.
 - Product-direction questions are marked `STATUS: USER DECISION NEEDED` and escalated, not resolved between agents.
+- After a task the user accepts and closes, its owner appends a short close entry (normally 3-6 lines) to their own outbox.
+- Rejected or still-iterating work is never recorded as closed.
+- `HANDOFF.md` changes only when the active task or its owner changes.

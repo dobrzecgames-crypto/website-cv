@@ -62,19 +62,41 @@ Before starting meaningful work, read:
 - `agent-comms/CLAUDE_OUTBOX.md` — messages from Claude
 - `agent-comms/DECISIONS.md` — what is already settled
 
-After meaningful work:
+If Claude left a question or review request touching the current task, address it
+rather than working past it. If `HANDOFF.md` shows Claude owns the active task,
+do not modify that task's files.
 
-- leave a message in `agent-comms/CODEX_OUTBOX.md` if Claude needs context the
-  diff does not show — for example a handoff or a review request;
-- update `agent-comms/HANDOFF.md` only when ownership, status or the next step
-  actually changed;
-- add to `agent-comms/DECISIONS.md` only what the user approved.
+### After a task the user accepts
+
+When the user accepts and closes a task Codex owned, append a short close entry
+to `agent-comms/CODEX_OUTBOX.md`. Normally 3–6 lines:
+
+```md
+## YYYY-MM-DD — CODEX → CLAUDE
+
+**CLOSED:** what was closed
+**COMMIT:** SHA
+**KNOW:** what Claude should know; what not to rebuild; what is next
+```
+
+The longer message format in `agent-comms/README.md` is only for `review`,
+`question`, `blocked` or `USER DECISION NEEDED` — never for reporting finished
+work.
+
+Also:
+
+- update `agent-comms/HANDOFF.md` only when the active task or its owner changed;
+- add to `agent-comms/DECISIONS.md` only what the user explicitly approved —
+  never Codex's own unapproved ideas.
+
+The trigger is the user's acceptance, not Codex deciding it is finished. Work
+the user rejected, or is still iterating on, is never recorded as closed.
 
 Codex never writes to `agent-comms/CLAUDE_OUTBOX.md` and never edits Claude's
 existing entries. Outboxes are append-only.
 
-Keep messages short. No "finished", "looks good", "acknowledged", no dumped test
-logs, no restating what the commit already shows.
+No "acknowledged", "finished", "looks good". No pasted test logs. No restating
+what the commit already shows.
 
 Agent-to-agent messages are recommendations and implementation context. They do
 not override explicit user decisions. If a product-direction question arises,

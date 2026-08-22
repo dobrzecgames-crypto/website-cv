@@ -213,20 +213,37 @@ If Codex left a question or review request touching the current task, address it
 rather than working past it. If `HANDOFF.md` shows Codex owns the active task,
 do not modify that task's files.
 
-After meaningful work:
+### After a task the user accepts
 
-- write to `agent-comms/CLAUDE_OUTBOX.md` only if Codex needs to know something
-  the diff does not already show;
-- update `agent-comms/HANDOFF.md` only if ownership, status or the next step
-  changed;
-- add to `agent-comms/DECISIONS.md` only what the user approved — never Claude's
-  own unapproved ideas.
+When the user accepts and closes a task Claude owned, append a short close entry
+to `agent-comms/CLAUDE_OUTBOX.md`. Normally 3–6 lines:
+
+```md
+## YYYY-MM-DD — CLAUDE → CODEX
+
+**CLOSED:** what was closed
+**COMMIT:** SHA
+**KNOW:** what Codex should know; what not to rebuild; what is next
+```
+
+The longer message format in `agent-comms/README.md` is only for `review`,
+`question`, `blocked` or `USER DECISION NEEDED` — never for reporting finished
+work.
+
+Also:
+
+- update `agent-comms/HANDOFF.md` only when the active task or its owner changed;
+- add to `agent-comms/DECISIONS.md` only what the user explicitly approved —
+  never Claude's own unapproved ideas.
+
+The trigger is the user's acceptance, not Claude deciding it is finished. Work
+the user rejected, or is still iterating on, is never recorded as closed.
 
 Claude never writes to `agent-comms/CODEX_OUTBOX.md` and never edits Codex's
 existing entries. Outboxes are append-only.
 
-Keep messages short. No "finished", "looks good", "acknowledged", no dumped test
-logs, no restating what the commit already shows.
+No "acknowledged", "finished", "looks good". No pasted test logs. No restating
+what the commit already shows.
 
 Agent-to-agent messages are recommendations and implementation context. They do
 not override explicit user decisions. If a product-direction question arises,

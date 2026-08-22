@@ -50,13 +50,35 @@ real product decision, it belongs in the root file too.
 
 ---
 
-## Message format
+## Two message forms
+
+### 1. Close entry — the default
+
+Written by the task owner after the user accepts and closes a task. Normally
+3–6 lines. This is what most entries look like.
+
+````md
+## YYYY-MM-DD — CODEX → CLAUDE
+
+**CLOSED:** what was closed
+**COMMIT:** SHA
+**KNOW:** what the other agent should know; what not to rebuild; what is next
+````
+
+`KNOW` is the only field that carries judgment. Use it for intent, constraint,
+risk, or "this is settled, do not touch it". Leave it out if there is genuinely
+nothing to add.
+
+### 2. Full message — only when something is open
+
+Use this **only** for `review`, `question`, `blocked` or `USER DECISION NEEDED`.
+Do not use it to report finished work.
 
 ````md
 ## YYYY-MM-DD HH:MM — CLAUDE → CODEX
 
 **TOPIC:** short subject
-**STATUS:** info | review | question | blocked | USER DECISION NEEDED
+**STATUS:** review | question | blocked | USER DECISION NEEDED
 **RELATED:** commit SHA / file / feature
 
 ### Message
@@ -65,21 +87,20 @@ What the other agent needs to know. Short.
 
 ### Requested action
 
-What the other agent should actually do or judge. Omit if STATUS is `info`.
+What the other agent should actually do or judge.
 
 ### Do not change
 
 Optional. Things the other agent should leave alone.
 ````
 
-Rules:
+Rules for both forms:
 
-- One entry per topic. Do not merge unrelated topics into one message.
-- Use 24h local time in the heading.
-- `RELATED` should point at something verifiable: a commit SHA, a file path or
-  a named feature. Do not invent SHAs.
-- If a message is obsolete, do not delete it — post a new entry that supersedes
-  it and say so in `RELATED`.
+- One entry per topic. Do not merge unrelated topics.
+- `COMMIT` / `RELATED` must point at something verifiable — a real SHA, a real
+  file path, a named feature. Never invent a SHA.
+- If an entry is obsolete, do not delete it. Post a new one that supersedes it
+  and say so.
 
 ---
 
@@ -100,14 +121,15 @@ task's files. Work on something else or ask the user.
 
 ## End-of-task protocol
 
-After meaningful work:
+Triggered by the user accepting and closing a task — **not** by an agent
+deciding it is finished.
 
-1. Write to your own outbox **only if the other agent needs to know something**
-   that is not obvious from the diff.
-2. Update `HANDOFF.md` **only if ownership, status or the next step changed**.
-3. Add to `DECISIONS.md` **only** what the user approved.
+1. The task owner appends a **close entry** to their own outbox.
+2. Update `HANDOFF.md` **only** if the active task or its owner changed.
+3. Add to `DECISIONS.md` **only** what the user explicitly approved.
 
-Nothing to add is a valid outcome. Silence is cheaper than noise.
+Work the user rejected, or is still iterating on, is **never** recorded as
+closed. Recording it would put a false state into the channel.
 
 ---
 
@@ -133,12 +155,13 @@ If unsure, leave it out and mark the open message `STATUS: USER DECISION NEEDED`
 
 Update it when:
 
-- a task starts or finishes,
+- the active task changes,
 - ownership moves between agents,
 - something becomes blocked,
 - a new stable checkpoint exists.
 
-Do not update it to say work is "in progress" with no state change.
+Do not update it to say work is "in progress" with no state change. A stale
+`HANDOFF.md` is worse than none, because the other agent trusts it.
 
 ---
 
@@ -147,7 +170,7 @@ Do not update it to say work is "in progress" with no state change.
 Do not write:
 
 - "finished", "done", "looks good", "acknowledged",
-- full test logs without a reason,
+- test logs, build output or full reports pasted in without a reason,
 - restatements of changes already readable in the commit,
 - status updates that change nothing,
 - long prose where three lines would do.
