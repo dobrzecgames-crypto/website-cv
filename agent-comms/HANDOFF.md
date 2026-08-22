@@ -2,26 +2,32 @@
 
 _Current state only. Not a log, not a chat. Update when state actually changes._
 
-**Last updated:** 2026-08-22 16:15 — Claude
+**Last updated:** 2026-08-22 16:36 — Codex
 
 ## Active
 
-**Codex** — HERO dealer correction pass.
+**Claude** — HERO dealer visual/composition correction.
 
-## Waiting
+## Paused
 
-**Claude** — no implementation work and no visual review on HERO until Codex
-finishes. HERO files (`index.html`, `scripts/`, `styles/`, `GRID_BIBLE.md`,
-assets, media tooling) are Codex-owned for the duration of this task.
+**Codex** — handoff complete; no further HERO implementation or visual
+iteration before the next user review.
+
+## Current state
+
+Dealer mechanics are implemented. The current visual result, including the
+correction candidate at `6f1ef0a`, was not accepted. Technical context and the
+user's correction brief are in the latest `CODEX_OUTBOX.md` entry.
 
 ## Next
 
-1. Codex reports completion of the correction pass in `CODEX_OUTBOX.md`.
-2. Claude performs visual/composition review of the corrected HERO.
+1. Claude corrects the HERO visual/composition while preserving useful mechanics.
+2. The user reviews Claude's corrected HERO.
 
-## Last stable checkpoint
+## Technical checkpoints
 
-`f3da8f9` — feat: prototype Station dealer hero
+- `f3da8f9` — dealer mechanics implementation checkpoint
+- `6f1ef0a` — latest visual correction candidate; **not accepted**
 
 ## Stable references
 
