@@ -803,6 +803,7 @@
      ------------------------------------------------------------------- */
 
   var seqSteps = Array.from(document.querySelectorAll('.seq-step'));
+  var seqColumns = Array.from(document.querySelectorAll('.seq-column'));
   var seqTransport = document.getElementById('seqTransport');
   var seqRunning = !reduceMotion.matches;
   var seqEpoch = performance.now();
@@ -811,7 +812,10 @@
   function updateTransport() {
     seqTransport.setAttribute('aria-pressed', String(seqRunning));
     seqTransport.querySelector('span').textContent = seqRunning ? 'Playhead on' : 'Playhead off';
-    if (!seqRunning) seqSteps.forEach(function (step) { step.classList.remove('is-playhead'); });
+    if (!seqRunning) {
+      seqSteps.forEach(function (step) { step.classList.remove('is-playhead'); });
+      seqColumns.forEach(function (column) { column.classList.remove('is-playhead'); });
+    }
   }
 
   function renderPlayhead(stepNumber) {
@@ -820,13 +824,33 @@
     seqSteps.forEach(function (step) {
       step.classList.toggle('is-playhead', Number(step.dataset.step) === stepNumber);
     });
+    seqColumns.forEach(function (column) {
+      column.classList.toggle('is-playhead', Number(column.dataset.step) === stepNumber);
+    });
+  }
+
+  function toggleSeqStep(step) {
+    var active = !step.classList.contains('is-on');
+    step.classList.toggle('is-on', active);
+    step.setAttribute('aria-pressed', String(active));
   }
 
   seqSteps.forEach(function (step) {
-    step.addEventListener('click', function () {
-      var active = !step.classList.contains('is-on');
-      step.classList.toggle('is-on', active);
-      step.setAttribute('aria-pressed', String(active));
+    step.addEventListener('pointerdown', function (event) {
+      if (event.pointerType === 'mouse' && event.button !== 0) return;
+      event.preventDefault();
+      step.setPointerCapture(event.pointerId);
+      step.classList.add('is-pressed');
+      toggleSeqStep(step);
+    });
+    step.addEventListener('pointerup', function (event) {
+      step.classList.remove('is-pressed');
+      if (step.hasPointerCapture(event.pointerId)) step.releasePointerCapture(event.pointerId);
+    });
+    step.addEventListener('pointercancel', function () { step.classList.remove('is-pressed'); });
+    step.addEventListener('lostpointercapture', function () { step.classList.remove('is-pressed'); });
+    step.addEventListener('click', function (event) {
+      if (event.detail === 0) toggleSeqStep(step);
     });
   });
   seqTransport.addEventListener('click', function () {
