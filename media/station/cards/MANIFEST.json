@@ -1,0 +1,363 @@
+{
+  "generatedFrom": "assets/station/current",
+  "sourceSetId": "2026-08-21-0c64ac8",
+  "contentBox": {
+    "x": 6,
+    "width": 1341
+  },
+  "webpQuality": 0.84,
+  "tool": "tools/derive-cards.mjs",
+  "note": "One card is one thing, cut on a real panel boundary in the source capture.",
+  "files": [
+    {
+      "card": "laser-waveform",
+      "source": "laser/laser-sliced.png",
+      "sourceSha256": "cb26a3344f0643975dcd3cb35db8443c924c8ed0a6b2b2e913a5d60607d500cd",
+      "sourceRect": {
+        "x": 6,
+        "y": 693,
+        "width": 1341,
+        "height": 462
+      },
+      "outputPx": {
+        "width": 1088,
+        "height": 375
+      },
+      "aspect": 2.9013,
+      "renderWidth": 544,
+      "role": "The break, cut into eight slices. The waveform display with its gold markers.",
+      "outputs": [
+        {
+          "file": "laser-waveform.webp",
+          "bytes": 13852,
+          "sha256": "0ac0faa37b925c769fc3c4bff05e0e0c61971bbf0b2438b272b7a4c46ae7471c"
+        }
+      ]
+    },
+    {
+      "card": "laser-cut",
+      "source": "laser/laser-sliced.png",
+      "sourceSha256": "cb26a3344f0643975dcd3cb35db8443c924c8ed0a6b2b2e913a5d60607d500cd",
+      "sourceRect": {
+        "x": 6,
+        "y": 1245,
+        "width": 1341,
+        "height": 282
+      },
+      "outputPx": {
+        "width": 864,
+        "height": 182
+      },
+      "aspect": 4.7473,
+      "renderWidth": 432,
+      "role": "The cut control: slice count, SET, and the audition transport under it.",
+      "outputs": [
+        {
+          "file": "laser-cut.webp",
+          "bytes": 2760,
+          "sha256": "7adbc41d9fcbd3439bee17428e26368bc4c3f207e90fcb43bb0a88f01f696e83"
+        }
+      ]
+    },
+    {
+      "card": "laser-slices",
+      "source": "laser/laser-sliced.png",
+      "sourceSha256": "cb26a3344f0643975dcd3cb35db8443c924c8ed0a6b2b2e913a5d60607d500cd",
+      "sourceRect": {
+        "x": 6,
+        "y": 1665,
+        "width": 1341,
+        "height": 678
+      },
+      "outputPx": {
+        "width": 640,
+        "height": 324
+      },
+      "aspect": 1.9753,
+      "renderWidth": 320,
+      "role": "The live slice map: eight slices sitting on eight pads, named and ready.",
+      "outputs": [
+        {
+          "file": "laser-slices.webp",
+          "bytes": 16736,
+          "sha256": "742ff7c3ce7a543db4202b09995beed590ce1ca035ded1ad134e5f8f2715abed"
+        }
+      ]
+    },
+    {
+      "card": "laser-source",
+      "source": "laser/laser-overview.png",
+      "sourceSha256": "8c38acfc3d47696c413b6e9298ffb413dfab07c970e8e53f8579c1e43bd16185",
+      "sourceRect": {
+        "x": 6,
+        "y": 693,
+        "width": 1341,
+        "height": 558
+      },
+      "outputPx": {
+        "width": 640,
+        "height": 266
+      },
+      "aspect": 2.406,
+      "renderWidth": 320,
+      "role": "Where a break comes in: choose a WAV, or start from one of four samples.",
+      "outputs": [
+        {
+          "file": "laser-source.webp",
+          "bytes": 4308,
+          "sha256": "52942457c26beb7c39090c807dfb38efdcae0a3b8e7c5b1dc429e59b9c3bf188"
+        }
+      ]
+    },
+    {
+      "card": "pads-grid",
+      "source": "pads/pads-active.png",
+      "sourceSha256": "509132e5be6fa270a65935bf91a5203948d6bb55be312dd5b8d4b0b8b178a5b2",
+      "sourceRect": {
+        "x": 6,
+        "y": 660,
+        "width": 1341,
+        "height": 1308
+      },
+      "outputPx": {
+        "width": 640,
+        "height": 624
+      },
+      "aspect": 1.0256,
+      "renderWidth": 320,
+      "role": "The sixteen-pad performance grid, eight of them loaded.",
+      "outputs": [
+        {
+          "file": "pads-grid.webp",
+          "bytes": 25234,
+          "sha256": "1f63368f35e30591ab319a5e2d333354c000da9f513b276493bc3294503f861d"
+        }
+      ]
+    },
+    {
+      "card": "synth-picker",
+      "source": "synth/synth-picker.png",
+      "sourceSha256": "7cd77c7c3495381f31775e6e5a4cdb3ccd38d44ff79e407eadaf1566401cb67d",
+      "sourceRect": {
+        "x": 6,
+        "y": 660,
+        "width": 1341,
+        "height": 1482
+      },
+      "outputPx": {
+        "width": 416,
+        "height": 460
+      },
+      "aspect": 0.9043,
+      "renderWidth": 208,
+      "role": "The instrument menu: four synthesizers, each with its own character.",
+      "outputs": [
+        {
+          "file": "synth-picker.webp",
+          "bytes": 14414,
+          "sha256": "1a9d5e4e889367dac159b7c2e5737b20df55ea6066479cfd9dc2ceb397eb190b"
+        }
+      ]
+    },
+    {
+      "card": "synth-zola-x",
+      "source": "synth/zola-x-idle.png",
+      "sourceSha256": "78aef14835519352586ff9128cfe52338d0db879f2e825ada2a280d3d3460dc6",
+      "sourceRect": {
+        "x": 6,
+        "y": 660,
+        "width": 1341,
+        "height": 1599
+      },
+      "outputPx": {
+        "width": 640,
+        "height": 763
+      },
+      "aspect": 0.8388,
+      "renderWidth": 320,
+      "role": "ZOLA-X, the wavetable polysynth. The whole instrument, table to scale.",
+      "outputs": [
+        {
+          "file": "synth-zola-x.webp",
+          "bytes": 21638,
+          "sha256": "f8c16f83a3149f84d136db1ccadd28901fe731760bc6673de093568019dfb79a"
+        }
+      ]
+    },
+    {
+      "card": "synth-bassic",
+      "source": "synth/bassic-idle.png",
+      "sourceSha256": "dd434a5befa404441bbb9a2d05ed9f9829390943671d372e6059923b29b31da3",
+      "sourceRect": {
+        "x": 6,
+        "y": 660,
+        "width": 1341,
+        "height": 1665
+      },
+      "outputPx": {
+        "width": 416,
+        "height": 517
+      },
+      "aspect": 0.8046,
+      "renderWidth": 208,
+      "role": "BASSIC: two oscillators, sub, filter. Monophonic bass and leads.",
+      "outputs": [
+        {
+          "file": "synth-bassic.webp",
+          "bytes": 10978,
+          "sha256": "58ab3057c6378574651e012dadd03b21c0772cb2cd0d307c23c76c7ec1882877"
+        }
+      ]
+    },
+    {
+      "card": "synth-monogorg",
+      "source": "synth/monogorg-idle.png",
+      "sourceSha256": "3e5799bdf0ddb89d72c5e7839876cccb036b811dd04a0cba0ee40048291c69a6",
+      "sourceRect": {
+        "x": 6,
+        "y": 660,
+        "width": 1341,
+        "height": 1644
+      },
+      "outputPx": {
+        "width": 416,
+        "height": 510
+      },
+      "aspect": 0.8157,
+      "renderWidth": 208,
+      "role": "MONOGORG: drive, contour and glide. Dark mono bass for sampled beats.",
+      "outputs": [
+        {
+          "file": "synth-monogorg.webp",
+          "bytes": 9280,
+          "sha256": "1e068c3c0af93cf4e37e189a2952c1b2863f3b0f3387bd1681b1b26dd0a5a29f"
+        }
+      ]
+    },
+    {
+      "card": "synth-drum",
+      "source": "synth/drum-synth-kick.png",
+      "sourceSha256": "0722bad3f5645d809bcdcc685b4ae6ba242385b8a341667a7779901fd800f36b",
+      "sourceRect": {
+        "x": 6,
+        "y": 660,
+        "width": 1341,
+        "height": 1245
+      },
+      "outputPx": {
+        "width": 416,
+        "height": 386
+      },
+      "aspect": 1.0777,
+      "renderWidth": 208,
+      "role": "The drum synth: eight shaping faders per voice, kick and snare.",
+      "outputs": [
+        {
+          "file": "synth-drum.webp",
+          "bytes": 7686,
+          "sha256": "61092d43c7e1d8070325c0f486b4de2b9690d1819128cf9a598c268231943561"
+        }
+      ]
+    },
+    {
+      "card": "seq-matrix",
+      "source": "seq-song/seq.png",
+      "sourceSha256": "312430a1db4cccdb64612b9761d8d921ac3b9456f40dff4d3c18b8bb8e40a929",
+      "sourceRect": {
+        "x": 6,
+        "y": 693,
+        "width": 1341,
+        "height": 1440
+      },
+      "outputPx": {
+        "width": 416,
+        "height": 447
+      },
+      "aspect": 0.9306,
+      "renderWidth": 208,
+      "role": "The step matrix: eight pads against sixteen steps, velocity per step.",
+      "outputs": [
+        {
+          "file": "seq-matrix.webp",
+          "bytes": 6868,
+          "sha256": "7c268877145421766109cbe17852f5ffe6c0a8038c18a97df3ae177404c0a5f1"
+        }
+      ]
+    },
+    {
+      "card": "song-arrangement",
+      "source": "seq-song/song.png",
+      "sourceSha256": "1914d758eb4cf7d2bf768ad6338394f87bd45ae4fa951c23f7579f220363b7f8",
+      "sourceRect": {
+        "x": 6,
+        "y": 693,
+        "width": 1341,
+        "height": 1041
+      },
+      "outputPx": {
+        "width": 640,
+        "height": 497
+      },
+      "aspect": 1.2877,
+      "renderWidth": 320,
+      "role": "The arrangement: six lanes of patterns laid out across the bars.",
+      "outputs": [
+        {
+          "file": "song-arrangement.webp",
+          "bytes": 8388,
+          "sha256": "7d2734a703a4f1fa0d37f8ff15a167df413cc7c08f129a66b18078c52d054bd6"
+        }
+      ]
+    },
+    {
+      "card": "mix-channels",
+      "source": "mix/mix-active.png",
+      "sourceSha256": "8fb6af0e473fd6385061b4777c2a0e89b55345c8c10cb4e1cae08046befabc41",
+      "sourceRect": {
+        "x": 6,
+        "y": 693,
+        "width": 1341,
+        "height": 1083
+      },
+      "outputPx": {
+        "width": 640,
+        "height": 517
+      },
+      "aspect": 1.2379,
+      "renderWidth": 320,
+      "role": "The mixer: eight channel strips with live meters, solo and mute.",
+      "outputs": [
+        {
+          "file": "mix-channels.webp",
+          "bytes": 15732,
+          "sha256": "e72a7c3b0355076f5b5266396b6c7ae496c925e18d751b0123787985c35b9df5"
+        }
+      ]
+    },
+    {
+      "card": "mix-bus",
+      "source": "mix/mix-active-02.png",
+      "sourceSha256": "f3370e70d46d6323555c281188964b2c34880a8f71ff0027f18ef6477bb63a07",
+      "sourceRect": {
+        "x": 6,
+        "y": 1900,
+        "width": 1341,
+        "height": 176
+      },
+      "outputPx": {
+        "width": 640,
+        "height": 84
+      },
+      "aspect": 7.619,
+      "renderWidth": 320,
+      "role": "Bus and FX routing, and the master.",
+      "outputs": [
+        {
+          "file": "mix-bus.webp",
+          "bytes": 2246,
+          "sha256": "4afd8312ee4578d3585e4d76020794cd8ce31e539eb55756b0749bda6d2fe7b9"
+        }
+      ]
+    }
+  ]
+}

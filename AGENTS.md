@@ -31,21 +31,24 @@ At canonical 1440 desktop, the grid is based on a 4px atom, 16px dot pitch, 12 c
 
 ## Hero interaction
 
-The opening Station interaction treats the central mode area as a magazine of
-states:
+The page opens on Station and nothing else: one closed instrument, nothing
+showing from under the chassis, no card on the table.
 
-`LASER → PADS → SYNTH → SEQ → SONG → MIX`
+`LASER IT` performs on Station the cut Station performs on a sample. One flash,
+the machine delaminates along its own seams, and the fourteen things it was
+holding go across the table at once, fast, the way a dealer throws. The machine
+does not survive the cut — nothing of it is left standing among its contents.
 
-Station starts intact, with nothing showing from under the chassis. One
-`LASER IT` cuts it open; the six modules leave the slot quickly into an
-asymmetric but deterministic composition, each released at its own real panel
-seam; the emptied chassis then closes over its bay and docks. An outgoing
-module must not remain duplicated in the central Station. Final positions land
-on the grid; motion paths may leave it.
+A card is ONE thing: one instrument, one grid, one display, one control group,
+cut out of a real capture on that panel's own boundary. Never the same chassis
+again with a different tab open, and never a strip of chassis — that is part of
+the machine's natural look and says nothing on its own. Do not invent a card
+the capture set has no evidence for.
 
-The landing coordinates are now measured and **frozen** in `GRID_BIBLE.md`
-section 19, "Opened-instrument hero contract". Do not re-derive them; change
-the contract first if the composition has to move.
+Landing positions are measured and **frozen** in `GRID_BIBLE.md` section 19,
+"Dealt-table hero contract". Do not re-derive them in CSS; revise that contract
+first if the table has to change. `tools/derive-cards.mjs` carries the crop
+rectangles and how they were measured.
 
 The interactive per-mode components in `prototypes/station-interactions/` are
 for the reading chapters below the hero, not for the hero itself.

@@ -1,18 +1,16 @@
 /* ===========================================================================
-   LASER IT — one machine, one six-module slot, one cut.
+   LASER IT — one machine, one cut, fourteen cards on the table.
 
      intact -> arming -> slicing -> dealing -> released
-                                                |
-                                           closing -> intact
+                                                 |
+                                            closing -> intact
 
-   CSS owns all geometry, every trajectory and the crop each module is
-   released at. JS owns only narrative state and the clock.
+   CSS owns all geometry: where every card lands, how big it is, and the arc it
+   takes. JS owns narrative state and the clock, nothing else.
 
-   Every departing module is the exact node that filled the central slot, so
-   revealing the next one is a consequence of the motion rather than a
-   screenshot swap or a duplicate appearing elsewhere. The chassis closes over
-   its own emptied bay on its own beat, once the last module is clear of it —
-   which is why 'released' is entered before the last flight has finished.
+   The deal is deliberately faster than a card can be read. Nobody is meant to
+   study the table on the way past — the impression to leave is how much came
+   out of one object, and that only lands if it happens at once.
    ========================================================================== */
 
 (function () {
@@ -24,7 +22,7 @@
   var deck = document.getElementById('deck');
   if (!stage || !trigger || !deck) return;
 
-  var cards = Array.prototype.slice.call(deck.querySelectorAll('.plate'));
+  var cards = Array.prototype.slice.call(deck.querySelectorAll('.card'));
   var label = document.getElementById('triggerLabel');
   var meta = document.getElementById('triggerMeta');
   var readout = document.getElementById('readoutText');
@@ -41,22 +39,19 @@
   if (audit) stage.dataset.audit = '[]';
   function calm() { return frozen || (!forcedMotion && calmQuery.matches); }
 
-  function mark(event, mode) {
+  function mark(event, card) {
     if (!audit) return;
-    audit.push({ event: event, mode: mode || null, at: Math.round(performance.now() - runStart) });
+    audit.push({ event: event, card: card || null, at: Math.round(performance.now() - runStart) });
     stage.dataset.audit = JSON.stringify(audit);
   }
 
-  /* Six launches inside 475ms, after a 160ms prelude. The chassis starts
-     closing 90ms after the last module clears it and takes 380ms, so the
-     scene resolves at 1105ms and the cue follows 160ms after that.
-     GRID_BIBLE.md section 11 is the contract these numbers answer to. */
+  /* Fourteen launches inside 500ms after a 160ms prelude, flights of 320-400ms.
+     The table is complete a touch under a second after the flash; the cue
+     follows 160ms behind the last card. GRID_BIBLE.md section 11. */
   var CLOCK = {
     arm: 50,
     sweep: 110,
-    interval: 95,
-    close: 90,
-    closing: 380,
+    interval: 38,
     cueDelay: 160,
     restore: 300
   };
@@ -65,26 +60,16 @@
     intact: {
       readout: 'Source loaded · 1 slice',
       label: 'Laser it',
-      meta: 'cut 6',
-      hint: 'One pass. Six modules, all held in the same central slot.'
+      meta: 'open it up',
+      hint: 'One instrument. Cut it open and see what it is holding.'
     },
-    cutting: {
-      readout: 'Cutting',
-      label: 'Cutting',
-      meta: '···',
-      hint: ''
-    },
-    dealing: {
-      readout: 'Opening · 6 modules',
-      label: 'Opening',
-      meta: 'bach · bach',
-      hint: ''
-    },
+    cutting: { readout: 'Cutting', label: 'Cutting', meta: '···', hint: '' },
+    dealing: { readout: 'Dealing', label: 'Dealing', meta: 'bach · bach · bach', hint: '' },
     released: {
-      readout: '6 modules · chassis closed',
-      label: 'Close it',
-      meta: 'put it back',
-      hint: 'Six modules left one machine. What is left of it is the surface that names them.'
+      readout: '14 cards · one machine',
+      label: 'Put it back',
+      meta: 'close it up',
+      hint: 'Every one of these came out of the same tab.'
     }
   };
 
@@ -111,17 +96,18 @@
   }
   function state(name) { stage.dataset.state = name; }
 
-  /* Load the five cards under LASER before they are needed. They are small
-     derived WebP assets; intent is the safety net for an immediate click. */
+  /* The cards are worth 156 KB between them and none of them is on screen
+     before the click, so they are fetched at idle — or the moment the pointer
+     reaches the trigger, which is the safety net for an immediate press. */
   var deckReady = false;
-  var deckUrls = ['pads', 'synth', 'seq', 'song', 'mix'].map(function (mode) {
-    return 'media/station/final/station-mode-' + mode + '.webp';
-  });
   function readyDeck() {
     if (deckReady) return;
     deckReady = true;
     root.classList.add('deck-ready');
-    deckUrls.forEach(function (src) { var image = new Image(); image.src = src; });
+    cards.forEach(function (card) {
+      var image = new Image();
+      image.src = 'media/station/cards/' + card.dataset.card + '.webp';
+    });
   }
   function scheduleDeck() {
     if (window.requestIdleCallback) window.requestIdleCallback(readyDeck, { timeout: 1600 });
@@ -137,16 +123,14 @@
     return value.slice(-2) === 'ms' ? parseFloat(value) : parseFloat(value) * 1000;
   }
 
-  function clearCard(card) {
-    card.classList.remove('is-launching', 'is-landed', 'is-returning');
+  function clearCard(card) { card.classList.remove('is-out', 'is-landed', 'is-back'); }
+  function land(card) {
+    card.classList.remove('is-out', 'is-back');
+    card.classList.add('is-landed');
   }
   function resetCards() {
     cards.forEach(clearCard);
     deck.setAttribute('aria-hidden', 'true');
-  }
-  function land(card) {
-    card.classList.remove('is-launching', 'is-returning');
-    card.classList.add('is-landed');
   }
   function landAll() {
     cards.forEach(land);
@@ -155,6 +139,7 @@
 
   function finishDeal() {
     landAll();
+    state('released');
     say('released');
     setBusy(false);
     mark('settled');
@@ -170,33 +155,19 @@
     deck.removeAttribute('aria-hidden');
     mark('deal-start');
 
-    var lastLaunch = 0;
-    var lastSettle = 0;
-    cards.forEach(function (card, index) {
-      var launch = index * CLOCK.interval;
-      var flight = milliseconds(card);
-      var settle = launch + flight;
-      lastLaunch = Math.max(lastLaunch, launch);
-      lastSettle = Math.max(lastSettle, settle);
+    var last = 0;
+    cards.forEach(function (card) {
+      var order = parseInt(card.style.getPropertyValue('--n'), 10) || 0;
+      var launch = order * CLOCK.interval;
+      var settle = launch + milliseconds(card);
+      last = Math.max(last, settle);
       at(launch, function () {
-        card.classList.add('is-launching');
-        mark('launch', card.dataset.mode);
+        card.classList.add('is-out');
+        mark('deal', card.dataset.card);
       });
-      at(settle, function () {
-        land(card);
-        mark('land', card.dataset.mode);
-      });
+      at(settle, function () { land(card); });
     });
-
-    /* The machine closes on its own beat, not as an afterthought once every
-       module has settled: by the time MIX is clear of the slot there is
-       nothing left in it, and a chassis that waited would read as a hole. */
-    var closed = lastLaunch + CLOCK.close;
-    at(closed, function () {
-      state('released');
-      mark('chassis-close');
-    });
-    at(Math.max(lastSettle, closed + CLOCK.closing), finishDeal);
+    at(last, finishDeal);
   }
 
   function cut() {
@@ -246,8 +217,8 @@
     }
 
     cards.forEach(function (card) {
-      card.classList.remove('is-launching', 'is-landed');
-      card.classList.add('is-returning');
+      card.classList.remove('is-out', 'is-landed');
+      card.classList.add('is-back');
     });
     at(CLOCK.restore, function () {
       resetCards();
@@ -277,8 +248,7 @@
   else if (calmQuery.addListener) calmQuery.addListener(onCalmChange);
 
   deck.setAttribute('aria-hidden', 'true');
-  var wanted = flags.get('state');
-  if (wanted === 'released') {
+  if (flags.get('state') === 'released') {
     readyDeck();
     landAll();
     state('released');

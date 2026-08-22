@@ -596,12 +596,12 @@ body::after {
   --gutter: 16px;
   --hero-width: min(1328px, calc(100vw - 80px));
   --hero-rail: max(40px, calc((100vw - 1328px) / 2));
-  --chrome: 224px;
+  --chrome: 204px;
   display: grid;
   grid-template-rows: auto minmax(0, 1fr) auto;
-  gap: clamp(12px, 2.2vh, 26px);
+  gap: clamp(10px, 1.8vh, 20px);
   min-height: 100svh;
-  padding: 30px var(--hero-rail) 24px;
+  padding: 24px var(--hero-rail) 20px;
   overflow: hidden;
 }
 
@@ -697,8 +697,8 @@ body::after {
   /* Development/review escape hatch: ?motion=on lets the authored dealer be
      inspected on a machine whose OS preference is reduced motion. Normal page
      loads continue to respect that preference. */
-  .force-motion .plate.is-launching { animation-duration: var(--flight) !important; }
-  .force-motion .plate.is-returning { animation-duration: 280ms !important; }
+  .force-motion .card.is-out { animation-duration: var(--flight) !important; }
+  .force-motion .card.is-back { animation-duration: 260ms !important; }
   .force-motion [data-state="slicing"] .beam { display: block; animation-duration: var(--t-sweep) !important; }
   .force-motion .flash { display: block; animation-duration: var(--t-flash) !important; }
   .force-motion .scroll-cue { transition-duration: 180ms !important; }
