@@ -1,0 +1,237 @@
+<!doctype html>
+<html lang="en" class="no-js">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <meta name="color-scheme" content="dark">
+  <title>Station Micro-Interaction Lab</title>
+  <meta name="description" content="An isolated playground for five focused Station interface micro-interactions.">
+  <script>document.documentElement.classList.remove('no-js')</script>
+  <link rel="stylesheet" href="lab.css">
+</head>
+<body>
+  <main class="lab-shell">
+    <header class="lab-header">
+      <div>
+        <p class="eyebrow"><span class="status-dot" aria-hidden="true"></span> Isolated prototype · no audio</p>
+        <h1>Station<br><span>Micro-Interaction Lab</span></h1>
+      </div>
+      <p class="lab-intro">Five small tests for interface feedback. Each experiment isolates one decision instead of recreating the workstation.</p>
+    </header>
+
+    <nav class="lab-nav" role="tablist" aria-label="Station micro-interaction prototypes">
+      <button class="lab-tab is-active" id="tab-pads" type="button" role="tab" aria-selected="true" aria-controls="pads" data-target="pads">
+        <span>01</span><strong>Pads</strong><small>Physical rubber feel</small>
+      </button>
+      <button class="lab-tab" id="tab-zola" type="button" role="tab" aria-selected="false" aria-controls="zola" data-target="zola" tabindex="-1">
+        <span>02</span><strong>ZOLA-X</strong><small>One control per view</small>
+      </button>
+      <button class="lab-tab" id="tab-mixer" type="button" role="tab" aria-selected="false" aria-controls="mixer" data-target="mixer" tabindex="-1">
+        <span>03</span><strong>Mixer</strong><small>Dynamic meters</small>
+      </button>
+      <button class="lab-tab" id="tab-laser" type="button" role="tab" aria-selected="false" aria-controls="laser" data-target="laser" tabindex="-1">
+        <span>04</span><strong>Laser</strong><small>Slicing feedback</small>
+      </button>
+      <button class="lab-tab" id="tab-seq" type="button" role="tab" aria-selected="false" aria-controls="seq" data-target="seq" tabindex="-1">
+        <span>05</span><strong>Seq</strong><small>Step interaction</small>
+      </button>
+    </nav>
+
+    <section class="experiments" aria-live="off">
+      <article class="experiment is-active" id="pads" role="tabpanel" aria-labelledby="tab-pads">
+        <header class="experiment-head">
+          <div>
+            <p class="experiment-number">01 / Physical response</p>
+            <h2>Pads</h2>
+          </div>
+          <p>Decision under test: can a flat screen communicate the short travel, edge compression and controlled under-light of a rubber pad?</p>
+        </header>
+
+        <div class="experiment-stage pads-stage">
+          <div class="pad-bank" role="group" aria-label="Four playable prototype pads">
+            <button class="rubber-pad" type="button" data-mechanism="pad" data-pad="01" data-pressed="false" data-playing="false" data-selected="false" data-loaded="true" aria-label="PAD 01, loaded: aalonbutler-gettinsoul.wav">
+              <span class="pad-number">PAD 01</span><span class="pad-file" title="aalonbutler-gettinsoul.wav">aalonbutler-gettinsoul.wav</span><span class="pad-footer">READY</span>
+            </button>
+            <button class="rubber-pad" type="button" data-mechanism="pad" data-pad="02" data-pressed="false" data-playing="false" data-selected="false" data-loaded="true" aria-label="PAD 02, loaded: break-02.wav">
+              <span class="pad-number">PAD 02</span><span class="pad-file" title="break-02.wav">break-02.wav</span><span class="pad-footer">READY</span>
+            </button>
+            <button class="rubber-pad" type="button" data-mechanism="pad" data-pad="03" data-pressed="false" data-playing="false" data-selected="false" data-loaded="true" aria-label="PAD 03, loaded: break-03.wav">
+              <span class="pad-number">PAD 03</span><span class="pad-file" title="break-03.wav">break-03.wav</span><span class="pad-footer">READY</span>
+            </button>
+            <button class="rubber-pad" type="button" data-mechanism="pad" data-pad="04" data-pressed="false" data-playing="false" data-selected="false" data-loaded="true" aria-label="PAD 04, loaded: break-04.wav">
+              <span class="pad-number">PAD 04</span><span class="pad-file" title="break-04.wav">break-04.wav</span><span class="pad-footer">READY</span>
+            </button>
+          </div>
+          <p class="stage-note"><span>Input</span> Pointer, touch or keyboard. Hold a pad, then release it.</p>
+        </div>
+      </article>
+
+      <article class="experiment" id="zola" role="tabpanel" aria-labelledby="tab-zola" hidden>
+        <header class="experiment-head">
+          <div>
+            <p class="experiment-number">02 / Control → response</p>
+            <h2>ZOLA-X</h2>
+          </div>
+          <p>Decision under test: can one focused control per view make the display response feel direct, technical and immediately understandable?</p>
+        </header>
+
+        <div class="experiment-stage zola-stage">
+          <section class="zx-workspace" id="zolaWorkspace" aria-label="ZOLA-X visual micro-demo">
+            <div class="zx-display">
+              <div class="zx-display-glass">
+                <div class="zx-display-readout">
+                  <span id="zolaDisplayLabel">OSC 1 / BLOOM</span>
+                  <output id="zolaDisplayValue">28% POSITION</output>
+                </div>
+                <div class="zx-display-visual">
+                  <svg id="zolaDisplaySvg" viewBox="0 0 640 180" preserveAspectRatio="none" role="img" aria-label="Oscillator output with its recent history receding behind it"></svg>
+                </div>
+              </div>
+            </div>
+
+            <div class="zx-pages" role="group" aria-label="ZOLA-X section">
+              <button class="zx-page-key" id="zx-tab-osc" type="button" data-zx-page="osc" data-engaged="true" aria-pressed="true"><span class="zx-page-face">OSC<span class="zx-lamp" aria-hidden="true"></span></span></button>
+              <button class="zx-page-key" id="zx-tab-filter" type="button" data-zx-page="filter" data-engaged="false" aria-pressed="false"><span class="zx-page-face">FILTER<span class="zx-lamp" aria-hidden="true"></span></span></button>
+              <button class="zx-page-key" id="zx-tab-env" type="button" data-zx-page="env" data-engaged="false" aria-pressed="false"><span class="zx-page-face">ENV<span class="zx-lamp" aria-hidden="true"></span></span></button>
+              <button class="zx-page-key" id="zx-tab-mod" type="button" data-zx-page="mod" data-engaged="false" aria-pressed="false"><span class="zx-page-face">MOD<span class="zx-lamp" aria-hidden="true"></span></span></button>
+            </div>
+
+            <div class="zx-editor-panel" id="zolaControlPanel">
+              <label class="zx-control zx-primary-control">
+                <input id="zolaPrimaryControl" type="range" min="0" max="1" step="0.01" value="0.28" aria-label="POSITION">
+                <span class="zx-control-legend" id="zolaControlLegend">POSITION</span>
+                <output id="zolaControlValue">28%</output>
+                <span class="zx-control-track" aria-hidden="true"><span class="zx-control-shuttle"></span></span>
+              </label>
+            </div>
+          </section>
+          <p class="stage-note" id="zolaStatus"><span>Input</span> Each view exposes one display-linked control: POSITION, CUTOFF, ATTACK or PHASE.</p>
+        </div>
+      </article>
+
+      <article class="experiment" id="mixer" role="tabpanel" aria-labelledby="tab-mixer" hidden>
+        <header class="experiment-head">
+          <div>
+            <p class="experiment-number">03 / Signal behavior</p>
+            <h2>Mixer</h2>
+          </div>
+          <p>Decision under test: believable meter motion needs signal-shaped envelopes—quick attacks, slower releases and independent channel character.</p>
+        </header>
+
+        <div class="experiment-stage mixer-stage">
+          <div class="mixer-bank" id="mixerBank" aria-label="Five mixer channels with simulated deterministic signal meters">
+            <div class="channel" data-channel="0"><span class="channel-id">01</span><i class="channel-lamp"></i><div class="meter" aria-hidden="true"><i class="meter-energy"></i><i class="meter-peak"></i></div><output class="channel-db">−18.0</output><span class="fader-cap"></span></div>
+            <div class="channel" data-channel="1"><span class="channel-id">02</span><i class="channel-lamp"></i><div class="meter" aria-hidden="true"><i class="meter-energy"></i><i class="meter-peak"></i></div><output class="channel-db">−21.0</output><span class="fader-cap"></span></div>
+            <div class="channel" data-channel="2"><span class="channel-id">03</span><i class="channel-lamp"></i><div class="meter" aria-hidden="true"><i class="meter-energy"></i><i class="meter-peak"></i></div><output class="channel-db">−16.0</output><span class="fader-cap"></span></div>
+            <div class="channel" data-channel="3"><span class="channel-id">04</span><i class="channel-lamp"></i><div class="meter" aria-hidden="true"><i class="meter-energy"></i><i class="meter-peak"></i></div><output class="channel-db">−24.0</output><span class="fader-cap"></span></div>
+            <div class="channel" data-channel="4"><span class="channel-id">05</span><i class="channel-lamp"></i><div class="meter" aria-hidden="true"><i class="meter-energy"></i><i class="meter-peak"></i></div><output class="channel-db">−19.0</output><span class="fader-cap"></span></div>
+          </div>
+          <p class="stage-note"><span>Source</span> Programmed envelopes and curves only. No random-per-frame values and no audio engine.</p>
+        </div>
+      </article>
+
+      <article class="experiment" id="laser" role="tabpanel" aria-labelledby="tab-laser" hidden>
+        <header class="experiment-head">
+          <div>
+            <p class="experiment-number">04 / Direct feedback</p>
+            <h2>Laser</h2>
+          </div>
+          <p>Decision under test: slicing feedback should be immediate and precise. A short hot line confirms the action; it does not become a light show.</p>
+        </header>
+
+        <div class="experiment-stage laser-stage">
+          <div class="laser-surface" id="laserSurface" tabindex="0" role="group" aria-label="Waveform with seven slice markers. Move the pointer to position the playhead and click to trigger the nearest slice.">
+            <svg class="waveform" id="laserWaveform" viewBox="0 0 1000 300" preserveAspectRatio="none" aria-hidden="true">
+              <path class="waveform-fill waveform-fill--top" id="waveFillTop"></path>
+              <path class="waveform-fill waveform-fill--bottom" id="waveFillBottom"></path>
+              <path class="waveform-line" id="waveLineTop"></path>
+              <path class="waveform-line" id="waveLineBottom"></path>
+              <line class="waveform-zero" x1="0" y1="150" x2="1000" y2="150"></line>
+            </svg>
+            <div class="slice-reaction" id="sliceReaction" aria-hidden="true"></div>
+            <div class="laser-playhead" id="laserPlayhead" aria-hidden="true"></div>
+            <div class="laser-flashline" id="laserFlash" aria-hidden="true"></div>
+            <div class="slice-markers" aria-label="Slice markers">
+              <button class="slice-marker" type="button" style="--x:10%" data-x="0.10" aria-label="Trigger slice marker 1"><span>1</span></button>
+              <button class="slice-marker" type="button" style="--x:25%" data-x="0.25" aria-label="Trigger slice marker 2"><span>2</span></button>
+              <button class="slice-marker" type="button" style="--x:42%" data-x="0.42" aria-label="Trigger slice marker 3"><span>3</span></button>
+              <button class="slice-marker" type="button" style="--x:55%" data-x="0.55" aria-label="Trigger slice marker 4"><span>4</span></button>
+              <button class="slice-marker" type="button" style="--x:63%" data-x="0.63" aria-label="Trigger slice marker 5"><span>5</span></button>
+              <button class="slice-marker" type="button" style="--x:76%" data-x="0.76" aria-label="Trigger slice marker 6"><span>6</span></button>
+              <button class="slice-marker" type="button" style="--x:90%" data-x="0.90" aria-label="Trigger slice marker 7"><span>7</span></button>
+            </div>
+          </div>
+          <p class="stage-note" id="laserStatus" aria-live="polite"><span>Input</span> Move for playhead · click waveform or a numbered marker to audition visual feedback.</p>
+        </div>
+      </article>
+
+      <article class="experiment" id="seq" role="tabpanel" aria-labelledby="tab-seq" hidden>
+        <header class="experiment-head">
+          <div>
+            <p class="experiment-number">05 / Discrete state</p>
+            <h2>Seq</h2>
+          </div>
+          <p>Decision under test: active steps should read as committed musical events, not selected cells in a data table.</p>
+        </header>
+
+        <div class="experiment-stage seq-stage">
+          <div class="seq-toolbar">
+            <span>Pattern 01-A</span>
+            <button id="seqTransport" type="button" aria-pressed="true"><i aria-hidden="true"></i><span>Playhead on</span></button>
+          </div>
+          <div class="seq-grid" id="seqGrid" role="grid" aria-label="Four pads by eight steps">
+            <span class="seq-corner" role="columnheader">Pad</span>
+            <span role="columnheader">1</span><span role="columnheader">2</span><span role="columnheader">3</span><span role="columnheader">4</span><span role="columnheader">5</span><span role="columnheader">6</span><span role="columnheader">7</span><span role="columnheader">8</span>
+            <span class="seq-row-label" role="rowheader">01</span>
+            <button class="seq-step is-on" role="gridcell" type="button" data-row="1" data-step="1" aria-label="Pad 01, step 1" aria-pressed="true"><i></i></button>
+            <button class="seq-step" role="gridcell" type="button" data-row="1" data-step="2" aria-label="Pad 01, step 2" aria-pressed="false"><i></i></button>
+            <button class="seq-step" role="gridcell" type="button" data-row="1" data-step="3" aria-label="Pad 01, step 3" aria-pressed="false"><i></i></button>
+            <button class="seq-step" role="gridcell" type="button" data-row="1" data-step="4" aria-label="Pad 01, step 4" aria-pressed="false"><i></i></button>
+            <button class="seq-step is-on" role="gridcell" type="button" data-row="1" data-step="5" aria-label="Pad 01, step 5" aria-pressed="true"><i></i></button>
+            <button class="seq-step" role="gridcell" type="button" data-row="1" data-step="6" aria-label="Pad 01, step 6" aria-pressed="false"><i></i></button>
+            <button class="seq-step" role="gridcell" type="button" data-row="1" data-step="7" aria-label="Pad 01, step 7" aria-pressed="false"><i></i></button>
+            <button class="seq-step" role="gridcell" type="button" data-row="1" data-step="8" aria-label="Pad 01, step 8" aria-pressed="false"><i></i></button>
+
+            <span class="seq-row-label" role="rowheader">02</span>
+            <button class="seq-step" role="gridcell" type="button" data-row="2" data-step="1" aria-label="Pad 02, step 1" aria-pressed="false"><i></i></button>
+            <button class="seq-step" role="gridcell" type="button" data-row="2" data-step="2" aria-label="Pad 02, step 2" aria-pressed="false"><i></i></button>
+            <button class="seq-step is-on" role="gridcell" type="button" data-row="2" data-step="3" aria-label="Pad 02, step 3" aria-pressed="true"><i></i></button>
+            <button class="seq-step" role="gridcell" type="button" data-row="2" data-step="4" aria-label="Pad 02, step 4" aria-pressed="false"><i></i></button>
+            <button class="seq-step" role="gridcell" type="button" data-row="2" data-step="5" aria-label="Pad 02, step 5" aria-pressed="false"><i></i></button>
+            <button class="seq-step" role="gridcell" type="button" data-row="2" data-step="6" aria-label="Pad 02, step 6" aria-pressed="false"><i></i></button>
+            <button class="seq-step is-on" role="gridcell" type="button" data-row="2" data-step="7" aria-label="Pad 02, step 7" aria-pressed="true"><i></i></button>
+            <button class="seq-step" role="gridcell" type="button" data-row="2" data-step="8" aria-label="Pad 02, step 8" aria-pressed="false"><i></i></button>
+
+            <span class="seq-row-label" role="rowheader">03</span>
+            <button class="seq-step" role="gridcell" type="button" data-row="3" data-step="1" aria-label="Pad 03, step 1" aria-pressed="false"><i></i></button>
+            <button class="seq-step is-on" role="gridcell" type="button" data-row="3" data-step="2" aria-label="Pad 03, step 2" aria-pressed="true"><i></i></button>
+            <button class="seq-step" role="gridcell" type="button" data-row="3" data-step="3" aria-label="Pad 03, step 3" aria-pressed="false"><i></i></button>
+            <button class="seq-step" role="gridcell" type="button" data-row="3" data-step="4" aria-label="Pad 03, step 4" aria-pressed="false"><i></i></button>
+            <button class="seq-step" role="gridcell" type="button" data-row="3" data-step="5" aria-label="Pad 03, step 5" aria-pressed="false"><i></i></button>
+            <button class="seq-step is-on" role="gridcell" type="button" data-row="3" data-step="6" aria-label="Pad 03, step 6" aria-pressed="true"><i></i></button>
+            <button class="seq-step" role="gridcell" type="button" data-row="3" data-step="7" aria-label="Pad 03, step 7" aria-pressed="false"><i></i></button>
+            <button class="seq-step" role="gridcell" type="button" data-row="3" data-step="8" aria-label="Pad 03, step 8" aria-pressed="false"><i></i></button>
+
+            <span class="seq-row-label" role="rowheader">04</span>
+            <button class="seq-step" role="gridcell" type="button" data-row="4" data-step="1" aria-label="Pad 04, step 1" aria-pressed="false"><i></i></button>
+            <button class="seq-step" role="gridcell" type="button" data-row="4" data-step="2" aria-label="Pad 04, step 2" aria-pressed="false"><i></i></button>
+            <button class="seq-step" role="gridcell" type="button" data-row="4" data-step="3" aria-label="Pad 04, step 3" aria-pressed="false"><i></i></button>
+            <button class="seq-step is-on" role="gridcell" type="button" data-row="4" data-step="4" aria-label="Pad 04, step 4" aria-pressed="true"><i></i></button>
+            <button class="seq-step" role="gridcell" type="button" data-row="4" data-step="5" aria-label="Pad 04, step 5" aria-pressed="false"><i></i></button>
+            <button class="seq-step" role="gridcell" type="button" data-row="4" data-step="6" aria-label="Pad 04, step 6" aria-pressed="false"><i></i></button>
+            <button class="seq-step" role="gridcell" type="button" data-row="4" data-step="7" aria-label="Pad 04, step 7" aria-pressed="false"><i></i></button>
+            <button class="seq-step is-on" role="gridcell" type="button" data-row="4" data-step="8" aria-label="Pad 04, step 8" aria-pressed="true"><i></i></button>
+          </div>
+          <p class="stage-note"><span>Input</span> Toggle individual steps. The playhead is visual only and carries no timing engine.</p>
+        </div>
+      </article>
+    </section>
+
+    <footer class="lab-footer">
+      <span>Station interaction study</span><span>Native HTML · CSS · JS</span><span>Prototype / 2026</span>
+    </footer>
+  </main>
+
+  <script src="lab.js" defer></script>
+</body>
+</html>
